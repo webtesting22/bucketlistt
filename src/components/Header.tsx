@@ -369,7 +369,7 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <Button
-                className="bg-orange-500 hover:bg-orange-600 text-white transition-colors"
+                style={{background:"var(--brand-color)"}}
                 onClick={() => navigate("/auth")}
               >
                 Sign in
@@ -533,7 +533,7 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <Button
-                className="bg-orange-500 hover:bg-orange-600 text-white transition-colors text-sm px-3 py-2"
+               style={{background:"var(--brand-color)"}}
                 onClick={() => navigate("/auth")}
               >
                 Sign in
