@@ -64,7 +64,7 @@ export function ExperienceCard({
         .eq('experience_id', id)
         .eq('is_primary', true)
         .single()
-      
+
       if (error) return null
       return data?.image_url || null
     },
@@ -73,7 +73,7 @@ export function ExperienceCard({
 
   const handleClick = () => {
     setIsClicked(true)
-    
+
     // Add a small delay for the animation to be visible before navigation
     setTimeout(() => {
       navigate(`/experience/${id}`)
@@ -96,14 +96,15 @@ export function ExperienceCard({
   const displayImage = image && image !== '' ? image : primaryImage || '/placeholder.svg'
 
   return (
-    <Card 
-      className={`group cursor-pointer overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''}`}
+    <Card
+      className={`group cursor-pointer overflow-hidden border-0  transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''}`}
       onClick={handleClick}
+      style={{boxShadow: 'none'}}
     >
       <CardContent className="p-0">
         <div className="relative">
           {isSpecialOffer && (
-            <Badge className="absolute top-3 left-3 z-10 bg-orange-500 hover:bg-orange-600">
+            <Badge className="absolute top-3 left-3 z-10" id="BadgeEditStyle">
               Special offer
             </Badge>
           )}
@@ -117,15 +118,25 @@ export function ExperienceCard({
             aspectRatio="aspect-[4/3]"
           />
         </div>
-        
+
         <div className="p-4 space-y-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div>
             {displayCategories.length > 0 && (
-              <div className="flex flex-wrap gap-1">
+              <div>
                 {displayCategories.slice(0, 2).map((cat, index) => (
                   <span key={cat.id || index} className="flex items-center gap-1">
                     {cat.icon && <span>{cat.icon}</span>}
-                    <span>{cat.name}</span>
+                    <div id="FlexContainerRowBetween">
+                      <span className="fontSizeSm">{cat.name}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 fontSizeSm" />
+                          <span className="font-medium fontSizeSm">{rating}</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground fontSizeSm">({reviews})</span>
+                      </div>
+                    </div>
+
                     {index < Math.min(displayCategories.length, 2) - 1 && <span>•</span>}
                   </span>
                 ))}
@@ -135,28 +146,28 @@ export function ExperienceCard({
               </div>
             )}
           </div>
-          
-          <h3 className="font-semibold text-lg leading-tight group-hover:text-orange-500 transition-colors">
+
+          <h3 className="CommonH3 text-start">
             {title}
           </h3>
-          
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+
+          <div className="flex items-center gap-4 text-sm text-muted-foreground marginUnset">
             {duration && (
               <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                <span>{duration}</span>
+                <Clock className="h-3 w-3 fontSizeSm" />
+                <span className="fontSizeSm">{duration}</span>
               </div>
             )}
             {groupSize && (
               <div className="flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                <span>{groupSize}</span>
+                <Users className="h-3 w-3" />
+                <span className="fontSizeSm">{groupSize}</span>
               </div>
             )}
           </div>
 
           {getDistanceDisplay() && (
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1 text-sm text-muted-foreground ">
               {distanceKm === 0 ? (
                 <MapPin className="h-4 w-4" />
               ) : (
@@ -165,20 +176,11 @@ export function ExperienceCard({
               <span>{getDistanceDisplay()}</span>
             </div>
           )}
-          
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-medium">{rating}</span>
-            </div>
-            <span className="text-sm text-muted-foreground">({reviews})</span>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-orange-500">{price}</span>
+          <div>
+            <div id="PriceContainerOfferHomePageCards">
+              <span className="text-lg font-bold fontSizeMd" style={{color: 'var(--brand-color)'}}>{price}</span>
               {originalPrice && (
-                <span className="text-sm text-muted-foreground line-through">{originalPrice}</span>
+                <span className="text-sm text-muted-foreground line-through fontSizeSm">{originalPrice}</span>
               )}
             </div>
           </div>

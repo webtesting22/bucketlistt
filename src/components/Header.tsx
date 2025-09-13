@@ -40,7 +40,7 @@ export function Header() {
   const { favoritesCount } = useFavorites();
   const { theme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
-  
+
   // Check if we're on the landing page
   const isLandingPage = location.pathname === "/";
 
@@ -48,7 +48,7 @@ export function Header() {
     const handleScroll = () => {
       // Check if we're on mobile
       const isMobile = window.innerWidth < 768;
-      
+
       // Only apply scroll effect on landing page
       if (!isLandingPage) {
         setIsScrolled(true); // Always dark on non-landing pages
@@ -137,10 +137,10 @@ export function Header() {
   // Get theme-aware background and text colors
   const getHeaderStyles = () => {
     if (!isScrolled) return "bg-transparent";
-    
+
     const isMobile = window.innerWidth < 768;
     const backdropBlur = isMobile && isLandingPage ? "backdrop-blur-xl" : "backdrop-blur-md";
-    
+
     if (theme === "light") {
       return `bg-white/90 ${backdropBlur} border-b border-gray-200 text-gray-900`;
     } else {
@@ -150,7 +150,7 @@ export function Header() {
 
   const getButtonStyles = () => {
     if (!isScrolled) return "text-white hover:bg-white/20";
-    
+
     if (theme === "light") {
       return "text-gray-900 hover:bg-gray-100/80";
     } else {
@@ -170,7 +170,7 @@ export function Header() {
             onClick={() => navigate("/")}
           >
             <img
-              src="/bucket-list-icon.png"
+              src="https://prepseed.s3.ap-south-1.amazonaws.com/Bucketlistt+(3).png"
               alt="bucketlistt Logo"
               className="h-20 w-auto"
             />
@@ -454,7 +454,7 @@ export function Header() {
                     </div>
                   </div>
                   <DropdownMenuSeparator />
-                  
+
                   {/* Mobile-specific: Notification item */}
                   {nextBooking && (
                     <>
@@ -471,7 +471,7 @@ export function Header() {
                       <DropdownMenuSeparator />
                     </>
                   )}
-                  
+
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("/profile")}

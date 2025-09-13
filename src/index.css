@@ -9,6 +9,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Swiper Styles */
+.mySwiper {
+  padding: 10px 0;
+}
+
+.mySwiper .swiper-slide {
+  height: auto;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
 
 @layer base {

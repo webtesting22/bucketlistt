@@ -17,7 +17,7 @@ export function DestinationCard({ id, image, title, subtitle }: DestinationCardP
 
   const handleClick = () => {
     setIsClicked(true)
-    
+
     // Add a small delay for the animation to be visible before navigation
     setTimeout(() => {
       navigate(`/destination/${id}`)
@@ -25,16 +25,17 @@ export function DestinationCard({ id, image, title, subtitle }: DestinationCardP
   }
 
   return (
-    <Card 
-      className={`group cursor-pointer overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''}`} 
+    <Card
+      className={`group cursor-pointer overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''}`}
       onClick={handleClick}
     >
-      <CardContent className="p-0 relative">
-        <LazyImage
+      <CardContent className="p-0 relative" id="DestinationCardStyles">
+        <img
           src={image}
           alt={title}
-          className="group-hover:scale-105 transition-transform duration-200"
-          aspectRatio="aspect-[4/3]"
+          loading="lazy"
+          className="DestinationsImage"
+        // aspectRatio="aspect-[4/3]"
         />
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
           <p className="text-sm opacity-90 mb-1">{subtitle}</p>

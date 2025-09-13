@@ -1,0 +1,28 @@
+#DestinationsSwiperCardStyles {
+    min-height: 400px;
+    border-radius: 30px !important;
+    overflow: hidden !important;
+}
+
+#DestinationCardStyles {
+    height: 400px;
+}
+
+#DestinationCardStyles .DestinationsImage {
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover;
+    /* border-radius: 50px !important; */
+}
+
+#DestinationCardStyles .DestinationsImage img {
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover;
+}
+
+@media (max-width:900px) {
+    #PaddingTopNewForOnlyMobile {
+        padding-top: 4rem !important;
+    }
+}

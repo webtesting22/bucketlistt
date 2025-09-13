@@ -17,6 +17,7 @@ export function Hero() {
   });
   const [videoScale, setVideoScale] = useState(1.2);
   const [scrollZoomScale, setScrollZoomScale] = useState(1);
+  const [scrollTranslateY, setScrollTranslateY] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -98,16 +99,22 @@ export function Hero() {
         updateDropdownPosition();
       }
 
-      // Calculate zoom effect based on scroll position
+      // Calculate parallax effect based on scroll position
       const scrollY = window.scrollY;
       const windowHeight = window.innerHeight;
 
       // Calculate scroll progress (0 to 1) within the hero section
       const scrollProgress = Math.min(scrollY / windowHeight, 1);
 
-      // Apply enhanced zoom effect: starts at 1 and zooms in to 1.8 as user scrolls
-      const zoomScale = 1 + scrollProgress * 0.8;
+      // Enhanced parallax zoom effect: starts at 1 and zooms in to 2.2 as user scrolls
+      // This creates a more dramatic parallax effect
+      const zoomScale = 1 + scrollProgress * 1.2;
       setScrollZoomScale(zoomScale);
+
+      // Add subtle translate effect for more dynamic parallax
+      // Video moves up slightly as user scrolls down
+      const translateY = scrollProgress * 50; // Move up to 50px
+      setScrollTranslateY(translateY);
     };
 
     const handleResize = () => {
@@ -168,19 +175,35 @@ export function Hero() {
     (suggestions.destinations.length > 0 || suggestions.experiences.length > 0);
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden -mt-16">
+    <section id="HeroVideoContainer" className="relative h-screen flex items-center justify-center overflow-hidden -mt-16 ">
       {/* Background - Video for Both Desktop and Mobile */}
-      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden"       id="HeroVideoContainer">
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden parallax-container" >
         {/* YouTube Video Background for all devices */}
         <div
-    
+
           className="absolute inset-0 w-full h-full"
           style={{
             background: "linear-gradient(135deg, hsl(var(--gradient-secondary-start)) 0%, hsl(var(--gradient-secondary-end)) 100%)", // Fallback gradient
           }}
         >
-          <iframe
-            src="https://www.youtube.com/embed/IPLVm3dNr9c?autoplay=1&mute=1&loop=1&playlist=IPLVm3dNr9c&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&fs=0&cc_load_policy=0&playsinline=1&enablejsapi=1"
+          <video
+            src="https://prepseed.s3.ap-south-1.amazonaws.com/Hero+page+video+-+draft+(5)+(1).mp4"
+            autoPlay
+            muted
+            loop
+            className="absolute top-1/2 left-1/2 pointer-events-none transition-transform duration-75 ease-out parallax-video"
+            style={{
+              transform: `translate(-50%, calc(-50% + ${scrollTranslateY}px)) scale(${videoScale * scrollZoomScale})`,
+              transformOrigin: "center center",
+              width: isMobile ? "100vw" : "100%",
+              height: isMobile ? "100vh" : "100%",
+              minWidth: isMobile ? "100vw" : "100%",
+              minHeight: isMobile ? "100vh" : "100%",
+              objectFit: "cover"
+            }}
+          />
+          {/* <iframe
+            src="https://prepseed.s3.ap-south-1.amazonaws.com/Hero+page+video+-+draft+(5)+(1).mp4"
             title="Background Video"
             className="absolute top-1/2 left-1/2 pointer-events-none transition-transform duration-75 ease-out"
             style={{
@@ -194,7 +217,7 @@ export function Hero() {
             }}
             allow="autoplay; encrypted-media"
             allowFullScreen={false}
-          />
+          /> */}
         </div>
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black/40 z-10" />
@@ -207,31 +230,32 @@ export function Hero() {
       </div>
 
       {/* Content - Perfectly centered */}
-      <div className="relative z-20 w-full px-4 text-center flex flex-col items-center justify-center">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <div id="MobileChangeAlignment" className="relative max-w-7xl z-20 w-full px-4 text-center flex flex-col items-center justify-center">
+        <div className=" MobileChangeAlignmentContainer">
           {/* Main Heading */}
-          <div className="px-4">
-            <h1 className="CommonH1 text-white leading-tight mb-4">
-              India's best experiences
-              <br />
-              curated just for you
+          <div>
+            <h1 id="MobileTextFontSize" className={`CommonH1  text-white leading-tight mb-4 ${isMobile ? "text-start" : ""}`}>
+              India's best experiences  curated just for you
+              {/* <br /> */}
+
             </h1>
           </div>
 
           {/* Search Bar */}
           <div
-            className={`w-full mx-auto relative z-30 ${isMobile ? "px-6 max-w-sm" : "px-4 max-w-2xl"
-              }`}
+            className="MaxVideoWidth"
+            // className={`w-full mx-auto relative z-30 ${isMobile ? "px-6 max-w-sm" : "px-4 max-w-2xl"
+            //   }`}
             ref={dropdownRef}
           >
             <form onSubmit={handleSearch}>
               <div className="relative" ref={searchContainerRef}>
                 <div className={`flex items-stretch bg-white/95 backdrop-blur-sm shadow-2xl transition-all duration-300 ${isMobile
-                  ? "flex-col rounded-2xl p-4 gap-4 border border-white/20"
+                  ? "flex-col rounded-0xl p-0 gap-4 border border-white/20"
                   : "flex-row rounded-lg p-2 gap-2 sm:gap-0"
                   }`}>
                   <div className={`flex items-center flex-1 ${isMobile
-                    ? "px-4 py-4 bg-gray-50/80 rounded-xl border border-gray-200/50"
+                    ? "px-4 py-1 bg-gray-50/80 border border-gray-200/50"
                     : "px-4 py-2 sm:py-0"
                     }`}>
                     <Search className={`text-gray-400 mr-3 flex-shrink-0 ${isMobile ? "h-6 w-6" : "h-5 w-5"
@@ -254,11 +278,11 @@ export function Hero() {
                           }
                         }
                       }}
-                      className={`border-0 bg-transparent text-gray-800 placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0 font-medium !border-none !outline-none w-full ${isMobile ? "text-lg py-1" : "text-base"
+                      className={`border-0 bg-transparent text-gray-800 placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0 font-medium !border-none !outline-none w-full ${isMobile ? " py-1" : "text-base"
                         }`}
                     />
                   </div>
-                  <Button
+                  {/* <Button
                     type="submit"
                     size={isMobile ? "lg" : "lg"}
                     className={`bg-gradient-to-r from-brand-primary to-brand-primary-light hover:from-brand-primary-dark hover:to-brand-primary text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl ${isMobile
@@ -267,7 +291,7 @@ export function Hero() {
                       }`}
                   >
                     {isMobile ? "🔍 Search" : "Search"}
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             </form>

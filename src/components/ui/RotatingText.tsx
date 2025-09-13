@@ -122,7 +122,7 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
             className="inline-block"
             aria-hidden="true"
           >
-            {texts[currentTextIndex]}
+            <h2  className="CommonH2">{texts[currentTextIndex]}</h2>
           </motion.span>
         </AnimatePresence>
       </span>

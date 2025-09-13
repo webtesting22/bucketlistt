@@ -110,16 +110,15 @@ export function TestimonialCarousel() {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`h-3 w-3 ${
-          i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-400"
-        }`}
+        className={`h-3 w-3 ${i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-400"
+          }`}
       />
     ));
   };
 
   return (
     <section className="py-16 md:py-24 px-4 bg-gray-900">
-      <div className="container max-w-7xl mx-auto">
+      <div className=" max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
           {/* Left Side - Title and Navigation */}
           <div className="flex-shrink-0 lg:w-80 w-full text-center lg:text-left">

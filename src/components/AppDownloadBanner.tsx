@@ -7,7 +7,7 @@ const AppDownloadBanner = () => {
       delay={200}
       duration={700}
     >
-      <section className="py-8 md:py-12 px-4 bg-background">
+      <section className=" bg-background PaddingSectionTop">
         <div className="container max-w-6xl mx-auto">
           <div
             className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 min-h-[200px] md:min-h-[300px]"
