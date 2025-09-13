@@ -121,15 +121,15 @@ export function TestimonialCarousel() {
       <div className=" max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
           {/* Left Side - Title and Navigation */}
-          <div className="flex-shrink-0 lg:w-80 w-full text-center lg:text-left">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 lg:mb-8 leading-tight">
-              Millions
-              <br />
-              love completing bucketlistt
-              <br />
+          <div className="flex-shrink-0 lg:w-80 w-full text-center lg:text-left" id="GapAddedForTestimonial">
+            <h1 className="text-white CommonH1 leading-tight">
+              
+              {/* <br /> */}
+              Millions love completing bucketlistt
+              {/* <br /> */}
               with us 💖
-            </h2>
-
+            </h1>
+<br />
             {/* Navigation Buttons */}
             <div className="flex gap-3 justify-center lg:justify-start">
               <Button
