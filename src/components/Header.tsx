@@ -179,10 +179,10 @@ export function Header() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-2">
             {/* Theme Toggle */}
-            <ThemeToggle variant="header" buttonStyles={getButtonStyles()} />
+            {/* <ThemeToggle variant="header" buttonStyles={getButtonStyles()} /> */}
 
             {/* Feedback Button - Hidden on mobile */}
-            <FeedbackFish
+            {/* <FeedbackFish
               projectId="ec45667732aaa6"
               userId={user?.email || undefined}
             >
@@ -193,7 +193,7 @@ export function Header() {
               >
                 <MessageSquare className="h-5 w-5" />
               </Button>
-            </FeedbackFish>
+            </FeedbackFish> */}
 
             {/* Favorites Button */}
             <Button
@@ -369,7 +369,7 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <Button
-                style={{background:"var(--brand-color)"}}
+                style={{ background: "var(--brand-color)" }}
                 onClick={() => navigate("/auth")}
               >
                 Sign in
@@ -380,10 +380,10 @@ export function Header() {
           {/* Mobile Right Side */}
           <div className="flex md:hidden items-center space-x-1">
             {/* Theme Toggle - Mobile */}
-            <ThemeToggle variant="header" buttonStyles={getButtonStyles()} />
+            {/* <ThemeToggle variant="header" buttonStyles={getButtonStyles()} /> */}
 
             {/* Feedback Button - Mobile */}
-            <FeedbackFish
+            {/* <FeedbackFish
               projectId="ec45667732aaa6"
               userId={user?.email || undefined}
             >
@@ -394,7 +394,7 @@ export function Header() {
               >
                 <MessageSquare className="h-5 w-5" />
               </Button>
-            </FeedbackFish>
+            </FeedbackFish> */}
 
             {/* Favorites Button - Mobile */}
             <Button
@@ -533,7 +533,7 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <Button
-               style={{background:"var(--brand-color)"}}
+                style={{ background: "var(--brand-color)" }}
                 onClick={() => navigate("/auth")}
               >
                 Sign in
