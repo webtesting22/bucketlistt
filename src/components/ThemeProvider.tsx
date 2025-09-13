@@ -27,9 +27,17 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  )
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Check for URL parameter first (useful for forcing theme)
+    const urlParams = new URLSearchParams(window.location.search)
+    const forceTheme = urlParams.get('theme') as Theme
+    if (forceTheme && ['light', 'dark', 'system'].includes(forceTheme)) {
+      return forceTheme
+    }
+    
+    // Fallback to localStorage or default
+    return (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  })
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -54,6 +62,11 @@ export function ThemeProvider({
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme)
       setTheme(theme)
+      
+      // Remove theme parameter from URL if it exists
+      const url = new URL(window.location.href)
+      url.searchParams.delete('theme')
+      window.history.replaceState({}, '', url.toString())
     },
   }
 
