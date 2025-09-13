@@ -114,6 +114,38 @@
     <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Theme initialization script - runs before React -->
+    <script>
+      (function() {
+        // Check for URL parameter first
+        const urlParams = new URLSearchParams(window.location.search);
+        const forceTheme = urlParams.get('theme');
+        
+        let theme = 'light'; // Default theme
+        
+        if (forceTheme && ['light', 'dark', 'system'].includes(forceTheme)) {
+          theme = forceTheme;
+        } else {
+          // Check localStorage
+          const storedTheme = localStorage.getItem('bucketlistt-ui-theme');
+          if (storedTheme && ['light', 'dark', 'system'].includes(storedTheme)) {
+            theme = storedTheme;
+          }
+        }
+        
+        // Apply theme immediately
+        const root = document.documentElement;
+        root.classList.remove('light', 'dark');
+        
+        if (theme === 'system') {
+          const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          root.classList.add(systemTheme);
+        } else {
+          root.classList.add(theme);
+        }
+      })();
+    </script>
   </head>
 
   <body>

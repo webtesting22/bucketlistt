@@ -35,7 +35,7 @@ const queryClient = new QueryClient()
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="bucketlistt-ui-theme">
+      <ThemeProvider defaultTheme="light" storageKey="bucketlistt-ui-theme">
         <AuthProvider>
           <Toaster />
           <Sonner />

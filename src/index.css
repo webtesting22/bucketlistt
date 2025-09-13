@@ -54,48 +54,81 @@
     --radius: 0.5rem;
 
     /* Brand Colors */
-    --brand-primary: 24 100% 50%;        /* Orange #ff6600 */
-    --brand-primary-light: 24 100% 60%;  /* Light Orange #ff8533 */
-    --brand-primary-dark: 24 100% 40%;   /* Dark Orange #cc5200 */
-    --brand-secondary: 45 100% 50%;      /* Yellow #ffaa00 */
-    --brand-accent: 340 100% 50%;        /* Pink #ff0066 */
+    --brand-primary: 24 100% 50%;
+    /* Orange #ff6600 */
+    --brand-primary-light: 24 100% 60%;
+    /* Light Orange #ff8533 */
+    --brand-primary-dark: 24 100% 40%;
+    /* Dark Orange #cc5200 */
+    --brand-secondary: 45 100% 50%;
+    /* Yellow #ffaa00 */
+    --brand-accent: 340 100% 50%;
+    /* Pink #ff0066 */
 
     /* Semantic Colors */
-    --success: 142 76% 36%;              /* Green #10b981 */
-    --success-light: 142 76% 46%;        /* Light Green #34d399 */
-    --success-dark: 142 76% 26%;         /* Dark Green #059669 */
-    
-    --warning: 38 92% 50%;               /* Orange #f59e0b */
-    --warning-light: 38 92% 60%;         /* Light Orange #fbbf24 */
-    --warning-dark: 38 92% 40%;          /* Dark Orange #d97706 */
-    
-    --error: 0 84% 60%;                  /* Red #ef4444 */
-    --error-light: 0 84% 70%;            /* Light Red #f87171 */
-    --error-dark: 0 84% 50%;             /* Dark Red #dc2626 */
-    
-    --info: 217 91% 60%;                 /* Blue #3b82f6 */
-    --info-light: 217 91% 70%;           /* Light Blue #60a5fa */
-    --info-dark: 217 91% 50%;            /* Dark Blue #2563eb */
+    --success: 142 76% 36%;
+    /* Green #10b981 */
+    --success-light: 142 76% 46%;
+    /* Light Green #34d399 */
+    --success-dark: 142 76% 26%;
+    /* Dark Green #059669 */
+
+    --warning: 38 92% 50%;
+    /* Orange #f59e0b */
+    --warning-light: 38 92% 60%;
+    /* Light Orange #fbbf24 */
+    --warning-dark: 38 92% 40%;
+    /* Dark Orange #d97706 */
+
+    --error: 0 84% 60%;
+    /* Red #ef4444 */
+    --error-light: 0 84% 70%;
+    /* Light Red #f87171 */
+    --error-dark: 0 84% 50%;
+    /* Dark Red #dc2626 */
+
+    --info: 217 91% 60%;
+    /* Blue #3b82f6 */
+    --info-light: 217 91% 70%;
+    /* Light Blue #60a5fa */
+    --info-dark: 217 91% 50%;
+    /* Dark Blue #2563eb */
 
     /* Neutral Colors */
-    --neutral-50: 210 20% 98%;           /* Very Light Gray */
-    --neutral-100: 210 20% 95%;          /* Light Gray */
-    --neutral-200: 210 16% 93%;          /* Light Gray */
-    --neutral-300: 210 14% 89%;          /* Medium Light Gray */
-    --neutral-400: 210 14% 83%;          /* Medium Gray */
-    --neutral-500: 210 11% 71%;          /* Gray */
-    --neutral-600: 210 7% 56%;           /* Medium Dark Gray */
-    --neutral-700: 210 9% 31%;           /* Dark Gray */
-    --neutral-800: 210 10% 23%;          /* Very Dark Gray */
-    --neutral-900: 210 11% 15%;          /* Almost Black */
+    --neutral-50: 210 20% 98%;
+    /* Very Light Gray */
+    --neutral-100: 210 20% 95%;
+    /* Light Gray */
+    --neutral-200: 210 16% 93%;
+    /* Light Gray */
+    --neutral-300: 210 14% 89%;
+    /* Medium Light Gray */
+    --neutral-400: 210 14% 83%;
+    /* Medium Gray */
+    --neutral-500: 210 11% 71%;
+    /* Gray */
+    --neutral-600: 210 7% 56%;
+    /* Medium Dark Gray */
+    --neutral-700: 210 9% 31%;
+    /* Dark Gray */
+    --neutral-800: 210 10% 23%;
+    /* Very Dark Gray */
+    --neutral-900: 210 11% 15%;
+    /* Almost Black */
 
     /* Gradient Colors */
-    --gradient-primary-start: 24 100% 50%;    /* Orange */
-    --gradient-primary-end: 45 100% 50%;      /* Yellow */
-    --gradient-secondary-start: 217 91% 60%;  /* Blue */
-    --gradient-secondary-end: 262 83% 58%;    /* Purple */
-    --gradient-accent-start: 340 100% 50%;    /* Pink */
-    --gradient-accent-end: 24 100% 50%;       /* Orange */
+    --gradient-primary-start: 24 100% 50%;
+    /* Orange */
+    --gradient-primary-end: 45 100% 50%;
+    /* Yellow */
+    --gradient-secondary-start: 217 91% 60%;
+    /* Blue */
+    --gradient-secondary-end: 262 83% 58%;
+    /* Purple */
+    --gradient-accent-start: 340 100% 50%;
+    /* Pink */
+    --gradient-accent-end: 24 100% 50%;
+    /* Orange */
 
     /* Sidebar Colors */
     --sidebar-background: 220 13% 9%;
@@ -139,48 +172,81 @@
     --ring: 222.2 84% 4.9%;
 
     /* Brand Colors - Light Theme */
-    --brand-primary: 24 100% 50%;        /* Orange #ff6600 */
-    --brand-primary-light: 24 100% 60%;  /* Light Orange #ff8533 */
-    --brand-primary-dark: 24 100% 40%;   /* Dark Orange #cc5200 */
-    --brand-secondary: 45 100% 50%;      /* Yellow #ffaa00 */
-    --brand-accent: 340 100% 50%;        /* Pink #ff0066 */
+    --brand-primary: 24 100% 50%;
+    /* Orange #ff6600 */
+    --brand-primary-light: 24 100% 60%;
+    /* Light Orange #ff8533 */
+    --brand-primary-dark: 24 100% 40%;
+    /* Dark Orange #cc5200 */
+    --brand-secondary: 45 100% 50%;
+    /* Yellow #ffaa00 */
+    --brand-accent: 340 100% 50%;
+    /* Pink #ff0066 */
 
     /* Semantic Colors - Light Theme */
-    --success: 142 76% 36%;              /* Green #10b981 */
-    --success-light: 142 76% 46%;        /* Light Green #34d399 */
-    --success-dark: 142 76% 26%;         /* Dark Green #059669 */
-    
-    --warning: 38 92% 50%;               /* Orange #f59e0b */
-    --warning-light: 38 92% 60%;         /* Light Orange #fbbf24 */
-    --warning-dark: 38 92% 40%;          /* Dark Orange #d97706 */
-    
-    --error: 0 84% 60%;                  /* Red #ef4444 */
-    --error-light: 0 84% 70%;            /* Light Red #f87171 */
-    --error-dark: 0 84% 50%;             /* Dark Red #dc2626 */
-    
-    --info: 217 91% 60%;                 /* Blue #3b82f6 */
-    --info-light: 217 91% 70%;           /* Light Blue #60a5fa */
-    --info-dark: 217 91% 50%;            /* Dark Blue #2563eb */
+    --success: 142 76% 36%;
+    /* Green #10b981 */
+    --success-light: 142 76% 46%;
+    /* Light Green #34d399 */
+    --success-dark: 142 76% 26%;
+    /* Dark Green #059669 */
+
+    --warning: 38 92% 50%;
+    /* Orange #f59e0b */
+    --warning-light: 38 92% 60%;
+    /* Light Orange #fbbf24 */
+    --warning-dark: 38 92% 40%;
+    /* Dark Orange #d97706 */
+
+    --error: 0 84% 60%;
+    /* Red #ef4444 */
+    --error-light: 0 84% 70%;
+    /* Light Red #f87171 */
+    --error-dark: 0 84% 50%;
+    /* Dark Red #dc2626 */
+
+    --info: 217 91% 60%;
+    /* Blue #3b82f6 */
+    --info-light: 217 91% 70%;
+    /* Light Blue #60a5fa */
+    --info-dark: 217 91% 50%;
+    /* Dark Blue #2563eb */
 
     /* Neutral Colors - Light Theme */
-    --neutral-50: 210 20% 98%;           /* Very Light Gray */
-    --neutral-100: 210 20% 95%;          /* Light Gray */
-    --neutral-200: 210 16% 93%;          /* Light Gray */
-    --neutral-300: 210 14% 89%;          /* Medium Light Gray */
-    --neutral-400: 210 14% 83%;          /* Medium Gray */
-    --neutral-500: 210 11% 71%;          /* Gray */
-    --neutral-600: 210 7% 56%;           /* Medium Dark Gray */
-    --neutral-700: 210 9% 31%;           /* Dark Gray */
-    --neutral-800: 210 10% 23%;          /* Very Dark Gray */
-    --neutral-900: 210 11% 15%;          /* Almost Black */
+    --neutral-50: 210 20% 98%;
+    /* Very Light Gray */
+    --neutral-100: 210 20% 95%;
+    /* Light Gray */
+    --neutral-200: 210 16% 93%;
+    /* Light Gray */
+    --neutral-300: 210 14% 89%;
+    /* Medium Light Gray */
+    --neutral-400: 210 14% 83%;
+    /* Medium Gray */
+    --neutral-500: 210 11% 71%;
+    /* Gray */
+    --neutral-600: 210 7% 56%;
+    /* Medium Dark Gray */
+    --neutral-700: 210 9% 31%;
+    /* Dark Gray */
+    --neutral-800: 210 10% 23%;
+    /* Very Dark Gray */
+    --neutral-900: 210 11% 15%;
+    /* Almost Black */
 
     /* Gradient Colors - Light Theme */
-    --gradient-primary-start: 24 100% 50%;    /* Orange */
-    --gradient-primary-end: 45 100% 50%;      /* Yellow */
-    --gradient-secondary-start: 217 91% 60%;  /* Blue */
-    --gradient-secondary-end: 262 83% 58%;    /* Purple */
-    --gradient-accent-start: 340 100% 50%;    /* Pink */
-    --gradient-accent-end: 24 100% 50%;       /* Orange */
+    --gradient-primary-start: 24 100% 50%;
+    /* Orange */
+    --gradient-primary-end: 45 100% 50%;
+    /* Yellow */
+    --gradient-secondary-start: 217 91% 60%;
+    /* Blue */
+    --gradient-secondary-end: 262 83% 58%;
+    /* Purple */
+    --gradient-accent-start: 340 100% 50%;
+    /* Pink */
+    --gradient-accent-end: 24 100% 50%;
+    /* Orange */
 
     /* Sidebar Colors - Light Theme */
     --sidebar-background: 0 0% 99%;
@@ -217,15 +283,41 @@
   }
 
   /* All text elements use Montserrat */
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     font-family: "Montserrat", sans-serif !important;
   }
-  
+
   /* Ensure all common text elements use Montserrat */
-  p, span, div, a, button, input, textarea, select, label, 
-  .text-xs, .text-sm, .text-base, .text-lg, .text-xl, .text-2xl, .text-3xl, .text-4xl, .text-5xl, .text-6xl,
-  .font-normal, .font-medium, .font-semibold, .font-bold, .font-extrabold,
-  .card, .button, .input, .textarea {
+  p,
+  span,
+  div,
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  label,
+  .text-xs,
+  .text-sm,
+  .text-base,
+  .text-lg,
+  .text-xl,
+  .text-2xl,
+  .text-3xl,
+  .text-4xl,
+  .text-5xl,
+  .text-6xl,
+  .font-normal,
+  .font-medium,
+  .font-semibold,
+  .font-bold,
+  .font-extrabold,
+  .card,
+  .button,
+  .input,
+  .textarea {
     font-family: "Montserrat", sans-serif !important;
   }
 
@@ -249,7 +341,7 @@
 
   /* Theme-specific transitions for key elements only */
   .theme-transition {
-    transition: 
+    transition:
       background-color 0.2s ease,
       border-color 0.2s ease,
       color 0.2s ease;
@@ -273,7 +365,7 @@
   input,
   textarea,
   select {
-    transition: 
+    transition:
       background-color 0.15s ease,
       border-color 0.15s ease,
       color 0.15s ease;
@@ -282,6 +374,7 @@
 
 /* Global padding utilities */
 @layer components {
+
   /* Enhanced container with responsive padding */
   .container {
     @apply mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16;
@@ -300,28 +393,29 @@
 
 /* Section background utilities for alternating colors */
 @layer components {
+
   /* Alternating section backgrounds with optimized theme transitions */
   .section-bg-primary {
     @apply bg-background theme-transition;
   }
-  
+
   .section-bg-secondary {
     @apply bg-neutral-50 dark:bg-neutral-900/30 theme-transition;
   }
-  
+
   .section-bg-tertiary {
     @apply bg-neutral-100/50 dark:bg-neutral-800/20 theme-transition;
   }
-  
+
   /* Section wrapper with padding and background */
   .section-wrapper {
     @apply py-6 md:py-8 lg:py-10;
   }
-  
+
   .section-wrapper-sm {
     @apply py-4 md:py-6;
   }
-  
+
   .section-wrapper-lg {
     @apply py-8 md:py-12 lg:py-16;
   }
@@ -375,10 +469,8 @@
 
   /* Grid pattern background */
   .bg-grid-white\/\[0\.02\] {
-    background-image: linear-gradient(
-        rgba(255, 255, 255, 0.02) 1px,
-        transparent 1px
-      ),
+    background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px,
+        transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
   }
 
@@ -403,10 +495,12 @@
   }
 
   @keyframes float {
+
     0%,
     100% {
       transform: translateY(0px);
     }
+
     50% {
       transform: translateY(-20px);
     }
@@ -417,10 +511,12 @@
   }
 
   @keyframes pulseGlow {
+
     0%,
     100% {
       box-shadow: 0 0 20px hsl(var(--brand-primary) / 0.3);
     }
+
     50% {
       box-shadow: 0 0 40px hsl(var(--brand-primary) / 0.6);
     }
@@ -448,9 +544,11 @@
     0% {
       transform: scale(1);
     }
+
     50% {
       transform: scale(1.05);
     }
+
     100% {
       transform: scale(1.1);
     }
@@ -503,6 +601,7 @@
       opacity: 0;
       transform: translateY(30px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -514,6 +613,7 @@
       opacity: 0;
       transform: translateX(30px);
     }
+
     to {
       opacity: 1;
       transform: translateX(0);
@@ -525,6 +625,7 @@
       opacity: 0;
       transform: translateX(-30px);
     }
+
     to {
       opacity: 1;
       transform: translateX(0);
@@ -536,6 +637,7 @@
       opacity: 0;
       transform: translateY(-30px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -547,6 +649,7 @@
       opacity: 0;
       transform: scale(0.9);
     }
+
     to {
       opacity: 1;
       transform: scale(1);
@@ -559,10 +662,12 @@
   }
 
   @keyframes skeletonPulse {
+
     0%,
     100% {
       opacity: 0.4;
     }
+
     50% {
       opacity: 0.8;
     }
