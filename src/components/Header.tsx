@@ -55,16 +55,10 @@ export function Header() {
         return;
       }
 
-      // For mobile devices, always show dark header
-      if (isMobile) {
-        setIsScrolled(true);
-        return;
-      }
+      // Mobile devices now follow the same scroll behavior as desktop
 
-      // Desktop behavior: Header should remain transparent throughout the entire hero section
-      // Hero section is h-screen (100vh), so trigger after full viewport height is scrolled
-      const heroHeight = window.innerHeight; // Full viewport height
-      const scrollThreshold = heroHeight - 100; // Trigger slightly before hero ends for smooth transition
+      // Header becomes opaque after scrolling just 100px
+      const scrollThreshold = 100; // Trigger after 100px scroll
 
       setIsScrolled(window.scrollY > scrollThreshold);
     };
@@ -139,7 +133,7 @@ export function Header() {
     if (!isScrolled) return "bg-transparent";
 
     const isMobile = window.innerWidth < 768;
-    const backdropBlur = isMobile && isLandingPage ? "backdrop-blur-xl" : "backdrop-blur-md";
+    const backdropBlur = isMobile ? "backdrop-blur-xl" : "backdrop-blur-md";
 
     if (theme === "light") {
       return `bg-white/90 ${backdropBlur} border-b border-gray-200 text-gray-900`;

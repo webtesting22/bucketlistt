@@ -199,10 +199,10 @@ export function Hero() {
             style={{
               transform: `translate(-50%, calc(-50% + ${scrollTranslateY}px)) scale(${videoScale * scrollZoomScale})`,
               transformOrigin: "center center",
-              width: isMobile ? "100vw" : "100%",
-              height: isMobile ? "100vh" : "100%",
-              minWidth: isMobile ? "100vw" : "100%",
-              minHeight: isMobile ? "100vh" : "100%",
+              // width: isMobile ? "100vw" : "100%",
+              // height: isMobile ? "100vh" : "100%",
+              // minWidth: isMobile ? "100vw" : "100%",
+              // minHeight: isMobile ? "100vh" : "100%",
               objectFit: "cover"
             }}
           />

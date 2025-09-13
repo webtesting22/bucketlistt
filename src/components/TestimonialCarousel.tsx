@@ -123,13 +123,13 @@ export function TestimonialCarousel() {
           {/* Left Side - Title and Navigation */}
           <div className="flex-shrink-0 lg:w-80 w-full text-center lg:text-left" id="GapAddedForTestimonial">
             <h1 className="text-white CommonH1 leading-tight">
-              
+
               {/* <br /> */}
               Millions love completing bucketlistt
               {/* <br /> */}
               with us 💖
             </h1>
-<br />
+            <br />
             {/* Navigation Buttons */}
             <div className="flex gap-3 justify-center lg:justify-start">
               <Button

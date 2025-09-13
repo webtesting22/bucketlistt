@@ -21,8 +21,8 @@
     object-fit: cover;
 }
 
-@media (max-width:900px) {
+/* @media (max-width:900px) {
     #PaddingTopNewForOnlyMobile {
         padding-top: 4rem !important;
     }
-}
+} */
