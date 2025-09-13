@@ -99,7 +99,7 @@ export function ExperienceCard({
     <Card
       className={`group cursor-pointer overflow-hidden border-0  transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''}`}
       onClick={handleClick}
-      style={{ boxShadow: 'none',borderRadius: '0px' }}
+      style={{ boxShadow: 'none',borderRadius: '5px' }}
     >
       <CardContent className="p-0">
         <div className="relative">
