@@ -97,7 +97,19 @@ body {
   margin: 0 auto;
 }
 
+.OnlyPc{
+  display: block;
+}
+
 @media (max-width:900px) {
+  .FontAdjustForMobile{
+    font-size: 12px !important;
+    line-height: 20px !important;
+    margin-top: 10px !important;
+  }
+  .OnlyPc{
+    display: none;
+  }
   .LogoATOAIStyles {
     width: 80%;
   }

@@ -341,13 +341,13 @@ const Index = () => {
                     spaceBetween={16}
                     loop={true}
                     speed={600}
-                    autoplay={{
-                      delay: 2000,
-                      disableOnInteraction: false,
-                    }}
+                    // autoplay={{
+                    //   delay: 2000,
+                    //   disableOnInteraction: false,
+                    // }}
                     breakpoints={{
                       320: {
-                        slidesPerView: 1,
+                        slidesPerView: 2,
                         spaceBetween: 8,
                       },
                       640: {

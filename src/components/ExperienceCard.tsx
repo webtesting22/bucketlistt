@@ -99,7 +99,7 @@ export function ExperienceCard({
     <Card
       className={`group cursor-pointer overflow-hidden border-0  transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''}`}
       onClick={handleClick}
-      style={{boxShadow: 'none'}}
+      style={{ boxShadow: 'none',borderRadius: '0px' }}
     >
       <CardContent className="p-0">
         <div className="relative">
@@ -119,7 +119,7 @@ export function ExperienceCard({
           />
         </div>
 
-        <div className="p-4 space-y-3">
+        <div className="p-3  space-y-3">
           <div>
             {displayCategories.length > 0 && (
               <div>
@@ -147,41 +147,43 @@ export function ExperienceCard({
             )}
           </div>
 
-          <h3 className="CommonH3 text-start">
+          <h3 className="CommonH3 text-start FontAdjustForMobile">
             {title}
           </h3>
 
-          <div className="flex items-center gap-4 text-sm text-muted-foreground marginUnset">
-            {duration && (
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3 fontSizeSm" />
-                <span className="fontSizeSm">{duration}</span>
-              </div>
-            )}
-            {groupSize && (
-              <div className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                <span className="fontSizeSm">{groupSize}</span>
-              </div>
-            )}
-          </div>
-
-          {getDistanceDisplay() && (
-            <div className="flex items-center gap-1 text-sm text-muted-foreground ">
-              {distanceKm === 0 ? (
-                <MapPin className="h-4 w-4" />
-              ) : (
-                <Route className="h-4 w-4" />
+          <div className="OnlyPc">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground marginUnset">
+              {duration && (
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3 fontSizeSm" />
+                  <span className="fontSizeSm">{duration}</span>
+                </div>
               )}
-              <span>{getDistanceDisplay()}</span>
+              {groupSize && (
+                <div className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  <span className="fontSizeSm">{groupSize}</span>
+                </div>
+              )}
             </div>
-          )}
-          <div>
-            <div id="PriceContainerOfferHomePageCards">
-              <span className="text-lg font-bold fontSizeMd" style={{color: 'var(--brand-color)'}}>{price}</span>
-              {originalPrice && (
-                <span className="text-sm text-muted-foreground line-through fontSizeSm">{originalPrice}</span>
-              )}
+
+            {getDistanceDisplay() && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground ">
+                {distanceKm === 0 ? (
+                  <MapPin className="h-4 w-4" />
+                ) : (
+                  <Route className="h-4 w-4" />
+                )}
+                <span>{getDistanceDisplay()}</span>
+              </div>
+            )}
+            <div>
+              <div id="PriceContainerOfferHomePageCards">
+                <span className="text-lg font-bold fontSizeMd" style={{ color: 'var(--brand-color)' }}>{price}</span>
+                {originalPrice && (
+                  <span className="text-sm text-muted-foreground line-through fontSizeSm">{originalPrice}</span>
+                )}
+              </div>
             </div>
           </div>
         </div>

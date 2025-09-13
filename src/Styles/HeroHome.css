@@ -40,6 +40,17 @@
     backface-visibility: hidden;
     transform-style: preserve-3d;
     position: relative;
+    /* iOS specific styles to prevent popup */
+    -webkit-playsinline: true;
+    -webkit-media-controls: none;
+    -webkit-media-controls-start-playback-button: none;
+    -webkit-media-controls-play-button: none;
+    -webkit-media-controls-volume-slider: none;
+    -webkit-media-controls-mute-button: none;
+    -webkit-media-controls-timeline: none;
+    -webkit-media-controls-current-time-display: none;
+    -webkit-media-controls-time-remaining-display: none;
+    -webkit-media-controls-fullscreen-button: none;
 }
 
 /* Smooth parallax transitions */
