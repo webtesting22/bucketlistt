@@ -26,3 +26,41 @@
         padding-top: 4rem !important;
     }
 } */
+
+
+#SearchBarAdjustContainer {
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#SearchBarAdjustContainer input::placeholder {
+    font-size: 14px;
+}
+
+#SearchBarAdjustContainerIcon {
+    height: 18px;
+    width: 18px;
+}
+
+
+@media (max-width:900px) {
+    /* #TestimonialImage{
+        min-height: 150px;
+    } */
+    .FromText {
+        font-size: 12px !important;
+    }
+
+    #LogoADjustContainer {
+        margin-left: -10px;
+    }
+
+    #DestinationCardStyles {
+        height: 200px;
+        /* width: 300px !important; */
+    }
+
+    #DestinationsSwiperCardStyles {
+        min-height: 100% !important;
+    }
+}

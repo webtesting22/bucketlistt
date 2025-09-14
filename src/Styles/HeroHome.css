@@ -97,13 +97,15 @@
 @media (max-width:900px) {
 
     #HeroVideoContainer {
-        height: 300px !important;
+        height: 450px !important;
     }
 
     #MobileTextFontSize {
-        font-size: 25px !important;
+        font-size: 20px !important;
         line-height: 30px !important;
         margin-bottom: 0px !important;
+        font-weight: 700 !important;
+        width: 80%;
     }
 
     #MobileChangeAlignment {

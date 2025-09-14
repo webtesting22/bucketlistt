@@ -99,7 +99,7 @@ export function ExperienceCard({
     <Card
       className={`group cursor-pointer overflow-hidden border-0  transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''}`}
       onClick={handleClick}
-      style={{ boxShadow: 'none',borderRadius: '5px' }}
+      style={{ boxShadow: 'none', borderRadius: '5px' }}
     >
       <CardContent className="p-0">
         <div className="relative">
@@ -150,7 +150,19 @@ export function ExperienceCard({
           <h3 className="CommonH3 text-start FontAdjustForMobile">
             {title}
           </h3>
+          <div>
+            <div id="PriceContainerOfferHomePageCards">
+              <div>
+                <span className="FromText">from</span> {originalPrice && (
+                  <span className="text-sm text-muted-foreground line-through fontSizeSm">{originalPrice}</span>
+                )}
+              </div>
+              <div style={{marginTop: '-5px'}}>
+                <span className="text-lg font-bold fontSizeMd" style={{ color: 'var(--brand-color)' }}>{price}</span>
+              </div>
 
+            </div>
+          </div>
           <div className="OnlyPc">
             <div className="flex items-center gap-4 text-sm text-muted-foreground marginUnset">
               {duration && (
@@ -183,6 +195,7 @@ export function ExperienceCard({
                 {originalPrice && (
                   <span className="text-sm text-muted-foreground line-through fontSizeSm">{originalPrice}</span>
                 )}
+
               </div>
             </div>
           </div>

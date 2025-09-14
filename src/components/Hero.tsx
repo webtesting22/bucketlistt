@@ -250,6 +250,7 @@ export function Hero() {
             className="MaxVideoWidth"
             // className={`w-full mx-auto relative z-30 ${isMobile ? "px-6 max-w-sm" : "px-4 max-w-2xl"
             //   }`}
+            id="SearchBarAdjustContainer"
             ref={dropdownRef}
           >
             <form onSubmit={handleSearch}>
@@ -262,10 +263,10 @@ export function Hero() {
                     ? "px-4 py-1 bg-gray-50/80 border border-gray-200/50"
                     : "px-4 py-2 sm:py-0"
                     }`}>
-                    <Search className={`text-gray-400 mr-3 flex-shrink-0 ${isMobile ? "h-6 w-6" : "h-5 w-5"
+                    <Search id="SearchBarAdjustContainerIcon" className={`text-gray-400 mr-3 flex-shrink-0  ${isMobile ? "h-6 w-6" : "h-5 w-5"
                       }`} />
                     <Input
-                      placeholder={isMobile ? "Where to next?" : "Search for experiences and cities"}
+                      placeholder={isMobile ? "Search for experiences and cities..." : "Search for experiences and cities..."}
                       value={searchQuery}
                       onChange={handleInputChange}
                       onFocus={() => {

@@ -219,7 +219,7 @@ const Index = () => {
             >
               <div className="flex items-center gap-3 mb-6 md:mb-8">
                 <h2 className="CommonH2 text-2xl md:text-3xl font-bold">
-                  Our Popular Destinations
+                  Explore India's top destinations
                 </h2>
               </div>
             </BidirectionalAnimatedSection>
@@ -250,11 +250,11 @@ const Index = () => {
                     }}
                     breakpoints={{
                       320: {
-                        slidesPerView: 1,
+                        slidesPerView: 2.3,
                         spaceBetween: 8,
                       },
                       640: {
-                        slidesPerView: 2,
+                        slidesPerView: 2.3,
                         spaceBetween: 12,
                       },
                       1024: {
@@ -279,7 +279,7 @@ const Index = () => {
                   </Swiper>
                 </div>
 
-                <BidirectionalAnimatedSection
+                {/* <BidirectionalAnimatedSection
                   animation="fade-up"
                   delay={400}
                   duration={600}
@@ -295,7 +295,7 @@ const Index = () => {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
-                </BidirectionalAnimatedSection>
+                </BidirectionalAnimatedSection> */}
               </>
             )}
           </div>
@@ -317,7 +317,7 @@ const Index = () => {
             >
               <div className="flex items-center gap-3 mb-6 md:mb-8">
                 <h2 className="CommonH2">
-                  Offers for you
+                  Top Experiences
                 </h2>
               </div>
             </BidirectionalAnimatedSection>
@@ -337,7 +337,7 @@ const Index = () => {
                   <Swiper
                     modules={[FreeMode, Autoplay]}
                     freeMode={true}
-                    slidesPerView={4}
+                    slidesPerView={1.5}
                     spaceBetween={16}
                     loop={true}
                     speed={600}
@@ -395,7 +395,7 @@ const Index = () => {
               </>
             )}
 
-            <BidirectionalAnimatedSection
+            {/* <BidirectionalAnimatedSection
               animation="fade-up"
               delay={400}
               duration={600}
@@ -411,7 +411,7 @@ const Index = () => {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
-            </BidirectionalAnimatedSection>
+            </BidirectionalAnimatedSection> */}
           </div>
         </section>
       </BidirectionalAnimatedSection>
@@ -515,10 +515,10 @@ const Index = () => {
                   And we are ATOAI certified
                 </h2>
                 <img
-                className="LogoATOAIStyles"
+                  className="LogoATOAIStyles"
                   src="/ATOAI_logo.jpg"
                   alt="ATOAI Logo"
-                  // className="mx-auto w-32 md:w-48 h-auto rounded-lg"
+                // className="mx-auto w-32 md:w-48 h-auto rounded-lg"
                 />
               </BidirectionalAnimatedSection>
 

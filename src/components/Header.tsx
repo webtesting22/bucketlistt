@@ -58,7 +58,7 @@ export function Header() {
       // Mobile devices now follow the same scroll behavior as desktop
 
       // Header becomes opaque after scrolling just 100px
-      const scrollThreshold = 100; // Trigger after 100px scroll
+      const scrollThreshold = 400; // Trigger after 100px scroll
 
       setIsScrolled(window.scrollY > scrollThreshold);
     };
@@ -162,11 +162,21 @@ export function Header() {
           <div
             className="flex items-center cursor-pointer"
             onClick={() => navigate("/")}
+            id="LogoADjustContainer"
           >
+            {/* First logo - shown by default */}
+            <img
+              src="https://s3.ap-south-1.amazonaws.com/prepseed/prod/ldoc/media/Bucketlistt.png"
+              alt="bucketlistt Logo"
+              className={`h-20 w-auto transition-opacity duration-300 ${isScrolled ? 'opacity-0 absolute' : 'opacity-100'
+                }`}
+            />
+            {/* Second logo - shown after scroll */}
             <img
               src="https://prepseed.s3.ap-south-1.amazonaws.com/Bucketlistt+(3).png"
               alt="bucketlistt Logo"
-              className="h-20 w-auto"
+              className={`h-20 w-auto transition-opacity duration-300 ${isScrolled ? 'opacity-100' : 'opacity-0 absolute'
+                }`}
             />
           </div>
 
@@ -526,12 +536,20 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button
-                style={{ background: "var(--brand-color)" }}
-                onClick={() => navigate("/auth")}
-              >
-                Sign in
-              </Button>
+              <>
+                {/* Existing Sign In Button - unchanged */}
+                <Button
+                  style={{
+                    background: isScrolled ? "#940fdb" : "white",
+                    color: isScrolled ? "white" : "black", padding: "0px 10px", height: "30px"
+                  }}
+                  onClick={() => navigate("/auth")}
+                >
+                  Sign in
+                </Button>
+
+
+              </>
             )}
           </div>
         </div>

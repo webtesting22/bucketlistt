@@ -117,21 +117,20 @@ export function TestimonialCarousel() {
   };
 
   return (
-    <section className="py-16 md:py-24 px-4 bg-gray-900">
+    <section className="py-5 md:py-24 px-4 " style={{ background: "rgb(39 28 55)" }}>
       <div className=" max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
+        <div className="flex flex-col lg:flex-row overflow-x-auto items-start justify-between gap-8">
           {/* Left Side - Title and Navigation */}
           <div className="flex-shrink-0 lg:w-80 w-full text-center lg:text-left" id="GapAddedForTestimonial">
             <h1 className="text-white CommonH1 leading-tight">
-
               {/* <br /> */}
-              Millions love completing bucketlistt
+              People love completing bucketlistt&nbsp;
               {/* <br /> */}
               with us 💖
             </h1>
-            <br />
+            {/* <br /> */}
             {/* Navigation Buttons */}
-            <div className="flex gap-3 justify-center lg:justify-start">
+            {/* <div className="flex gap-3 justify-center lg:justify-start">
               <Button
                 variant="outline"
                 size="icon"
@@ -148,14 +147,14 @@ export function TestimonialCarousel() {
               >
                 <ChevronRight className="h-5 w-5" />
               </Button>
-            </div>
+            </div> */}
           </div>
 
           {/* Right Side - Horizontal Scrollable Testimonials */}
           <div className="flex-1 relative w-full">
             <div
               ref={scrollContainerRef}
-              className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+              className="flex gap-6  scrollbar-hide pb-4"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -164,10 +163,10 @@ export function TestimonialCarousel() {
               {testimonials.map((testimonial) => (
                 <div
                   key={testimonial.id}
-                  className="bg-gray-800 rounded-2xl overflow-hidden flex flex-col flex-shrink-0 w-80 h-96"
+                  className="bg-gray-800 rounded-2xl  flex flex-col flex-shrink-0 w-80 "
                 >
                   {/* Image */}
-                  <div className="h-40 w-full bg-gradient-to-br from-blue-500 to-purple-600 relative overflow-hidden">
+                  <div className="h-40 w-full bg-gradient-to-br from-blue-500 to-purple-600 relative " id="TestimonialImage">
                     <img
                       src={testimonial.image}
                       alt={`${testimonial.experience} - ${testimonial.name}`}
@@ -178,7 +177,6 @@ export function TestimonialCarousel() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-                    {/* Rating badge */}
                     <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
                       <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                       <span className="text-white text-xs font-medium">
@@ -188,10 +186,10 @@ export function TestimonialCarousel() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-6 flex-1 flex flex-col">
+                  <div className="p-6 flex-1 flex flex-col" style={{ background: "rgb(28 21 37)" }}>
                     {/* Header with Avatar and Info */}
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold text-base">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base" style={{ background: "rgb(39, 28, 55)" }}>
                         {testimonial.initial}
                       </div>
                       <div className="flex-1">
@@ -203,7 +201,7 @@ export function TestimonialCarousel() {
                             {renderStars(testimonial.rating)}
                           </div>
                         </div>
-                        <p className="text-gray-400 text-xs">
+                        <p className="text-gray-400 text-xs text-start">
                           🇮🇳 {testimonial.location}
                         </p>
                       </div>
@@ -211,13 +209,13 @@ export function TestimonialCarousel() {
 
                     {/* Review Text */}
                     <div className="flex-1 mb-4">
-                      <p className="text-gray-300 text-sm leading-relaxed">
+                      <p className="text-gray-300 text-sm leading-relaxed" style={{ textAlign: "start" }}>
                         {testimonial.review}
                       </p>
                     </div>
 
                     {/* Experience Link */}
-                    <div className="text-xs text-blue-400 font-medium border-t border-gray-700 pt-3">
+                    <div className="text-xs text-white font-medium border-t border-gray-700 pt-3">
                       {testimonial.experience}
                     </div>
                   </div>
