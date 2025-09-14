@@ -31,7 +31,8 @@ const EditExperience = () => {
     queryFn: async () => {
       if (!id) throw new Error('Experience ID is required');
       
-      const { data, error } = await supabase
+      // Fetch experience with categories
+      const { data: experienceData, error: experienceError } = await supabase
         .from('experiences')
         .select(`
           *,
@@ -42,14 +43,58 @@ const EditExperience = () => {
         .eq('id', id)
         .single();
 
-      if (error) throw error;
+      if (experienceError) throw experienceError;
+      
+      // Fetch activities for this experience
+      const { data: activitiesData, error: activitiesError } = await supabase
+        .from('activities')
+        .select(`
+          *,
+          time_slots (
+            id,
+            start_time,
+            end_time,
+            capacity
+          )
+        `)
+        .eq('experience_id', id)
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (activitiesError) throw activitiesError;
+      
+      // If no activities exist, fetch legacy time slots for backward compatibility
+      let legacyTimeSlots: any[] = [];
+      if (!activitiesData || activitiesData.length === 0) {
+        const { data: timeSlotsData, error: timeSlotsError } = await supabase
+          .from('time_slots')
+          .select('id, start_time, end_time, capacity')
+          .eq('experience_id', id)
+          .order('start_time');
+        
+        if (timeSlotsError) throw timeSlotsError;
+        legacyTimeSlots = timeSlotsData || [];
+      }
       
       // Transform the data to include category_ids array
-      const categoryIds = data.experience_categories?.map(ec => ec.category_id) || [];
+      const categoryIds = experienceData.experience_categories?.map(ec => ec.category_id) || [];
+      
+      // Transform activities data to match our Activity interface
+      const transformedActivities = activitiesData?.map(activity => ({
+        id: activity.id,
+        name: activity.name,
+        distance: activity.distance,
+        duration: activity.duration,
+        price: activity.price,
+        currency: activity.currency,
+        timeSlots: activity.time_slots || []
+      })) || [];
       
       return {
-        ...data,
-        category_ids: categoryIds
+        ...experienceData,
+        category_ids: categoryIds,
+        activities: transformedActivities,
+        legacyTimeSlots: legacyTimeSlots
       };
     },
     enabled: !!id

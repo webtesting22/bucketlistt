@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
@@ -8,14 +7,17 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Clock, Users } from 'lucide-react'
 import { format } from 'date-fns'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface SlotSelectorProps {
-  experienceId: string
-  selectedDate: Date | undefined
-  selectedSlotId: string | undefined
-  participantCount: number
-  onDateChange: (date: Date | undefined) => void
-  onSlotChange: (slotId: string | undefined) => void
+  experienceId: string;
+  selectedDate: Date | undefined;
+  selectedSlotId: string | undefined;
+  selectedActivityId: string | undefined; // Add this
+  participantCount: number;
+  onDateChange: (date: Date | undefined) => void;
+  onSlotChange: (slotId: string | undefined) => void;
+  onActivityChange: (activityId: string | undefined) => void; // Add this
 }
 
 interface TimeSlot {
@@ -27,13 +29,23 @@ interface TimeSlot {
   available_spots: number
 }
 
-export const SlotSelector = ({ 
-  experienceId, 
-  selectedDate, 
-  selectedSlotId, 
+interface Activity {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+}
+
+// Add before the SlotSelector component
+export const SlotSelector = ({
+  experienceId,
+  selectedDate,
+  selectedSlotId,
+  selectedActivityId, // Add this
   participantCount,
-  onDateChange, 
-  onSlotChange 
+  onDateChange,
+  onSlotChange,
+  onActivityChange, // Add this
 }: SlotSelectorProps) => {
   // Query to get available dates (dates with available slots)
   const { data: availableDates } = useQuery({
@@ -91,18 +103,36 @@ export const SlotSelector = ({
     enabled: !!experienceId
   })
 
-  const { data: timeSlots, isLoading } = useQuery({
-    queryKey: ['time-slots', experienceId, selectedDate],
+  // Add query for activities
+  const { data: activities } = useQuery({
+    queryKey: ['activities', experienceId],
     queryFn: async () => {
-      if (!selectedDate) return []
+      const { data, error } = await supabase
+        .from('activities')
+        .select('*')
+        .eq('experience_id', experienceId)
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (error) throw error;
+      return data as Activity[];
+    },
+  });
+
+  // Update time slots query to filter by activity
+  const { data: timeSlots, isLoading } = useQuery({
+    queryKey: ['time-slots', experienceId, selectedDate, selectedActivityId],
+    queryFn: async () => {
+      if (!selectedDate || !selectedActivityId) return [];
       
-      const dateStr = selectedDate.toISOString().split('T')[0]
+      const dateStr = selectedDate.toISOString().split('T')[0];
       
       // Get time slots for the experience
       const { data: slots, error: slotsError } = await supabase
         .from('time_slots')
         .select('*')
         .eq('experience_id', experienceId)
+        .eq('activity_id', selectedActivityId);
       
       if (slotsError) throw slotsError
       
@@ -132,7 +162,7 @@ export const SlotSelector = ({
       
       return slotsWithAvailability as TimeSlot[]
     },
-    enabled: !!experienceId && !!selectedDate
+    enabled: !!experienceId && !!selectedDate && !!selectedActivityId
   })
 
   const formatTime = (time: string) => {
@@ -178,95 +208,128 @@ export const SlotSelector = ({
 
   return (
     <div className="space-y-6">
+      {/* Add Activity Selector */}
       <div>
-        <Label className="text-base font-semibold mb-3 block">Select Date</Label>
-        <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={onDateChange}
-          disabled={isDateDisabled}
-          className="rounded-md border"
-        />
+        <Label className="text-base font-semibold mb-3 block">Select Activity</Label>
+        <Select
+          value={selectedActivityId}
+          onValueChange={(value) => {
+            onActivityChange(value);
+            onSlotChange(undefined); // Reset slot when activity changes
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Choose an activity" />
+          </SelectTrigger>
+          <SelectContent>
+            {activities?.map((activity) => (
+              <SelectItem key={activity.id} value={activity.id}>
+                <div className="flex justify-between items-center w-full">
+                  <span>{activity.name}</span>
+                  <span className="text-muted-foreground">
+                    {activity.currency} {activity.price}
+                  </span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {selectedDate && (
-        <div>
-          <Label className="text-base font-semibold mb-3 block">
-            Available Time Slots for {format(selectedDate, 'MMM d, yyyy')}
-          </Label>
-          
-          {isLoading ? (
-            <div className="space-y-2">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 bg-muted animate-pulse rounded-lg"></div>
-              ))}
-            </div>
-          ) : timeSlots && timeSlots.length > 0 ? (
-            <div className="space-y-3">
-              {timeSlots.map((slot) => {
-                const available = isSlotAvailable(slot)
-                const isSelected = selectedSlotId === slot.id
-                
-                return (
-                  <Card 
-                    key={slot.id} 
-                    className={`cursor-pointer transition-colors ${
-                      isSelected 
-                        ? 'border-brand-primary bg-brand-primary/5 dark:bg-brand-primary/10' 
-                        : available 
-                        ? 'hover:border-brand-primary/30' 
-                        : 'opacity-50 cursor-not-allowed'
-                    }`}
-                    onClick={() => available && onSlotChange(isSelected ? undefined : slot.id)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Clock className="h-5 w-5 text-muted-foreground" />
-                          <div>
-                            <div className="font-medium">
-                              {formatTime(slot.start_time)} - {formatTime(slot.end_time)}
+      {/* Existing Calendar and Time Slots components */}
+      {selectedActivityId && (
+        <>
+          <div>
+            <Label className="text-base font-semibold mb-3 block">Select Date</Label>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={onDateChange}
+              disabled={isDateDisabled}
+              className="rounded-md border"
+            />
+          </div>
+
+          {selectedDate && (
+            <div>
+              <Label className="text-base font-semibold mb-3 block">
+                Available Time Slots for {format(selectedDate, 'MMM d, yyyy')}
+              </Label>
+              
+              {isLoading ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-16 bg-muted animate-pulse rounded-lg"></div>
+                  ))}
+                </div>
+              ) : timeSlots && timeSlots.length > 0 ? (
+                <div className="space-y-3">
+                  {timeSlots.map((slot) => {
+                    const available = isSlotAvailable(slot)
+                    const isSelected = selectedSlotId === slot.id
+                    
+                    return (
+                      <Card 
+                        key={slot.id} 
+                        className={`cursor-pointer transition-colors ${
+                          isSelected 
+                            ? 'border-brand-primary bg-brand-primary/5 dark:bg-brand-primary/10' 
+                            : available 
+                            ? 'hover:border-brand-primary/30' 
+                            : 'opacity-50 cursor-not-allowed'
+                        }`}
+                        onClick={() => available && onSlotChange(isSelected ? undefined : slot.id)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Clock className="h-5 w-5 text-muted-foreground" />
+                              <div>
+                                <div className="font-medium">
+                                  {formatTime(slot.start_time)} - {formatTime(slot.end_time)}
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Users className="h-4 w-4" />
+                                  <span>
+                                    {slot.available_spots} of {slot.capacity} spots available
+                                    {slot.booked_count > 0 && ` (${slot.booked_count} booked)`}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Users className="h-4 w-4" />
-                              <span>
-                                {slot.available_spots} of {slot.capacity} spots available
-                                {slot.booked_count > 0 && ` (${slot.booked_count} booked)`}
-                              </span>
+                            
+                            <div className="flex items-center gap-2">
+                              {getSlotStatusBadge(slot)}
+                              {isSelected && (
+                                <Badge className="bg-brand-primary">
+                                  Selected
+                                </Badge>
+                              )}
                             </div>
                           </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          {getSlotStatusBadge(slot)}
-                          {isSelected && (
-                            <Badge className="bg-brand-primary">
-                              Selected
-                            </Badge>
+                          
+                          {!available && slot.available_spots > 0 && (
+                            <div className="mt-2 text-sm text-error">
+                              Only {slot.available_spots} spots left, but you need {participantCount}
+                            </div>
                           )}
-                        </div>
-                      </div>
-                      
-                      {!available && slot.available_spots > 0 && (
-                        <div className="mt-2 text-sm text-error">
-                          Only {slot.available_spots} spots left, but you need {participantCount}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <div className="text-muted-foreground">
-                  No time slots available for this date
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
                 </div>
-              </CardContent>
-            </Card>
+              ) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <div className="text-muted-foreground">
+                      No time slots available for this date
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   )

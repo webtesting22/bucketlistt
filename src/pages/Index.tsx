@@ -58,6 +58,7 @@ const Index = () => {
         `
         )
         .order("created_at", { ascending: true })
+        .eq("is_active", true)
         .limit(8);
 
       if (error) throw error;

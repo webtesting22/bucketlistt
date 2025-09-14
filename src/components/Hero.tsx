@@ -33,11 +33,13 @@ export function Hero() {
         supabase
           .from("destinations")
           .select("id, title, subtitle")
+          .eq("is_active", true)
           .or(`title.ilike.%${searchQuery}%,subtitle.ilike.%${searchQuery}%`)
           .limit(3),
         supabase
           .from("experiences")
           .select("id, title, category, location")
+          .eq("is_active", true)
           .or(
             `title.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`
           )

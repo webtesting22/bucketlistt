@@ -1,454 +1,747 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/integrations/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { X, Upload } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { TimeSlotManager } from '@/components/TimeSlotManager'
-import { DestinationDropdown } from '@/components/DestinationDropdown'
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X, Upload } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { TimeSlotManager } from "@/components/TimeSlotManager";
+import { DestinationDropdown } from "@/components/DestinationDropdown";
+import { Plus, Trash2 } from "lucide-react";
 
 interface Category {
-  id: string
-  name: string
-  icon: string | null
-  color: string | null
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
 }
 
 interface TimeSlot {
-  start_time: string
-  end_time: string
-  capacity: number
+  start_time: string;
+  end_time: string;
+  capacity: number;
+  activity_id?: string; // Add this line
+}
+
+interface Activity {
+  id: string;
+  name: string;
+  distance?: string;
+  duration: string;
+  price: number;
+  currency: string;
+  timeSlots: TimeSlot[];
 }
 
 interface ExperienceData {
-  id?: string
-  title: string
-  description: string
-  category_ids: string[]
-  original_price: number
-  currency: string
-  duration: string
-  group_size: string
-  location: string
-  start_point: string
-  end_point: string
-  distance_km: number
-  days_open: string[]
-  price: number
+  id?: string;
+  title: string;
+  description: string;
+  category_ids: string[];
+  original_price: number;
+  currency: string;
+  duration: string;
+  group_size: string;
+  location: string;
+  start_point: string;
+  end_point: string;
+  distance_km: number;
+  days_open: string[];
+  price: number;
+  activities?: Activity[];
+  destination_id?: string;
+  legacyTimeSlots?: TimeSlot[];
 }
 
 interface CreateExperienceFormProps {
-  initialData?: ExperienceData
-  isEditing?: boolean
+  initialData?: ExperienceData;
+  isEditing?: boolean;
 }
 
-const DISTANCE_OPTIONS = [
-  { value: 'on-spot', label: 'On the spot' },
-  { value: '8km', label: '8km (Point A to Point B)' },
-  { value: '16km', label: '16km (Point A to Point B)' },
-  { value: '26km', label: '26km (Point A to Point B)' }
-]
-
 const DAYS_OF_WEEK = [
-  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-]
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 
-export function CreateExperienceForm({ initialData, isEditing = false }: CreateExperienceFormProps) {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const { toast } = useToast()
+export function CreateExperienceForm({
+  initialData,
+  isEditing = false,
+}: CreateExperienceFormProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(false)
-  const [selectedImages, setSelectedImages] = useState<File[]>([])
-  const [previewUrls, setPreviewUrls] = useState<string[]>([])
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [selectedVideos, setSelectedVideos] = useState<File[]>([]);
+  const [videoPreviewUrls, setVideoPreviewUrls] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    category_ids: initialData?.category_ids || [] as string[],
-    original_price: initialData?.original_price?.toString() || '',
-    discount_percentage: '',
-    currency: initialData?.currency || 'INR',
-    duration: initialData?.duration || '',
-    group_size: initialData?.group_size || '',
-    location: initialData?.location || '',
-    start_point: initialData?.start_point || '',
-    end_point: initialData?.end_point || '',
-    distance_km: initialData?.distance_km === 0 ? 'on-spot' : `${initialData?.distance_km}km` || '',
-    days_open: initialData?.days_open || [] as string[],
-    destination_id: initialData?.destination_id || ''
-  })
+    title: initialData?.title || "",
+    description: initialData?.description || "",
+    category_ids: initialData?.category_ids || ([] as string[]),
+    location: initialData?.location || "",
+    start_point: initialData?.start_point || "",
+    end_point: initialData?.end_point || "",
+    days_open: initialData?.days_open || ([] as string[]),
+    destination_id: initialData?.destination_id || "",
+  });
 
   // Calculate discount percentage if we have original price and current price
   useEffect(() => {
-    if (initialData?.original_price && initialData?.price && initialData.original_price > initialData.price) {
-      const discount = ((initialData.original_price - initialData.price) / initialData.original_price) * 100
-      setFormData(prev => ({ ...prev, discount_percentage: discount.toFixed(2) }))
+    if (
+      initialData?.original_price &&
+      initialData?.price &&
+      initialData.original_price > initialData.price
+    ) {
+      const discount =
+        ((initialData.original_price - initialData.price) /
+          initialData.original_price) *
+        100;
+      setFormData((prev) => ({
+        ...prev,
+        discount_percentage: discount.toFixed(2),
+      }));
     }
-  }, [initialData])
-
-  // Fetch existing time slots if editing
-  useEffect(() => {
-    if (isEditing && initialData?.id) {
-      fetchTimeSlots(initialData.id)
-    }
-  }, [isEditing, initialData?.id])
-
-  const fetchTimeSlots = async (experienceId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('time_slots')
-        .select('*')
-        .eq('experience_id', experienceId)
-        .order('start_time')
-
-      if (error) throw error
-
-      const slots = data?.map(slot => ({
-        start_time: slot.start_time,
-        end_time: slot.end_time,
-        capacity: slot.capacity
-      })) || []
-
-      setTimeSlots(slots)
-    } catch (error) {
-      console.error('Error fetching time slots:', error)
-    }
-  }
-
-  // Calculate final price based on original price and discount
-  const calculateFinalPrice = () => {
-    const originalPrice = parseFloat(formData.original_price) || 0
-    const discount = parseFloat(formData.discount_percentage) || 0
-    return originalPrice - (originalPrice * discount / 100)
-  }
+  }, [initialData]);
 
   useEffect(() => {
-    fetchCategories()
-  }, [])
+    fetchCategories();
+  }, []);
+
+  // Load existing activities when editing
+  useEffect(() => {
+    if (isEditing && initialData) {
+      if (initialData.activities && initialData.activities.length > 0) {
+        // Experience has activities - use them
+        setActivities(initialData.activities);
+      } else {
+        // Old experience without activities - create default activity from legacy data
+        const defaultActivity: Activity = {
+          id: Date.now().toString(),
+          name: initialData.title || "Experience Activity",
+          distance:
+            initialData.distance_km === 0
+              ? "On-site"
+              : `${initialData.distance_km}km`,
+          duration: initialData.duration || "Not specified",
+          price: initialData.price || 0,
+          currency: initialData.currency || "INR",
+          timeSlots: initialData.legacyTimeSlots || [], // Use legacy time slots if available
+        };
+        setActivities([defaultActivity]);
+      }
+    }
+  }, [isEditing, initialData]);
 
   const fetchCategories = async () => {
     try {
       const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name')
+        .from("categories")
+        .select("*")
+        .order("name");
 
-      if (error) throw error
-      setCategories(data || [])
+      if (error) throw error;
+      setCategories(data || []);
     } catch (error) {
-      console.error('Error fetching categories:', error)
+      console.error("Error fetching categories:", error);
     }
-  }
+  };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleDayToggle = (day: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       days_open: prev.days_open.includes(day)
-        ? prev.days_open.filter(d => d !== day)
-        : [...prev.days_open, day]
-    }))
-  }
+        ? prev.days_open.filter((d) => d !== day)
+        : [...prev.days_open, day],
+    }));
+  };
 
   const handleSelectAllDays = () => {
-    const allSelected = formData.days_open.length === DAYS_OF_WEEK.length
-    setFormData(prev => ({
+    const allSelected = formData.days_open.length === DAYS_OF_WEEK.length;
+    setFormData((prev) => ({
       ...prev,
-      days_open: allSelected ? [] : [...DAYS_OF_WEEK]
-    }))
-  }
+      days_open: allSelected ? [] : [...DAYS_OF_WEEK],
+    }));
+  };
+
+  const addActivity = () => {
+    const newActivity: Activity = {
+      id: Date.now().toString(),
+      name: "",
+      distance: "",
+      duration: "",
+      price: 0,
+      currency: "INR",
+      timeSlots: [],
+    };
+    setActivities((prev) => [...prev, newActivity]);
+  };
+
+  const removeActivity = (activityId: string) => {
+    setActivities((prev) =>
+      prev.filter((activity) => activity.id !== activityId)
+    );
+  };
+
+  const updateActivity = (
+    activityId: string,
+    field: keyof Activity,
+    value: string | number | TimeSlot[]
+  ) => {
+    setActivities((prev) =>
+      prev.map((activity) =>
+        activity.id === activityId ? { ...activity, [field]: value } : activity
+      )
+    );
+  };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || [])
+    const files = Array.from(event.target.files || []);
 
-    if (selectedImages.length + files.length > 10) {
+    // Separate images and videos
+    const images = files.filter((file) => file.type.startsWith("image/"));
+    const videos = files.filter((file) => file.type.startsWith("video/"));
+
+    // Handle images
+    if (selectedImages.length + images.length > 10) {
       toast({
         title: "Too many images",
         description: "You can upload a maximum of 10 images.",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
-    const newImages = [...selectedImages, ...files]
-    setSelectedImages(newImages)
+    // Handle videos
+    if (selectedVideos.length + videos.length > 1) {
+      toast({
+        title: "Too many videos",
+        description: "You can upload a maximum of 1 video.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    // Create preview URLs
-    const newPreviewUrls = files.map(file => URL.createObjectURL(file))
-    setPreviewUrls(prev => [...prev, ...newPreviewUrls])
-  }
+    // Update images state
+    const newImages = [...selectedImages, ...images];
+    setSelectedImages(newImages);
 
-  const removeImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index))
-    URL.revokeObjectURL(previewUrls[index])
-    setPreviewUrls(prev => prev.filter((_, i) => i !== index))
-  }
+    // Update videos state
+    const newVideos = [...selectedVideos, ...videos];
+    setSelectedVideos(newVideos);
+
+    // Create preview URLs for images
+    const newImagePreviewUrls = images.map((file) => URL.createObjectURL(file));
+    setPreviewUrls((prev) => [...prev, ...newImagePreviewUrls]);
+
+    // Create preview URLs for videos
+    const newVideoPreviewUrls = videos.map((file) => URL.createObjectURL(file));
+    setVideoPreviewUrls((prev) => [...prev, ...newVideoPreviewUrls]);
+  };
+
+  const removeMedia = (index: number, isVideo: boolean) => {
+    if (isVideo) {
+      URL.revokeObjectURL(videoPreviewUrls[index]);
+      setVideoPreviewUrls((prev) => prev.filter((_, i) => i !== index));
+      setSelectedVideos((prev) => prev.filter((_, i) => i !== index));
+    } else {
+      URL.revokeObjectURL(previewUrls[index]);
+      setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
+      setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    }
+  };
 
   const uploadImages = async (experienceId: string) => {
-    if (selectedImages.length === 0) return null
+    if (selectedImages.length === 0) return null;
 
     const uploadPromises = selectedImages.map(async (file, index) => {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${experienceId}/${Date.now()}_${index}.${fileExt}`
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${experienceId}/${Date.now()}_${index}.${fileExt}`;
 
       const { data, error } = await supabase.storage
-        .from('experience-images')
-        .upload(fileName, file)
+        .from("experience-images")
+        .upload(fileName, file);
 
-      if (error) throw error
+      if (error) throw error;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('experience-images')
-        .getPublicUrl(fileName)
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("experience-images").getPublicUrl(fileName);
 
       return {
         image_url: publicUrl,
         display_order: index,
         is_primary: index === 0,
-        experience_id: experienceId
-      }
-    })
+        experience_id: experienceId,
+      };
+    });
 
-    const imageData = await Promise.all(uploadPromises)
+    const imageData = await Promise.all(uploadPromises);
 
     const { error } = await supabase
-      .from('experience_images')
-      .insert(imageData)
+      .from("experience_images")
+      .insert(imageData);
 
-    if (error) throw error
+    if (error) throw error;
 
     // Return the primary image URL (first image)
-    return imageData[0]?.image_url || null
-  }
+    return imageData[0]?.image_url || null;
+  };
 
-  const updateTimeSlots = async (experienceId: string) => {
-    if (timeSlots.length === 0) return
+  const createActivities = async (experienceId: string) => {
+    if (activities.length === 0) {
+      console.warn("No activities to create");
+      return;
+    }
 
-    // Delete existing time slots
-    const { error: deleteError } = await supabase
-      .from('time_slots')
+    // Create activities without the id field
+    const activitiesData = activities.map((activity, index) => ({
+      experience_id: experienceId,
+      name: activity.name,
+      distance: activity.distance,
+      duration: activity.duration,
+      price: activity.price,
+      currency: activity.currency,
+      display_order: index,
+      is_active: true,
+    }));
+
+    const { data: createdActivities, error: activitiesError } = await supabase
+      .from("activities")
+      .insert(activitiesData)
+      .select("*"); // Get back all fields including the generated id
+
+    if (activitiesError) {
+      console.error("Error creating activities:", activitiesError);
+      throw activitiesError;
+    }
+
+    if (!createdActivities || createdActivities.length === 0) {
+      throw new Error("No activities were created");
+    }
+
+    // Create time slots for each activity
+    const allTimeSlots = activities.flatMap((activity, index) => {
+      const createdActivity = createdActivities[index];
+      return activity.timeSlots.map((slot) => ({
+        experience_id: experienceId,
+        activity_id: createdActivity.id,
+        start_time: slot.start_time,
+        end_time: slot.end_time,
+        capacity: slot.capacity,
+      }));
+    });
+
+    if (allTimeSlots.length > 0) {
+      const { error: timeSlotsError } = await supabase
+        .from("time_slots")
+        .insert(allTimeSlots);
+
+      if (timeSlotsError) {
+        console.error("Error creating time slots:", timeSlotsError);
+        throw timeSlotsError;
+      }
+    }
+  };
+
+const updateActivities = async (experienceId: string) => {
+  // Separate existing and new activities
+  const existingActivities = activities.filter((a) => a.id.length > 20); // Supabase UUIDs are longer
+  const newActivities = activities.filter((a) => a.id.length <= 20); // Client-side IDs are timestamps
+
+  // console.log("Existing activities to update:", existingActivities);
+  // console.log("New activities to create:", newActivities);
+
+  // Update existing activities
+  for (const activity of existingActivities) {
+    const updateData = {
+      name: activity.name,
+      distance: activity.distance || null,
+      duration: activity.duration || null,
+      price: activity.price,
+      currency: activity.currency,
+      display_order: activities.indexOf(activity),
+      is_active: true,
+    };
+
+    // console.log(`Updating activity ${activity.id} with data:`, updateData);
+
+    const { error: updateError } = await supabase
+      .from("activities")
+      .update(updateData)
+      .eq("id", activity.id);
+
+    if (updateError) {
+      console.error("Error updating activity:", updateError);
+      throw updateError;
+    }
+
+    // Update time slots for existing activity
+    // First delete existing time slots
+    const { error: deleteTimeSlotsError } = await supabase
+      .from("time_slots")
       .delete()
-      .eq('experience_id', experienceId)
+      .eq("activity_id", activity.id);
 
-    if (deleteError) throw deleteError
+    if (deleteTimeSlotsError) {
+      console.error("Error deleting time slots:", deleteTimeSlotsError);
+      throw deleteTimeSlotsError;
+    }
 
-    // Insert new time slots
-    const timeSlotsData = timeSlots.map(slot => ({
-      experience_id: experienceId,
-      start_time: slot.start_time,
-      end_time: slot.end_time,
-      capacity: slot.capacity
-    }))
+    // Create new time slots
+    if (activity.timeSlots.length > 0) {
+      const timeSlotData = activity.timeSlots.map((slot) => ({
+        experience_id: experienceId,
+        activity_id: activity.id,
+        start_time: slot.start_time,
+        end_time: slot.end_time,
+        capacity: slot.capacity,
+      }));
 
-    const { error } = await supabase
-      .from('time_slots')
-      .insert(timeSlotsData)
+      const { error: createTimeSlotsError } = await supabase
+        .from("time_slots")
+        .insert(timeSlotData);
 
-    if (error) throw error
+      if (createTimeSlotsError) {
+        console.error("Error creating time slots:", createTimeSlotsError);
+        throw createTimeSlotsError;
+      }
+    }
   }
 
-  const createTimeSlots = async (experienceId: string) => {
-    if (timeSlots.length === 0) return
-
-    const timeSlotsData = timeSlots.map(slot => ({
+  // Create new activities
+  if (newActivities.length > 0) {
+    const newActivitiesData = newActivities.map((activity, index) => ({
       experience_id: experienceId,
-      start_time: slot.start_time,
-      end_time: slot.end_time,
-      capacity: slot.capacity
-    }))
+      name: activity.name,
+      distance: activity.distance,
+      duration: activity.duration,
+      price: activity.price,
+      currency: activity.currency,
+      display_order: existingActivities.length + index,
+      is_active: true,
+    }));
 
-    const { error } = await supabase
-      .from('time_slots')
-      .insert(timeSlotsData)
+    console.log("Creating new activities:", newActivitiesData);
 
-    if (error) throw error
+    const { data: createdActivities, error: createError } = await supabase
+      .from("activities")
+      .insert(newActivitiesData)
+      .select("*");
+
+    if (createError) {
+      console.error("Error creating activities:", createError);
+      throw createError;
+    }
+
+    // Create time slots for new activities
+    const newTimeSlots = newActivities.flatMap((activity, index) => {
+      const createdActivity = createdActivities[index];
+      return activity.timeSlots.map((slot) => ({
+        experience_id: experienceId,
+        activity_id: createdActivity.id,
+        start_time: slot.start_time,
+        end_time: slot.end_time,
+        capacity: slot.capacity,
+      }));
+    });
+
+    if (newTimeSlots.length > 0) {
+      const { error: timeSlotsError } = await supabase
+        .from("time_slots")
+        .insert(newTimeSlots);
+
+      if (timeSlotsError) {
+        console.error("Error creating time slots for new activities:", timeSlotsError);
+        throw timeSlotsError;
+      }
+    }
   }
 
-  const createExperienceCategories = async (experienceId: string, categoryIds: string[]) => {
-    if (categoryIds.length === 0) return
+  // Handle deleted activities - Using a simpler approach
+  // First get all activities for this experience
+  const { data: allExistingActivities, error: fetchError } = await supabase
+    .from("activities")
+    .select("id")
+    .eq("experience_id", experienceId);
 
-    const experienceCategoriesData = categoryIds.map(categoryId => ({
-      experience_id: experienceId,
-      category_id: categoryId
-    }))
-
-    const { error } = await supabase
-      .from('experience_categories')
-      .insert(experienceCategoriesData)
-
-    if (error) throw error
+  if (fetchError) {
+    console.error("Error fetching existing activities:", fetchError);
+    throw fetchError;
   }
 
-  const updateExperienceCategories = async (experienceId: string, categoryIds: string[]) => {
+  // Find activities to delete (those not in our current activities list)
+  const currentActivityIds = existingActivities.map((a) => a.id);
+  const activitiesToDelete = (allExistingActivities || []).filter(
+    (existing) => !currentActivityIds.includes(existing.id)
+  );
+
+  // console.log("Activities to delete:", activitiesToDelete);
+
+  // Delete activities that are no longer needed
+  for (const activityToDelete of activitiesToDelete) {
+    const { error: deleteError } = await supabase
+      .from("activities")
+      .delete()
+      .eq("id", activityToDelete.id);
+
+    if (deleteError) {
+      console.error("Error deleting activity:", deleteError);
+      throw deleteError;
+    }
+  }
+
+  // console.log("Activities update completed successfully");
+};
+
+  const createExperienceCategories = async (
+    experienceId: string,
+    categoryIds: string[]
+  ) => {
+    if (categoryIds.length === 0) return;
+
+    const experienceCategoriesData = categoryIds.map((categoryId) => ({
+      experience_id: experienceId,
+      category_id: categoryId,
+    }));
+
+    const { error } = await supabase
+      .from("experience_categories")
+      .insert(experienceCategoriesData);
+
+    if (error) throw error;
+  };
+
+  const updateExperienceCategories = async (
+    experienceId: string,
+    categoryIds: string[]
+  ) => {
     // First, delete existing category associations
     const { error: deleteError } = await supabase
-      .from('experience_categories')
+      .from("experience_categories")
       .delete()
-      .eq('experience_id', experienceId)
+      .eq("experience_id", experienceId);
 
-    if (deleteError) throw deleteError
+    if (deleteError) throw deleteError;
 
     // Then create new associations
-    await createExperienceCategories(experienceId, categoryIds)
-  }
+    await createExperienceCategories(experienceId, categoryIds);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!user) {
       toast({
         title: "Authentication required",
-        description: "Please sign in to " + (isEditing ? "update" : "create") + " an experience.",
-        variant: "destructive"
-      })
-      return
+        description:
+          "Please sign in to " +
+          (isEditing ? "update" : "create") +
+          " an experience.",
+        variant: "destructive",
+      });
+      return;
     }
 
     if (!isEditing && selectedImages.length === 0) {
       toast({
         title: "Images required",
         description: "Please add at least one image for your experience.",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
-    if (timeSlots.length === 0) {
+    if (activities.length === 0) {
+      toast({
+        title: "Activities required",
+        description: "Please add at least one activity for your experience.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if all activities have at least one time slot
+    const activitiesWithoutTimeSlots = activities.filter(
+      (activity) => activity.timeSlots.length === 0
+    );
+    if (activitiesWithoutTimeSlots.length > 0) {
       toast({
         title: "Time slots required",
-        description: "Please add at least one time slot for your experience.",
-        variant: "destructive"
-      })
-      return
+        description: "Please add at least one time slot for each activity.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    setLoading(true)
+    // Validate activity data
+    const invalidActivities = activities.filter(
+      (activity) => !activity.name.trim() || activity.price <= 0
+    );
+    if (invalidActivities.length > 0) {
+      toast({
+        title: "Invalid activity data",
+        description:
+          "Please ensure all activities have valid name, distance, duration, and price.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
 
     try {
       if (formData.category_ids.length === 0) {
         toast({
           title: "Categories required",
-          description: "Please select at least one category for your experience.",
-          variant: "destructive"
-        })
-        return
+          description:
+            "Please select at least one category for your experience.",
+          variant: "destructive",
+        });
+        return;
       }
 
-      const finalPrice = calculateFinalPrice()
-
       // Get the first category name for the legacy category field
-      const primaryCategory = categories.find(c => c.id === formData.category_ids[0])
+      const primaryCategory = categories.find(
+        (c) => c.id === formData.category_ids[0]
+      );
+
+      // Calculate the minimum price from activities for legacy pricing
+      const minPrice =
+        activities.length > 0 ? Math.min(...activities.map((a) => a.price)) : 0;
 
       const experienceData = {
         title: formData.title,
         description: formData.description,
-        category: primaryCategory?.name || 'General', // Legacy field - use first selected category
-        price: finalPrice,
-        original_price: formData.original_price ? parseFloat(formData.original_price) : null,
-        currency: formData.currency,
-        duration: formData.duration,
-        group_size: formData.group_size,
+        category: primaryCategory?.name || "General", // Legacy field - use first selected category
+        price: minPrice,
+        original_price: null, // No longer used
+        currency: activities.length > 0 ? activities[0].currency : "INR", // Use first activity's currency
+        duration: null, // Legacy field - no longer used
+        group_size: null, // Legacy field - no longer used
         location: formData.location,
         start_point: formData.start_point,
         end_point: formData.end_point,
-        distance_km: formData.distance_km === 'on-spot' ? 0 : parseInt(formData.distance_km.replace('km', '')),
+        distance_km: 0, // Legacy field - kept for compatibility
         days_open: formData.days_open,
         vendor_id: user.id,
-        destination_id: formData.destination_id
-      }
+        destination_id: formData.destination_id,
+      };
 
       if (isEditing && initialData?.id) {
         // Update existing experience
         const { error: experienceError } = await supabase
-          .from('experiences')
+          .from("experiences")
           .update(experienceData)
-          .eq('id', initialData.id)
+          .eq("id", initialData.id)
+          .eq("is_active", true);
 
-        if (experienceError) throw experienceError
+        if (experienceError) throw experienceError;
 
         // Upload new images if any
         if (selectedImages.length > 0) {
-          const primaryImageUrl = await uploadImages(initialData.id)
+          const primaryImageUrl = await uploadImages(initialData.id);
 
           if (primaryImageUrl) {
             const { error: updateError } = await supabase
-              .from('experiences')
+              .from("experiences")
               .update({ image_url: primaryImageUrl })
-              .eq('id', initialData.id)
+              .eq("id", initialData.id)
+              .eq("is_active", true);
 
-            if (updateError) throw updateError
+            if (updateError) throw updateError;
           }
         }
 
-        await updateTimeSlots(initialData.id)
-        await updateExperienceCategories(initialData.id, formData.category_ids)
+        await updateActivities(initialData.id);
+        await updateExperienceCategories(initialData.id, formData.category_ids);
 
         toast({
           title: "Experience updated successfully!",
-          description: "Your experience has been updated."
-        })
+          description: "Your experience has been updated.",
+        });
       } else {
         // Create new experience
         const { data: experience, error: experienceError } = await supabase
-          .from('experiences')
-          .insert([{ ...experienceData, image_url: '' }])
+          .from("experiences")
+          .insert([{ ...experienceData, image_url: "" }])
           .select()
-          .single()
+          .eq("is_active", true)
+          .single();
 
-        if (experienceError) throw experienceError
+        if (experienceError) throw experienceError;
 
         // Upload images and get primary image URL
-        const primaryImageUrl = await uploadImages(experience.id)
+        const primaryImageUrl = await uploadImages(experience.id);
 
         // Update the experience with the primary image URL
         if (primaryImageUrl) {
           const { error: updateError } = await supabase
-            .from('experiences')
+            .from("experiences")
             .update({ image_url: primaryImageUrl })
-            .eq('id', experience.id)
+            .eq("id", experience.id)
+            .eq("is_active", true);
 
-          if (updateError) throw updateError
+          if (updateError) throw updateError;
         }
 
-        await createTimeSlots(experience.id)
-        await createExperienceCategories(experience.id, formData.category_ids)
+        await createActivities(experience.id);
+        await createExperienceCategories(experience.id, formData.category_ids);
 
         toast({
           title: "Experience created successfully!",
-          description: "Your experience has been created with time slots and is now available."
-        })
+          description:
+            "Your experience has been created with time slots and is now available.",
+        });
       }
 
-      navigate('/profile')
+      navigate("/profile");
     } catch (error) {
-      console.error('Error ' + (isEditing ? 'updating' : 'creating') + ' experience:', error)
+      console.error(
+        "Error " + (isEditing ? "updating" : "creating") + " experience:",
+        error
+      );
       toast({
         title: "Error " + (isEditing ? "updating" : "creating") + " experience",
         description: "Please try again later.",
-        variant: "destructive"
-      })
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle>{isEditing ? 'Edit Experience' : 'Create New Experience'}</CardTitle>
+        <CardTitle>
+          {isEditing ? "Edit Experience" : "Create New Experience"}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -458,7 +751,7 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
+                onChange={(e) => handleInputChange("title", e.target.value)}
                 required
               />
             </div>
@@ -466,13 +759,17 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
             <div className="space-y-2">
               <Label htmlFor="categories">Categories *</Label>
               <Select
-                value={formData.category_ids.length > 0 ? formData.category_ids[0] : ''}
+                value={
+                  formData.category_ids.length > 0
+                    ? formData.category_ids[0]
+                    : ""
+                }
                 onValueChange={(value) => {
                   if (value && !formData.category_ids.includes(value)) {
-                    setFormData(prev => ({
+                    setFormData((prev) => ({
                       ...prev,
-                      category_ids: [...prev.category_ids, value]
-                    }))
+                      category_ids: [...prev.category_ids, value],
+                    }));
                   }
                 }}
               >
@@ -480,25 +777,32 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
                   <SelectValue placeholder="Select categories">
                     {formData.category_ids.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
-                        {formData.category_ids.map(categoryId => {
-                          const category = categories.find(c => c.id === categoryId)
+                        {formData.category_ids.map((categoryId) => {
+                          const category = categories.find(
+                            (c) => c.id === categoryId
+                          );
                           return category ? (
-                            <span key={categoryId} className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-md">
+                            <span
+                              key={categoryId}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-md"
+                            >
                               {category.icon && <span>{category.icon}</span>}
                               {category.name}
                               <X
                                 className="h-3 w-3 ml-1 cursor-pointer hover:text-orange-600"
                                 onClick={(e) => {
-                                  e.preventDefault()
-                                  e.stopPropagation()
-                                  setFormData(prev => ({
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setFormData((prev) => ({
                                     ...prev,
-                                    category_ids: prev.category_ids.filter(id => id !== categoryId)
-                                  }))
+                                    category_ids: prev.category_ids.filter(
+                                      (id) => id !== categoryId
+                                    ),
+                                  }));
                                 }}
                               />
                             </span>
-                          ) : null
+                          ) : null;
                         })}
                       </div>
                     ) : (
@@ -508,7 +812,9 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
                 </SelectTrigger>
                 <SelectContent>
                   {categories
-                    .filter(category => !formData.category_ids.includes(category.id))
+                    .filter(
+                      (category) => !formData.category_ids.includes(category.id)
+                    )
                     .map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         <div className="flex items-center gap-2">
@@ -517,7 +823,9 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
                         </div>
                       </SelectItem>
                     ))}
-                  {categories.filter(category => !formData.category_ids.includes(category.id)).length === 0 && (
+                  {categories.filter(
+                    (category) => !formData.category_ids.includes(category.id)
+                  ).length === 0 && (
                     <div className="px-2 py-1 text-sm text-muted-foreground">
                       All categories selected
                     </div>
@@ -532,157 +840,196 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
+              onChange={(e) => handleInputChange("description", e.target.value)}
               rows={4}
               required
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="original_price">Original Price *</Label>
-              <Input
-                id="original_price"
-                type="number"
-                step="0.01"
-                value={formData.original_price}
-                onChange={(e) => handleInputChange('original_price', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="discount_percentage">Discount Percentage</Label>
-              <Input
-                id="discount_percentage"
-                type="number"
-                min="0"
-                max="100"
-                step="0.01"
-                value={formData.discount_percentage}
-                onChange={(e) => handleInputChange('discount_percentage', e.target.value)}
-                placeholder="0"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
-              <Select
-                value={formData.currency}
-                onValueChange={(value) => handleInputChange('currency', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="INR">INR (₹)</SelectItem>
-                  <SelectItem value="USD">USD ($)</SelectItem>
-                  <SelectItem value="EUR">EUR (€)</SelectItem>
-                  <SelectItem value="GBP">GBP (£)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {formData.original_price && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="text-sm text-gray-600">Final Price Preview:</div>
-              <div className="text-lg font-semibold text-green-600">
-                {formData.currency === 'INR' ? '₹' :
-                  formData.currency === 'USD' ? '₹' :
-                    formData.currency === 'EUR' ? '€' : '£'}
-                {calculateFinalPrice().toFixed(2)}
-                {formData.discount_percentage && parseFloat(formData.discount_percentage) > 0 && (
-                  <span className="text-sm text-green-600 ml-2">
-                    ({formData.discount_percentage}% off)
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="duration">Duration</Label>
-              <Input
-                id="duration"
-                value={formData.duration}
-                onChange={(e) => handleInputChange('duration', e.target.value)}
-                placeholder="e.g., 2 hours, Half day"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="group_size">Group Size</Label>
-              <Input
-                id="group_size"
-                value={formData.group_size}
-                onChange={(e) => handleInputChange('group_size', e.target.value)}
-                placeholder="e.g., Up to 10 people"
-              />
-            </div>
-          </div>
-
           <div className="space-y-2">
-            <Label htmlFor="location">Address *</Label>
+            <Label htmlFor="location">Google Maps Link *</Label>
             <Input
               id="location"
               value={formData.location}
-              onChange={(e) => handleInputChange('location', e.target.value)}
+              onChange={(e) => handleInputChange("location", e.target.value)}
               required
+              placeholder="https://maps.google.com/..."
+              className={
+                !formData.location.includes("maps.google.com")
+                  ? "border-red-500"
+                  : ""
+              }
             />
+            {formData.location &&
+              !formData.location.includes("maps.google.com") && (
+                <p className="text-sm text-red-500">
+                  Please enter a valid Google Maps link
+                </p>
+              )}
           </div>
 
           <div>
             <DestinationDropdown
               value={formData.destination_id}
-              onValueChange={(value) => handleInputChange('destination_id', value)}
+              onValueChange={(value) =>
+                handleInputChange("destination_id", value)
+              }
               required={true}
               className=""
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="distance">Distance *</Label>
-            <Select
-              value={formData.distance_km}
-              onValueChange={(value) => handleInputChange('distance_km', value)}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select distance" />
-              </SelectTrigger>
-              <SelectContent>
-                {DISTANCE_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Activities Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-medium">Activities *</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addActivity}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Activity
+              </Button>
+            </div>
+
+            {activities.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                No activities added yet. Click "Add Activity" to get started.
+              </div>
+            )}
+
+            {activities.map((activity, index) => (
+              <Card key={activity.id} className="p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-medium">Activity {index + 1}</h4>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeActivity(activity.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`activity-name-${activity.id}`}>
+                      Activity Name *
+                    </Label>
+                    <Input
+                      id={`activity-name-${activity.id}`}
+                      value={activity.name}
+                      onChange={(e) =>
+                        updateActivity(activity.id, "name", e.target.value)
+                      }
+                      placeholder="e.g., River Rafting"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`activity-distance-${activity.id}`}>
+                      Distance
+                    </Label>
+                    <Input
+                      id={`activity-distance-${activity.id}`}
+                      value={activity.distance}
+                      onChange={(e) =>
+                        updateActivity(activity.id, "distance", e.target.value)
+                      }
+                      placeholder="e.g., 8km, 16km"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`activity-currency-${activity.id}`}>
+                      Currency
+                    </Label>
+                    <Select
+                      value={activity.currency}
+                      onValueChange={(value) =>
+                        updateActivity(activity.id, "currency", value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="INR">INR (₹)</SelectItem>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                        <SelectItem value="EUR">EUR (€)</SelectItem>
+                        <SelectItem value="GBP">GBP (£)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`activity-price-${activity.id}`}>
+                      Price *
+                    </Label>
+                    <Input
+                      id={`activity-price-${activity.id}`}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={activity.price}
+                      onChange={(e) =>
+                        updateActivity(
+                          activity.id,
+                          "price",
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Time Slots for this activity */}
+                <div className="mt-6">
+                  <Label className="text-sm font-medium">
+                    Time Slots for this Activity *
+                  </Label>
+                  <TimeSlotManager
+                    timeSlots={activity.timeSlots}
+                    onChange={(newTimeSlots) =>
+                      updateActivity(activity.id, "timeSlots", newTimeSlots)
+                    }
+                  />
+                </div>
+              </Card>
+            ))}
           </div>
 
-          {formData.distance_km && formData.distance_km !== 'on-spot' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="start_point">Start Point</Label>
-                <Input
-                  id="start_point"
-                  value={formData.start_point}
-                  onChange={(e) => handleInputChange('start_point', e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="end_point">End Point</Label>
-                <Input
-                  id="end_point"
-                  value={formData.end_point}
-                  onChange={(e) => handleInputChange('end_point', e.target.value)}
-                />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="start_point">Start Point</Label>
+              <Input
+                id="start_point"
+                value={formData.start_point}
+                onChange={(e) =>
+                  handleInputChange("start_point", e.target.value)
+                }
+                placeholder="Starting location"
+              />
             </div>
-          )}
+
+            <div className="space-y-2">
+              <Label htmlFor="end_point">End Point</Label>
+              <Input
+                id="end_point"
+                value={formData.end_point}
+                onChange={(e) => handleInputChange("end_point", e.target.value)}
+                placeholder="Ending location"
+              />
+            </div>
+          </div>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -693,7 +1040,9 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
                 size="sm"
                 onClick={handleSelectAllDays}
               >
-                {formData.days_open.length === DAYS_OF_WEEK.length ? 'Deselect All' : 'Select All'}
+                {formData.days_open.length === DAYS_OF_WEEK.length
+                  ? "Deselect All"
+                  : "Select All"}
               </Button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -704,17 +1053,13 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
                     checked={formData.days_open.includes(day)}
                     onCheckedChange={() => handleDayToggle(day)}
                   />
-                  <Label htmlFor={day} className="text-sm">{day}</Label>
+                  <Label htmlFor={day} className="text-sm">
+                    {day}
+                  </Label>
                 </div>
               ))}
             </div>
           </div>
-
-          {/* Time Slots Section */}
-          <TimeSlotManager
-            timeSlots={timeSlots}
-            onChange={setTimeSlots}
-          />
 
           {!isEditing && (
             <div className="space-y-3">
@@ -750,7 +1095,7 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
                       />
                       <button
                         type="button"
-                        onClick={() => removeImage(index)}
+                        onClick={() => removeMedia(index, false)}
                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
                       >
                         <X className="h-4 w-4" />
@@ -769,45 +1114,75 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
 
           {isEditing && (
             <div className="space-y-3">
-              <Label>Add New Images (Optional)</Label>
+              <Label>Add New Images/Videos (Optional)</Label>
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/*,video/*"
                   multiple
                   onChange={handleImageSelect}
                   className="hidden"
-                  id="image-upload"
+                  id="media-upload"
                 />
                 <label
-                  htmlFor="image-upload"
+                  htmlFor="media-upload"
                   className="flex flex-col items-center cursor-pointer"
                 >
                   <Upload className="h-8 w-8 text-gray-400 mb-2" />
                   <span className="text-sm text-gray-600">
-                    Click to upload new images ({selectedImages.length}/10)
+                    Click to upload new images/videos ({selectedImages.length}
+                    /10 images, {selectedVideos.length}/1 video)
                   </span>
                 </label>
               </div>
 
+              {/* Video Previews */}
+              {videoPreviewUrls.length > 0 && (
+                <div className="mt-4">
+                  <Label className="text-sm mb-2">Video Preview</Label>
+                  <div className="grid grid-cols-1 gap-4">
+                    {videoPreviewUrls.map((url, index) => (
+                      <div key={`video-${index}`} className="relative">
+                        <video
+                          src={url}
+                          controls
+                          className="w-full h-48 object-cover rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeMedia(index, true)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Image Previews */}
               {previewUrls.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
-                  {previewUrls.map((url, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={url}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
+                <div className="mt-4">
+                  <Label className="text-sm mb-2">Image Previews</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    {previewUrls.map((url, index) => (
+                      <div key={`image-${index}`} className="relative">
+                        <img
+                          src={url}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeMedia(index, false)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -816,12 +1191,12 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
           {!isEditing && (
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="terms"
-                  required
-                />
-                <Label htmlFor="terms" className="text-sm font-normal cursor-pointer">
-                  I agree to the{' '}
+                <Checkbox id="terms" required />
+                <Label
+                  htmlFor="terms"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  I agree to the{" "}
                   <a
                     href="/terms"
                     target="_blank"
@@ -837,13 +1212,24 @@ export function CreateExperienceForm({ initialData, isEditing = false }: CreateE
 
           <Button
             type="submit"
-            disabled={loading || (!isEditing && selectedImages.length === 0) || timeSlots.length === 0}
+            disabled={
+              loading ||
+              (!isEditing && selectedImages.length === 0) ||
+              activities.length === 0 ||
+              activities.some((activity) => activity.timeSlots.length === 0)
+            }
             className="w-full"
           >
-            {loading ? (isEditing ? 'Updating Experience...' : 'Creating Experience...') : (isEditing ? 'Update Experience' : 'Create Experience')}
+            {loading
+              ? isEditing
+                ? "Updating Experience..."
+                : "Creating Experience..."
+              : isEditing
+              ? "Update Experience"
+              : "Create Experience"}
           </Button>
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -363,6 +363,17 @@ const ExperienceDetail = () => {
     );
   }
 
+  if(experience.is_active === false) { 
+    return(
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-16 px-4">
+          <div className="text-center">This experience is not active.</div>
+        </div>
+      </div>
+    )
+  } 
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
