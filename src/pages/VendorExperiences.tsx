@@ -1,23 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import {
-  Eye,
-  Edit,
-  Star,
-  Users,
-  Plus,
   Calendar,
+  Clock,
+  Edit,
+  Eye,
   IndianRupee,
   MapPin,
-  Clock,
+  Plus,
+  Star,
+  Users,
 } from "lucide-react";
-import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 // Convert USD to INR (using approximate rate of 83)
 const convertToINR = (usdAmount: number) => {
@@ -124,20 +124,24 @@ const VendorExperiences = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
           {/* Header Section */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-left">
                 My Experiences
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-gray-600 dark:text-gray-400 mt-2 text-left">
                 Manage and track your experience listings
               </p>
             </div>
-            <Button onClick={() => navigate("/create-experience")} className="flex items-center gap-2">
+            <Button
+              onClick={() => navigate("/create-experience")}
+              className="flex items-center gap-2"
+              style={{ background: "var(--brand-color)" }}
+            >
               <Plus className="h-4 w-4" />
               Create New Experience
             </Button>
@@ -169,7 +173,10 @@ const VendorExperiences = () => {
                       Total Bookings
                     </p>
                     <p className="text-2xl font-bold text-green-800 dark:text-green-200">
-                      {Object.values(experienceStats || {}).reduce((sum: number, stat: any) => sum + stat.totalBookings, 0)}
+                      {Object.values(experienceStats || {}).reduce(
+                        (sum: number, stat: any) => sum + stat.totalBookings,
+                        0
+                      )}
                     </p>
                   </div>
                   <Calendar className="h-8 w-8 text-green-600" />
@@ -185,7 +192,13 @@ const VendorExperiences = () => {
                       Total Revenue
                     </p>
                     <p className="text-2xl font-bold text-purple-800 dark:text-purple-200">
-                      ₹{Object.values(experienceStats || {}).reduce((sum: number, stat: any) => sum + stat.totalRevenue, 0).toFixed(0)}
+                      ₹
+                      {Object.values(experienceStats || {})
+                        .reduce(
+                          (sum: number, stat: any) => sum + stat.totalRevenue,
+                          0
+                        )
+                        .toFixed(0)}
                     </p>
                   </div>
                   <IndianRupee className="h-8 w-8 text-purple-600" />
@@ -201,10 +214,14 @@ const VendorExperiences = () => {
                       Avg Rating
                     </p>
                     <p className="text-2xl font-bold text-orange-800 dark:text-orange-200">
-                      {experiences?.length ? 
-                        (experiences.reduce((sum, exp) => sum + (exp.rating || 0), 0) / experiences.length).toFixed(1) : 
-                        "0.0"
-                      }
+                      {experiences?.length
+                        ? (
+                            experiences.reduce(
+                              (sum, exp) => sum + (exp.rating || 0),
+                              0
+                            ) / experiences.length
+                          ).toFixed(1)
+                        : "0.0"}
                     </p>
                   </div>
                   <Star className="h-8 w-8 text-orange-600" />
@@ -275,7 +292,9 @@ const VendorExperiences = () => {
                             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                               <div className="flex items-center gap-2">
                                 <MapPin className="h-4 w-4" />
-                                <span className="truncate">{experience.location}</span>
+                                <span className="truncate">
+                                  {experience.location}
+                                </span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4" />
@@ -290,7 +309,10 @@ const VendorExperiences = () => {
                                   Price
                                 </p>
                                 <p className="font-semibold text-green-600">
-                                  ₹{convertToINR(Number(experience.price)).toFixed(0)}
+                                  ₹
+                                  {convertToINR(
+                                    Number(experience.price)
+                                  ).toFixed(0)}
                                 </p>
                               </div>
                               <div>
@@ -317,7 +339,10 @@ const VendorExperiences = () => {
                                   Created
                                 </p>
                                 <p className="font-semibold text-xs">
-                                  {format(new Date(experience.created_at), "MMM dd, yyyy")}
+                                  {format(
+                                    new Date(experience.created_at),
+                                    "MMM dd, yyyy"
+                                  )}
                                 </p>
                               </div>
                             </div>
@@ -332,11 +357,17 @@ const VendorExperiences = () => {
                   <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
                     <Users className="h-8 w-8 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">No experiences yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    No experiences yet
+                  </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                    Start by creating your first experience to attract customers and grow your business.
+                    Start by creating your first experience to attract customers
+                    and grow your business.
                   </p>
-                  <Button onClick={() => navigate("/create-experience")} className="flex items-center gap-2">
+                  <Button
+                    onClick={() => navigate("/create-experience")}
+                    className="flex items-center gap-2"
+                  >
                     <Plus className="h-4 w-4" />
                     Create Your First Experience
                   </Button>

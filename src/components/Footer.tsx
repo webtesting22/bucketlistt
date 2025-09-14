@@ -119,7 +119,7 @@ export function Footer() {
             <h3 className="font-semibold text-sm mb-4 text-foreground">
               BUCKETLISTT
             </h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
+            <ul className="space-y-2 text-sm text-muted-foreground mb-2">
               <li>
                 <Button
                   variant="link"
