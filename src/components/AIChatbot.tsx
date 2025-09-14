@@ -31,10 +31,21 @@ export function AIChatbot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
-  // Use environment variable or fallback API key
-  const apiKey =
-    import.meta.env.VITE_GROQ_API_KEY ||
-    "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";
+  // Get API key from Supabase Edge Function
+  const getApiKey = async () => {
+    const supabaseUrl =
+      import.meta.env.VITE_SUPABASE_URL ||
+      "https://uaptkggmrsxoqayjjnlz.supabase.co";
+    const response = await fetch(`${supabaseUrl}/functions/v1/get-secrets`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+    });
+    const secrets = await response.json();
+    return secrets.groqAuthKey;
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -59,6 +70,12 @@ export function AIChatbot() {
     setIsLoading(true);
 
     try {
+      const apiKey = await getApiKey();
+
+      if (!apiKey) {
+        throw new Error("API key not available");
+      }
+
       const response = await fetch(
         "https://api.groq.com/openai/v1/chat/completions",
         {

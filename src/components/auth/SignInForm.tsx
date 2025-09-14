@@ -61,10 +61,10 @@ export function SignInForm({
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "http://localhost:3000/dashboard",
+        redirectTo: "https://bucketlistt.vercel.app/",
       },
     });
-    console.log(data);
+    // console.log(data);
     if (error) console.error(error.message);
   };
   return (
@@ -113,7 +113,7 @@ export function SignInForm({
             </Button>
 
             {/* Apple Button */}
-            <Button
+            {/* <Button
               type="button"
               variant="outline"
               className="w-full h-12 flex items-center justify-center space-x-3 border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
@@ -131,7 +131,7 @@ export function SignInForm({
                 style={{ width: "20px" }}
               />
               <span className="font-medium">Continue with Apple</span>
-            </Button>
+            </Button> */}
           </div>
 
           {/* Divider */}
