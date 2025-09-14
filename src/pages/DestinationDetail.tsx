@@ -8,6 +8,11 @@ import { ExperienceCard } from "@/components/ExperienceCard"
 import { LazyImage } from "@/components/LazyImage"
 import { DetailedItinerary } from "@/components/DetailedItinerary"
 import { ArrowLeft, Star, MapPin, Clock, Thermometer, Calendar, Users, Filter, ArrowUpDown } from "lucide-react"
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, Navigation, Pagination } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
 import { useState, useEffect } from "react"
 import {
   Select,
@@ -181,87 +186,278 @@ const DestinationDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Destination Header Section */}
-      <section className="section-wrapper section-bg-primary">
+      {/* Full Screen Image Swiper */}
+      <section className="relative h-screen w-full container" id="DestinationDetailSwiper">
+        <Swiper
+          modules={[Autoplay, Navigation, Pagination]}
+          // slidesPerView={1}
+          spaceBetween={20}
+          autoplay={{
+            delay: 4000,
+            disableOnInteraction: false,
+          }}
+          // navigation={{
+          //   nextEl: '.destination-swiper-button-next',
+          //   prevEl: '.destination-swiper-button-prev',
+          // }}
+          pagination={{
+            clickable: true,
+            bulletClass: 'swiper-pagination-bullet',
+            bulletActiveClass: 'swiper-pagination-bullet-active',
+          }}
+          loop={true}
+          className="h-full w-full"
+        >
+          <SwiperSlide>
+            <div className="relative h-full w-full SwiperSlideBorderRadius">
+              <LazyImage
+                src={destination.image_url || ''}
+                alt={destination.title}
+                aspectRatio="aspect-auto"
+                className="h-full w-full object-cover"
+              />
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-black/40"></div>
+              {/* Back Button */}
+              <div className="absolute top-4 left-4 z-10">
+                {/* <Button
+                  variant="ghost"
+                  onClick={() => navigate('/')}
+                  className="bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Home
+                </Button> */}
+              </div>
+              {/* Title Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
+                <h2 className="CommonH2 text-white">{destination.title}</h2>
+                <p className="text-white">{destination.subtitle}</p>
+              </div>
+            </div>
+          </SwiperSlide>
+
+          {/* Additional slides can be added here if you have multiple images */}
+          <SwiperSlide>
+            <div className="relative h-full w-full SwiperSlideBorderRadius">
+              <LazyImage
+                src={destination.image_url || ''}
+                alt={destination.title}
+                aspectRatio="aspect-auto"
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40"></div>
+              {/* <div className="absolute top-4 left-4 z-10">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/')}
+                  className="bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Home
+                </Button>
+              </div> */}
+              <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
+                <h2 className="CommonH2 text-white">{destination.title}</h2>
+                <p className="text-white">{destination.subtitle}</p>
+              </div>
+            </div>
+          </SwiperSlide>
+        </Swiper>
+
+        {/* Custom Navigation Buttons */}
+        {/* <div className="destination-swiper-button-prev destination-nav-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div className="destination-swiper-button-next destination-nav-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div> */}
+      </section>
+
+      {/* Destination Info Section */}
+      <section className="section-wrapper section-bg-primary" style={{ marginTop: "-20px" }}>
         <div className="container">
-          <div className={`scroll-fade-in ${isAnimated ? 'animate' : ''}`}>
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/')}
-              className="mb-6 hover:bg-accent"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Button>
-          </div>
-
-          {/* Destination Header */}
-          <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8 scroll-fade-in ${isAnimated ? 'animate' : ''}`} style={{ animationDelay: '0.1s' }}>
-            <LazyImage
-              src={destination.image_url || ''}
-              alt={destination.title}
-              aspectRatio="aspect-[4/3]"
-              className="rounded-xl"
-            />
-
+          <div className={`scroll-fade-in ${isAnimated ? 'animate' : ''}`} style={{ animationDelay: '0.1s' }}>
             <div className="space-y-6">
               <div>
-                <h1 className="text-4xl font-bold mb-2">{destination.title}</h1>
-                <p className="text-xl text-muted-foreground mb-4">{destination.subtitle}</p>
-
-                {destination.description && (
-                  <p className="text-muted-foreground leading-relaxed mb-6">
+                {/* <h1 className="CommonH1 textStart">About {destination.title}</h1> */}
+                {/* {destination.description && (
+                  <p className="text-sm textStart">
                     {destination.description}
                   </p>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                  {destination.best_time_to_visit && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-brand-primary" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Best time to visit</p>
-                        <p className="font-medium">{destination.best_time_to_visit}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {destination.recommended_duration && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-5 w-5 text-brand-primary" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Recommended duration</p>
-                        <p className="font-medium">{destination.recommended_duration}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {destination.timezone && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5 text-brand-primary" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Timezone</p>
-                        <p className="font-medium">{destination.timezone}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {weatherInfo && (
-                    <div className="flex items-center gap-2">
-                      <Thermometer className="h-5 w-5 text-brand-primary" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Weather</p>
-                        <p className="font-medium">{weatherInfo.nov_apr?.temp} (Cool season)</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                )} */}
+                {/* <p style={{ textAlign: "start", }} >Rishikesh is where adventure meets spirituality—rafting, bungee jumping, yoga, and the sacred Triveni Sangam all in one unforgettable destination!</p> */}
+                <p style={{ textAlign: "start", fontSize: "14px", marginTop: "-5px" }}>Rishikesh is where adventure meets spirituality—rafting, bungee jumping, yoga, and the sacred Triveni Sangam all in one unforgettable destination!</p>
+                {/* <br /> */}
               </div>
             </div>
           </div>
         </div>
       </section>
+      <section className="section-wrapper section-bg-primary" id="TopActivitiesToDo">
+        <div className="container">
+          {/* Category Filters and Sorting */}
+          <div className={`mb-2 scroll-fade-in ${isAnimated ? 'animate' : ''}`} style={{ animationDelay: '0.4s' }}>
+            <div className="FlexContainerChange ">
+              <div className="flex items-center gap-4 HeadingADjustMargin">
+                {/* <Filter className="h-5 w-5 text-brand-primary" /> */}
+                <h2 className="CommonH2" style={{ textTransform: "unset", marginBottom: "10px" }}>Top activities to do in {destination.title}</h2>
+              </div>
 
+              {/* <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rating">Highest rated</SelectItem>
+                    <SelectItem value="price_low">Price: Low to High</SelectItem>
+                    <SelectItem value="price_high">Price: High to Low</SelectItem>
+                    <SelectItem value="newest">Newest first</SelectItem>
+                    <SelectItem value="name">Name A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div> */}
+            </div>
+
+            {/* <div className="flex flex-wrap gap-3 mb-8">
+              <Button
+                variant={selectedCategory === null ? "default" : "outline"}
+                onClick={() => setSelectedCategory(null)}
+                className={selectedCategory === null ? "bg-brand-primary hover:bg-brand-primary-dark" : ""}
+              >
+                All
+              </Button>
+              {categories?.map((category) => (
+                <Button
+                  key={category.id}
+                  variant={selectedCategory === category.id ? "default" : "outline"}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={selectedCategory === category.id ? "bg-brand-primary hover:bg-brand-primary-dark" : ""}
+                >
+                  <span className="mr-2">{category.icon}</span>
+                  {category.name}
+                </Button>
+              ))}
+            </div> */}
+          </div>
+
+          {/* Experiences - Desktop Swiper / Mobile Static Grid */}
+          <div className={`scroll-fade-in ${isAnimated ? 'animate' : ''}`} style={{ animationDelay: '0.5s' }}>
+            {experiencesLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-6 bg-muted rounded w-48 mx-auto"></div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {[...Array(8)].map((_, i) => (
+                      <div key={i} className="space-y-3">
+                        <div className="h-48 bg-muted rounded-lg"></div>
+                        <div className="h-4 bg-muted rounded w-3/4"></div>
+                        <div className="h-4 bg-muted rounded w-1/2"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : experiences && experiences.length > 0 ? (
+              <>
+                {/* Desktop Swiper - Hidden on mobile */}
+                <div className="hidden lg:block relative">
+                  <Swiper
+                    modules={[Navigation]}
+                    navigation={{
+                      nextEl: '.experiences-swiper-button-next',
+                      prevEl: '.experiences-swiper-button-prev',
+                    }}
+                    breakpoints={{
+                      1024: {
+                        slidesPerView: 4,
+                        spaceBetween: 24,
+                      },
+                    }}
+                    className="experiences-swiper"
+                  >
+                    {experiences.map((experience, index) => (
+                      <SwiperSlide key={experience.id}>
+                        <div
+                          className={`scroll-scale-in ${isAnimated ? 'animate' : ''}`}
+                          style={{ animationDelay: `${0.6 + index * 0.05}s` }}
+                        >
+                          <ExperienceCard
+                            id={experience.id}
+                            image={experience.image_url || ''}
+                            title={experience.title}
+                            categories={experience.experience_categories?.map(ec => ec.categories) || []}
+                            rating={Number(experience.rating)}
+                            reviews={experience.reviews_count?.toString() || '0'}
+                            price={`From ${experience.currency === 'USD' ? '₹' : experience.currency} ${experience.price}`}
+                            originalPrice={experience.original_price ? `${experience.currency === 'USD' ? '₹' : experience.currency} ${experience.original_price}` : undefined}
+                            duration={experience.duration || undefined}
+                            groupSize={experience.group_size || undefined}
+                            isSpecialOffer={experience.is_special_offer || false}
+                            index={index}
+                            description={experience.description || undefined}
+                          />
+                        </div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+
+                  {/* Custom Navigation Buttons for Desktop */}
+                  <div className="experiences-swiper-button-prev experiences-nav-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  <div className="experiences-swiper-button-next experiences-nav-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Mobile Static Grid - Hidden on desktop */}
+                <div className="lg:hidden grid grid-cols-1 gap-6">
+                  {experiences.map((experience, index) => (
+                    <div
+                      key={experience.id}
+                      className={`scroll-scale-in ${isAnimated ? 'animate' : ''}`}
+                      style={{ animationDelay: `${0.6 + index * 0.05}s` }}
+                    >
+                      <ExperienceCard
+                        id={experience.id}
+                        image={experience.image_url || ''}
+                        title={experience.title}
+                        categories={experience.experience_categories?.map(ec => ec.categories) || []}
+                        rating={Number(experience.rating)}
+                        reviews={experience.reviews_count?.toString() || '0'}
+                        price={`From ${experience.currency === 'USD' ? '₹' : experience.currency} ${experience.price}`}
+                        originalPrice={experience.original_price ? `${experience.currency === 'USD' ? '₹' : experience.currency} ${experience.original_price}` : undefined}
+                        duration={experience.duration || undefined}
+                        groupSize={experience.group_size || undefined}
+                        isSpecialOffer={experience.is_special_offer || false}
+                        index={index}
+                        description={experience.description || undefined}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <div className={`scroll-fade-in ${isAnimated ? 'animate' : ''}`} style={{ animationDelay: '0.6s' }}>
+                  <p className="text-muted-foreground">No activities found for this category. But we'll surely add some later.</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
       {/* Must-Visit Attractions */}
       {attractions && attractions.length > 0 && (
         <section className="section-wrapper section-bg-secondary">
@@ -290,7 +486,47 @@ const DestinationDetail = () => {
           </div>
         </section>
       )}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {destination.best_time_to_visit && (
+          <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <Calendar className="h-6 w-6 text-brand-primary flex-shrink-0" />
+            <div>
+              <p className="text-sm text-muted-foreground">Best time to visit</p>
+              <p className="font-medium">{destination.best_time_to_visit}</p>
+            </div>
+          </div>
+        )}
 
+        {destination.recommended_duration && (
+          <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <Clock className="h-6 w-6 text-brand-primary flex-shrink-0" />
+            <div>
+              <p className="text-sm text-muted-foreground">Recommended duration</p>
+              <p className="font-medium">{destination.recommended_duration}</p>
+            </div>
+          </div>
+        )}
+
+        {destination.timezone && (
+          <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <MapPin className="h-6 w-6 text-brand-primary flex-shrink-0" />
+            <div>
+              <p className="text-sm text-muted-foreground">Timezone</p>
+              <p className="font-medium">{destination.timezone}</p>
+            </div>
+          </div>
+        )}
+
+        {weatherInfo && (
+          <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <Thermometer className="h-6 w-6 text-brand-primary flex-shrink-0" />
+            <div>
+              <p className="text-sm text-muted-foreground">Weather</p>
+              <p className="font-medium">{weatherInfo.nov_apr?.temp} (Cool season)</p>
+            </div>
+          </div>
+        )}
+      </div>
       {/* Detailed Itinerary */}
       <section className="section-wrapper section-bg-tertiary">
         <div className="container">
@@ -301,106 +537,7 @@ const DestinationDetail = () => {
       </section>
 
       {/* Things to Do Section */}
-      <section className="section-wrapper section-bg-primary">
-        <div className="container">
-          {/* Category Filters and Sorting */}
-          <div className={`mb-8 scroll-fade-in ${isAnimated ? 'animate' : ''}`} style={{ animationDelay: '0.4s' }}>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <Filter className="h-5 w-5 text-brand-primary" />
-                <h2 className="text-2xl font-bold">Things to do</h2>
-              </div>
 
-              <div className="flex items-center gap-2">
-                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-                <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="rating">Highest rated</SelectItem>
-                    <SelectItem value="price_low">Price: Low to High</SelectItem>
-                    <SelectItem value="price_high">Price: High to Low</SelectItem>
-                    <SelectItem value="newest">Newest first</SelectItem>
-                    <SelectItem value="name">Name A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-3 mb-8">
-              <Button
-                variant={selectedCategory === null ? "default" : "outline"}
-                onClick={() => setSelectedCategory(null)}
-                className={selectedCategory === null ? "bg-brand-primary hover:bg-brand-primary-dark" : ""}
-              >
-                All
-              </Button>
-              {categories?.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={selectedCategory === category.id ? "bg-brand-primary hover:bg-brand-primary-dark" : ""}
-                >
-                  <span className="mr-2">{category.icon}</span>
-                  {category.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Activities Grid */}
-          <div className={`scroll-fade-in ${isAnimated ? 'animate' : ''}`} style={{ animationDelay: '0.5s' }}>
-            {experiencesLoading ? (
-              <div className="text-center py-12">
-                <div className="animate-pulse space-y-4">
-                  <div className="h-6 bg-muted rounded w-48 mx-auto"></div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {[...Array(8)].map((_, i) => (
-                      <div key={i} className="space-y-3">
-                        <div className="h-48 bg-muted rounded-lg"></div>
-                        <div className="h-4 bg-muted rounded w-3/4"></div>
-                        <div className="h-4 bg-muted rounded w-1/2"></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : experiences && experiences.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {experiences.map((experience, index) => (
-                  <div
-                    key={experience.id}
-                    className={`scroll-scale-in ${isAnimated ? 'animate' : ''}`}
-                    style={{ animationDelay: `${0.6 + index * 0.05}s` }}
-                  >
-                    <ExperienceCard
-                      id={experience.id}
-                      image={experience.image_url || ''}
-                      title={experience.title}
-                      categories={experience.experience_categories?.map(ec => ec.categories) || []}
-                      rating={Number(experience.rating)}
-                      reviews={experience.reviews_count?.toString() || '0'}
-                      price={`From ${experience.currency === 'USD' ? '₹' : experience.currency} ${experience.price}`}
-                      originalPrice={experience.original_price ? `${experience.currency === 'USD' ? '₹' : experience.currency} ${experience.original_price}` : undefined}
-                      duration={experience.duration || undefined}
-                      groupSize={experience.group_size || undefined}
-                      isSpecialOffer={experience.is_special_offer || false}
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className={`scroll-fade-in ${isAnimated ? 'animate' : ''}`} style={{ animationDelay: '0.6s' }}>
-                  <p className="text-muted-foreground">No activities found for this category. But we'll surely add some later.</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
     </div>
   )
 }

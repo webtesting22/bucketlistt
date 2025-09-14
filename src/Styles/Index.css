@@ -67,7 +67,7 @@
 }
 
 .ant-modal-wrap {
-background-color: rgba(0, 0, 0, 0.377);
+    background-color: rgba(0, 0, 0, 0.377);
 }
 
 @media (max-width:900px) {
@@ -90,6 +90,11 @@ background-color: rgba(0, 0, 0, 0.377);
 
     #LogoADjustContainer {
         margin-left: -10px;
+    }
+
+    #LogoADjustContainer img {
+        width: 130px !important;
+        height: 100% !important;
     }
 
     #DestinationCardStyles {
