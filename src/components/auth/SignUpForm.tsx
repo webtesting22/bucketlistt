@@ -19,9 +19,10 @@ import { useNavigate } from "react-router-dom";
 
 interface SignUpFormProps {
   onToggleMode: () => void;
+  onVendorMode?: () => void;
 }
 
-export function SignUpForm({ onToggleMode }: SignUpFormProps) {
+export function SignUpForm({ onToggleMode, onVendorMode }: SignUpFormProps) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",

@@ -32,6 +32,8 @@ interface ExperienceCardProps {
   distanceKm?: number
   startPoint?: string
   endPoint?: string
+  index?: number // New prop for index number
+  description?: string // New prop for description
 }
 
 export function ExperienceCard({
@@ -49,7 +51,9 @@ export function ExperienceCard({
   isSpecialOffer,
   distanceKm,
   startPoint,
-  endPoint
+  endPoint,
+  index,
+  description
 }: ExperienceCardProps) {
   const navigate = useNavigate()
   const [isClicked, setIsClicked] = useState(false)
@@ -97,73 +101,61 @@ export function ExperienceCard({
 
   return (
     <Card
-      className={`group cursor-pointer overflow-hidden border-0  transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''}`}
+      className={`group cursor-pointer overflow-hidden border-0 transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''} ExperienceCardMobileLayout`}
       onClick={handleClick}
       style={{ boxShadow: 'none', borderRadius: '5px' }}
     >
       <CardContent className="p-0">
-        <div className="relative">
-          {isSpecialOffer && (
-            <Badge className="absolute top-3 left-3 z-10" id="BadgeEditStyle">
-              Special offer
-            </Badge>
-          )}
-          <div className="absolute top-3 right-3 z-10">
-            <FavoriteButton experienceId={id} />
-          </div>
-          <LazyImage
-            src={displayImage}
-            alt={title}
-            className="group-hover:scale-105 transition-transform duration-200"
-            aspectRatio="aspect-[4/3]"
-          />
-        </div>
-
-        <div className="p-3  space-y-3">
-          <div>
-            {displayCategories.length > 0 && (
-              <div>
-                {displayCategories.slice(0, 2).map((cat, index) => (
-                  <span key={cat.id || index} className="flex items-center gap-1">
-                    {cat.icon && <span>{cat.icon}</span>}
-                    <div id="FlexContainerRowBetween">
-                      <span className="fontSizeSm">{cat.name}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 fontSizeSm" />
-                          <span className="font-medium fontSizeSm">{rating}</span>
-                        </div>
-                        <span className="text-sm text-muted-foreground fontSizeSm">({reviews})</span>
-                      </div>
-                    </div>
-
-                    {index < Math.min(displayCategories.length, 2) - 1 && <span>•</span>}
-                  </span>
-                ))}
-                {displayCategories.length > 2 && (
-                  <span className="text-xs">+{displayCategories.length - 2} more</span>
-                )}
-              </div>
+        {/* Desktop Layout */}
+        <div className="OnlyPc">
+          <div className="relative">
+            {isSpecialOffer && (
+              <Badge className="absolute top-3 left-3 z-10" id="BadgeEditStyle">
+                Special offer
+              </Badge>
             )}
-          </div>
-
-          <h3 className="CommonH3 text-start FontAdjustForMobile">
-            {title}
-          </h3>
-          <div>
-            <div id="PriceContainerOfferHomePageCards">
-              <div>
-                <span className="FromText">from</span> {originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through fontSizeSm">{originalPrice}</span>
-                )}
-              </div>
-              <div style={{marginTop: '-5px'}}>
-                <span className="text-lg font-bold fontSizeMd" style={{ color: 'var(--brand-color)' }}>{price}</span>
-              </div>
-
+            <div className="absolute top-3 right-3 z-10">
+              <FavoriteButton experienceId={id} />
             </div>
+            <LazyImage
+              src={displayImage}
+              alt={title}
+              className="group-hover:scale-105 transition-transform duration-200"
+              aspectRatio="aspect-[4/3]"
+            />
           </div>
-          <div className="OnlyPc">
+
+          <div className="p-3 space-y-1">
+            <div>
+              {displayCategories.length > 0 && (
+                <div>
+                  {displayCategories.slice(0, 2).map((cat, index) => (
+                    <span key={cat.id || index} className="flex items-center gap-1">
+                      {cat.icon && <span>{cat.icon}</span>}
+                      <div id="FlexContainerRowBetween">
+                        <span className="fontSizeSm">{cat.name}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 fontSizeSm" />
+                            <span className="font-medium fontSizeSm">{rating}</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground fontSizeSm">({reviews})</span>
+                        </div>
+                      </div>
+
+                      {index < Math.min(displayCategories.length, 2) - 1 && <span>•</span>}
+                    </span>
+                  ))}
+                  {displayCategories.length > 2 && (
+                    <span className="text-xs">+{displayCategories.length - 2} more</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <h3 className="CommonH3 text-start FontAdjustForMobile">
+              {title}
+            </h3>
             <div className="flex items-center gap-4 text-sm text-muted-foreground marginUnset">
               {duration && (
                 <div className="flex items-center gap-1">
@@ -195,7 +187,78 @@ export function ExperienceCard({
                 {originalPrice && (
                   <span className="text-sm text-muted-foreground line-through fontSizeSm">{originalPrice}</span>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
 
+        {/* Mobile Layout */}
+        <div className="OnlyMobile ExperienceCardMobileGrid">
+          <div className="relative ExperienceCardMobileImage">
+            {isSpecialOffer && (
+              <Badge className="absolute top-2 left-2 z-10" id="BadgeEditStyle">
+                Special offer
+              </Badge>
+            )}
+           
+            {/* Index Number - Only on Mobile */}
+            {index !== undefined && (
+              <div className="absolute top-2 right-2 z-20 ExperienceCardIndexNumber">
+                {index + 1}
+              </div>
+            )}
+            <LazyImage
+              src={displayImage}
+              alt={title}
+              className="group-hover:scale-105 transition-transform duration-200"
+              aspectRatio="aspect-[1/1]"
+            />
+          </div>
+
+          <div className="ExperienceCardMobileContent p-3 space-y-1">
+            <div>
+              {displayCategories.length > 0 && (
+                <div>
+                  {displayCategories.slice(0, 1).map((cat, index) => (
+                    <span key={cat.id || index} className="flex items-center gap-1">
+                      {cat.icon && <span>{cat.icon}</span>}
+                      <div id="FlexContainerRowBetween">
+                        <span className="fontSizeSm">{cat.name}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 fontSizeSm" />
+                            <span className="font-medium fontSizeSm">{rating}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground fontSizeSm">({reviews})</span>
+                        </div>
+                      </div>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className={`absolute z-10 ${index !== undefined ? 'top-0 right-0' : 'top-2 right-2'}`} style={{marginTop:"-2px"}}>
+              <FavoriteButton experienceId={id} />
+            </div>
+            <h3 className="CommonH3 text-start FontAdjustForMobile">
+              {title}
+            </h3>
+            <p className="DescriptionContainer">
+              {description && (
+                <>
+                  {description.split(' ').slice(0, 10).join(' ')}
+                  {description.split(' ').length > 20 && '...'}
+                </>
+              )}
+            </p>
+            <div id="PriceContainerOfferHomePageCards">
+              <div>
+                <span className="FromText">from</span> {originalPrice && (
+                  <span className="text-sm text-muted-foreground line-through fontSizeSm">{originalPrice}</span>
+                )}
+              </div>
+              <div style={{ marginTop: '-5px' }}>
+                <span className="text-lg font-bold fontSizeMd" style={{ color: 'var(--brand-color)' }}>{price}</span>
               </div>
             </div>
           </div>

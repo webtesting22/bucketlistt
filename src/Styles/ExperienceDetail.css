@@ -1,0 +1,14 @@
+.MainShowingImageContainer {
+    max-height: 500px !important;
+    overflow: hidden !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px !important;
+}
+
+#SwiperInsideImages img{
+    width: 100% !important;
+    height: 100%;
+    object-fit: contain !important;
+}

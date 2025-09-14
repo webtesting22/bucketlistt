@@ -4,7 +4,12 @@ import { LazyImage } from './LazyImage'
 import { Button } from './ui/button'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, Navigation, Pagination } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
+import "../Styles/ExperienceDetail.css"
 interface ImageGalleryProps {
   images: Array<{
     id: string
@@ -37,13 +42,13 @@ export function ImageGallery({ images, experienceTitle }: ImageGalleryProps) {
   }
 
   const goToPrevious = () => {
-    setSelectedImageIndex((prev) => 
+    setSelectedImageIndex((prev) =>
       prev === 0 ? sortedImages.length - 1 : prev - 1
     )
   }
 
   const goToNext = () => {
-    setSelectedImageIndex((prev) => 
+    setSelectedImageIndex((prev) =>
       prev === sortedImages.length - 1 ? 0 : prev + 1
     )
   }
@@ -61,25 +66,51 @@ export function ImageGallery({ images, experienceTitle }: ImageGalleryProps) {
 
   return (
     <>
-      <div className="space-y-4">
-        {/* Main Image */}
-        <div className="relative">
-          <LazyImage
-            src={mainImage.image_url}
-            alt={mainImage.alt_text || experienceTitle}
-            aspectRatio="aspect-[3/2]"
-            className="rounded-xl cursor-pointer"
-            onClick={() => openModal(0)}
-          />
+      <div className=" container">
+        {/* Main Image Swiper */}
+        <div className="relative MainShowingImageContainer">
+          <Swiper
+            modules={[Autoplay, Navigation, Pagination]}
+            autoplay={{
+              delay: 3000,
+              disableOnInteraction: false,
+            }}
+            // navigation={true}
+            // pagination={{
+            //   clickable: true,
+            //   bulletClass: 'swiper-pagination-bullet',
+            //   bulletActiveClass: 'swiper-pagination-bullet-active',
+            // }}
+            loop={sortedImages.length > 1}
+            className="rounded-xl overflow-hidden"
+          >
+            {sortedImages.map((image, index) => (
+              <SwiperSlide key={image.id}>
+                <div
+                  className="cursor-pointer"
+                  id="SwiperInsideImages"
+                // onClick={() => openModal(index)}
+                >
+                  <LazyImage
+                    src={image.image_url}
+                    alt={image.alt_text || `${experienceTitle} ${index + 1}`}
+                    aspectRatio="aspect-[3/2]"
+
+                    className="rounded-xl w-full h-full object-cover"
+                  />
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
           {sortedImages.length > 1 && (
-            <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-              1 / {sortedImages.length}
+            <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm z-10">
+              {sortedImages.length} images
             </div>
           )}
         </div>
 
         {/* Thumbnail Grid */}
-        {thumbnailImages.length > 0 && (
+        {/* {thumbnailImages.length > 0 && (
           <div className="grid grid-cols-4 gap-3">
             {thumbnailImages.map((image, index) => (
               <div key={image.id} className="relative">
@@ -91,7 +122,7 @@ export function ImageGallery({ images, experienceTitle }: ImageGalleryProps) {
                   onClick={() => openModal(index + 1)}
                 />
                 {index === 3 && sortedImages.length > 5 && (
-                  <div 
+                  <div
                     className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center cursor-pointer"
                     onClick={() => openModal(index + 1)}
                   >
@@ -103,12 +134,12 @@ export function ImageGallery({ images, experienceTitle }: ImageGalleryProps) {
               </div>
             ))}
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center ">
           <div className="relative w-full h-full flex items-center justify-center p-4">
             {/* Close Button */}
             <Button

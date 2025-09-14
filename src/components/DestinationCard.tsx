@@ -26,7 +26,7 @@ export function DestinationCard({ id, image, title, subtitle }: DestinationCardP
 
   return (
     <Card
-      className={`group cursor-pointer overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''}`}
+      className={`group cursor-pointer overflow-hidden border-0 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''}`}
       onClick={handleClick}
     >
       <CardContent className="p-0 relative" id="DestinationCardStyles">
@@ -37,11 +37,12 @@ export function DestinationCard({ id, image, title, subtitle }: DestinationCardP
           className="DestinationsImage"
         // aspectRatio="aspect-[4/3]"
         />
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
-          <p className="text-sm opacity-90 mb-1">{subtitle}</p>
-          <h3 className="text-lg font-semibold">{title}</h3>
-        </div>
+
       </CardContent>
+      <div className=" bottom-0 left-0 right-0 p-4  from-black/60 to-transparent text-black">
+        <p className="text-sm opacity-90 mb-1" style={{textAlign:"start"}}>{subtitle}</p>
+        <h2 className="" style={{textAlign:"start",color:"var(--brand-color)"}}>{title}</h2>
+      </div>
     </Card>
   )
 }

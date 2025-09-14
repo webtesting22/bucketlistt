@@ -7,6 +7,11 @@
     text-align: start !important;
 }
 
+.FooterLogoStyles {
+    width: 150px !important;
+    margin-top: -30px;
+}
+
 @media (max-width: 768px) {
     .FooterGridContainer {
         /* flex-direction: column; */
@@ -15,7 +20,18 @@
         margin-bottom: 20px;
     }
 
+    .FooterGridContainer>div:first-child {
+        width: 100% !important;
+        padding-bottom: 0px !important;
+    }
+
     .FooterGridContainer>div {
-        width: 48% !important;
+        width: 47% !important;
+        padding-bottom: 20px;
+    }
+
+    .FooterLogoStyles {
+        width: 60% !important;
+        margin-left: -15px;
     }
 }
