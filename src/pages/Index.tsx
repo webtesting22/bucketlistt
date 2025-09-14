@@ -243,11 +243,11 @@ const Index = () => {
                     spaceBetween={16}
                     loop={true}
                     speed={800}
-                    autoplay={{
-                      delay: 2500,
-                      disableOnInteraction: false,
-                      // pauseOnMouseEnter: true,
-                    }}
+                    // autoplay={{
+                    //   delay: 2500,
+                    //   disableOnInteraction: false,
+                    //   // pauseOnMouseEnter: true,
+                    // }}
                     breakpoints={{
                       320: {
                         slidesPerView: 2.3,
@@ -347,7 +347,7 @@ const Index = () => {
                     // }}
                     breakpoints={{
                       320: {
-                        slidesPerView: 2,
+                        slidesPerView: 1.3,
                         spaceBetween: 8,
                       },
                       640: {
@@ -486,17 +486,18 @@ const Index = () => {
                     delay={300 + index * 100}
                     duration={600}
                   >
-                    <div className="text-center group p-4 md:p-0">
+                    <div className="text-center group md:p-0" id="WhyChooseUsCard">
                       <div
-                        className={`w-12 h-12 md:w-16 md:h-16  mb-3 md:mb-4 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+
+                        className={`w-12 BorderGrdientContainer h-12 md:w-16 md:h-16  mb-3 md:mb-4  ${feature.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
                       >
                         <IconComponent className="h-6 w-6 md:h-8 md:w-8 text-white" />
                       </div>
-                      <h3 className="CommonH3 text-start
+                      <h3 className="CommonH3 text-start text_Adjust_For_Mobile
                       ">
                         {feature.title}
                       </h3>
-                      <p className="text-start">
+                      <p className="text-start text-sm">
                         {feature.description}
                       </p>
                     </div>
@@ -505,73 +506,76 @@ const Index = () => {
               })}
             </div>
 
-            <div className="mt-12 md:mt-16 md:space-y-5">
-              <BidirectionalAnimatedSection
-                animation="fade-up"
-                delay={100}
-                duration={600}
-              >
-                <h2 className="CommonH2 TextAlignment">
-                  And we are ATOAI certified
-                </h2>
-                <img
-                  className="LogoATOAIStyles"
-                  src="/ATOAI_logo.jpg"
-                  alt="ATOAI Logo"
-                // className="mx-auto w-32 md:w-48 h-auto rounded-lg"
-                />
-              </BidirectionalAnimatedSection>
-
-              <div className="WhyChooseFlexContainerColumnCenter">
+            <div className="ContainerDesinsPurposeOnly MaxWidth800">
+              <div className="mt-12 md:mt-16 md:space-y-5">
                 <BidirectionalAnimatedSection
                   animation="fade-up"
                   delay={100}
                   duration={600}
                 >
-                  <p className="TextAlignment">
-                    <span className="font-bold">bucketlistt</span> strictly
-                    adheres to the safety, ethical, and operational standards set
-                    by the{" "}
-                    <a
-                      href="https://www.atoai.org/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-bold hover:text-orange-500"
-                    >
-                      Adventure Tour Operators Association of India (ATOAI)
-                    </a>
-                    . All activities offered on our platform comply with the Basic
-                    Minimum Standards prescribed for adventure tourism, ensuring
-                    responsible practices, trained staff, certified equipment, and
-                    a strong commitment to environmental sustainability. Your
-                    safety and experience are our top priorities.
-                  </p>
-                </BidirectionalAnimatedSection>
-                <br /><br />
-                <BidirectionalAnimatedSection
-                  animation="fade-up"
-                  delay={100}
-                  duration={600}
-                >
-                  <div className="FlexTestContainerEdit">
-                    <h2 className="CommonH2">
-                      Proudly Made in
-                    </h2>
-                    <div style={{ minWidth: "100px" }}>
-                      <RotatingText
-                        texts={["India", "भारत", "ભારત"]}
-                        className="text-2xl md:text-4xl font-bold text-orange-500"
-                        rotationInterval={2000}
-                      />
-                    </div>
-                  </div>
-                  <br />
+                  <h2 className="CommonH2 TextAlignment">
+                    And we are ATOAI certified
+                  </h2>
                   <img
-                    src="/indian_flag.gif"
-                    alt="Indian Flag"
-                    className="mx-auto w-32 md:w-48 h-auto rounded-lg"
+                    className="LogoATOAIStyles"
+                    src="/ATOAI_logo.jpg"
+                    alt="ATOAI Logo"
+                  // className="mx-auto w-32 md:w-48 h-auto rounded-lg"
                   />
                 </BidirectionalAnimatedSection>
+
+                <div className="WhyChooseFlexContainerColumnCenter">
+                  <BidirectionalAnimatedSection
+                    animation="fade-up"
+                    delay={100}
+                    duration={600}
+                  >
+                    <p className="TextAlignment text-sm">
+                      <span className="font-bold">bucketlistt</span> strictly
+                      adheres to the safety, ethical, and operational standards set
+                      by the{" "}
+                      <a
+                        href="https://www.atoai.org/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-bold hover:text-orange-500"
+                      >
+                        Adventure Tour Operators Association of India (ATOAI)
+                      </a>
+                      . All activities offered on our platform comply with the Basic
+                      Minimum Standards prescribed for adventure tourism, ensuring
+                      responsible practices, trained staff, certified equipment, and
+                      a strong commitment to environmental sustainability. Your
+                      safety and experience are our top priorities.
+                    </p>
+                  </BidirectionalAnimatedSection>
+                  <br />
+                  <BidirectionalAnimatedSection
+                    animation="fade-up"
+                    delay={100}
+                    duration={600}
+                  >
+                    <div className="FlexTestContainerEdit">
+                      <h2 className="CommonH2">
+                        Proudly Made in
+                      </h2>
+                      <div style={{ minWidth: "100px" }}>
+                        <RotatingText
+                          texts={["India", "भारत", "ભારત"]}
+                          className="text-2xl md:text-4xl font-bold BrandColor"
+                          rotationInterval={2000}
+                        />
+                      </div>
+                    </div>
+                    <br />
+                    <img
+                      src="/indian_flag.gif"
+                      alt="Indian Flag"
+                      className="mx-auto w-32 md:w-48 h-auto rounded-lg"
+                      id="IndianFlagStyles"
+                    />
+                  </BidirectionalAnimatedSection>
+                </div>
               </div>
             </div>
           </div>

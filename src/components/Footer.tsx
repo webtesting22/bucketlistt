@@ -11,15 +11,15 @@ export function Footer() {
         <div className="FooterGridContainer">
           {/* Company Info & QR Code */}
           <div className="">
-            <div className="flex items-center space-x-2 mb-4">
+            <div className="flex items-center space-x-2">
               <img
-                src="/bucket-list-icon.png"
+                src="https://prepseed.s3.ap-south-1.amazonaws.com/Bucketlistt+(3).png"
                 alt="bucketlistt Logo"
-                className="h-8 w-auto"
+                className=" w-auto FooterLogoStyles"
               />
             </div>
             {/* QR Code Section */}
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <div className="w-20 h-20 mb-2">
                 <img
                   src="/qr.png"
@@ -32,7 +32,7 @@ export function Footer() {
                 <br />
                 launching soon!!
               </p>
-            </div>
+            </div> */}
           </div>
           {/* Get Help 24/7 */}
           <div>

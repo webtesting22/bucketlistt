@@ -267,7 +267,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Montserrat", sans-serif;
+    font-family: "Be Vietnam Pro", sans-serif !important;
     overflow-x: hidden;
   }
 
@@ -278,7 +278,7 @@
   h4,
   h5,
   h6 {
-    font-family: "Montserrat", sans-serif;
+    font-family: "Be Vietnam Pro", sans-serif !important;
     font-weight: 600;
   }
 
@@ -286,7 +286,7 @@
   *,
   *::before,
   *::after {
-    font-family: "Montserrat", sans-serif !important;
+    font-family: "Be Vietnam Pro", sans-serif !important;
   }
 
   /* Ensure all common text elements use Montserrat */
@@ -318,7 +318,7 @@
   .button,
   .input,
   .textarea {
-    font-family: "Montserrat", sans-serif !important;
+    font-family: "Be Vietnam Pro", sans-serif !important;
   }
 
   html {
@@ -766,4 +766,22 @@ body.razorpay-open * {
 body.razorpay-open [class*="razorpay"],
 body.razorpay-open [id*="razorpay"] {
   pointer-events: auto !important;
+}
+
+
+p,
+li,
+a,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+}
+
+
+.BrandShadeCommon {
+  background: #940fdb2b;
 }

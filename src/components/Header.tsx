@@ -31,6 +31,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
+import { AuthModal } from "@/components/AuthModal";
 
 export function Header() {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ export function Header() {
   const { favoritesCount } = useFavorites();
   const { theme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // Check if we're on the landing page
   const isLandingPage = location.pathname === "/";
@@ -374,7 +376,7 @@ export function Header() {
             ) : (
               <Button
                 style={{ background: "var(--brand-color)" }}
-                onClick={() => navigate("/auth")}
+                onClick={() => setIsAuthModalOpen(true)}
               >
                 Sign in
               </Button>
@@ -543,19 +545,21 @@ export function Header() {
                     background: isScrolled ? "#940fdb" : "white",
                     color: isScrolled ? "white" : "black", padding: "0px 10px", height: "30px"
                   }}
-                  onClick={() => navigate("/auth")}
+                  onClick={() => setIsAuthModalOpen(true)}
                 >
                   Sign in
                 </Button>
-
-
               </>
             )}
           </div>
         </div>
       </header>
 
-
+      {/* Auth Modal */}
+      <AuthModal
+        open={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </>
   );
 }

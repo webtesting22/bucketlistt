@@ -43,7 +43,7 @@ const DestinationDetail = () => {
         .select('*')
         .eq('id', id)
         .single()
-      
+
       if (error) throw error
       return data
     },
@@ -57,7 +57,7 @@ const DestinationDetail = () => {
         .from('categories')
         .select('*')
         .order('name')
-      
+
       if (error) throw error
       return data
     }
@@ -80,16 +80,16 @@ const DestinationDetail = () => {
           )
         `)
         .eq('destination_id', id)
-      
+
       if (selectedCategory) {
         // Filter by category using the junction table
         const { data: experienceIds, error: categoryError } = await supabase
           .from('experience_categories')
           .select('experience_id')
           .eq('category_id', selectedCategory)
-        
+
         if (categoryError) throw categoryError
-        
+
         const ids = experienceIds.map(item => item.experience_id)
         if (ids.length > 0) {
           query = query.in('id', ids)
@@ -98,7 +98,7 @@ const DestinationDetail = () => {
           return []
         }
       }
-      
+
       // Apply sorting
       switch (sortBy) {
         case 'rating':
@@ -119,9 +119,9 @@ const DestinationDetail = () => {
         default:
           query = query.order('rating', { ascending: false })
       }
-      
+
       const { data, error } = await query
-      
+
       if (error) throw error
       return data
     },
@@ -136,7 +136,7 @@ const DestinationDetail = () => {
         .select('*')
         .eq('destination_id', id)
         .order('title')
-      
+
       if (error) throw error
       return data
     },
@@ -180,13 +180,13 @@ const DestinationDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       {/* Destination Header Section */}
       <section className="section-wrapper section-bg-primary">
         <div className="container">
           <div className={`scroll-fade-in ${isAnimated ? 'animate' : ''}`}>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate('/')}
               className="mb-6 hover:bg-accent"
             >
@@ -197,68 +197,68 @@ const DestinationDetail = () => {
 
           {/* Destination Header */}
           <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8 scroll-fade-in ${isAnimated ? 'animate' : ''}`} style={{ animationDelay: '0.1s' }}>
-          <LazyImage
-            src={destination.image_url || ''}
-            alt={destination.title}
-            aspectRatio="aspect-[4/3]"
-            className="rounded-xl"
-          />
+            <LazyImage
+              src={destination.image_url || ''}
+              alt={destination.title}
+              aspectRatio="aspect-[4/3]"
+              className="rounded-xl"
+            />
 
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">{destination.title}</h1>
-              <p className="text-xl text-muted-foreground mb-4">{destination.subtitle}</p>
-              
-              {destination.description && (
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  {destination.description}
-                </p>
-              )}
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-4xl font-bold mb-2">{destination.title}</h1>
+                <p className="text-xl text-muted-foreground mb-4">{destination.subtitle}</p>
 
-              <div className="grid grid-cols-2 gap-4">
-                {destination.best_time_to_visit && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-brand-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Best time to visit</p>
-                      <p className="font-medium">{destination.best_time_to_visit}</p>
-                    </div>
-                  </div>
+                {destination.description && (
+                  <p className="text-muted-foreground leading-relaxed mb-6">
+                    {destination.description}
+                  </p>
                 )}
-                
-                {destination.recommended_duration && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-brand-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Recommended duration</p>
-                      <p className="font-medium">{destination.recommended_duration}</p>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {destination.best_time_to_visit && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-brand-primary" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Best time to visit</p>
+                        <p className="font-medium">{destination.best_time_to_visit}</p>
+                      </div>
                     </div>
-                  </div>
-                )}
-                
-                {destination.timezone && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-brand-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Timezone</p>
-                      <p className="font-medium">{destination.timezone}</p>
+                  )}
+
+                  {destination.recommended_duration && (
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-brand-primary" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Recommended duration</p>
+                        <p className="font-medium">{destination.recommended_duration}</p>
+                      </div>
                     </div>
-                  </div>
-                )}
-                
-                {weatherInfo && (
-                  <div className="flex items-center gap-2">
-                    <Thermometer className="h-5 w-5 text-brand-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Weather</p>
-                      <p className="font-medium">{weatherInfo.nov_apr?.temp} (Cool season)</p>
+                  )}
+
+                  {destination.timezone && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5 text-brand-primary" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Timezone</p>
+                        <p className="font-medium">{destination.timezone}</p>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {weatherInfo && (
+                    <div className="flex items-center gap-2">
+                      <Thermometer className="h-5 w-5 text-brand-primary" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Weather</p>
+                        <p className="font-medium">{weatherInfo.nov_apr?.temp} (Cool season)</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
         </div>
       </section>
 
@@ -270,8 +270,8 @@ const DestinationDetail = () => {
               <h2 className="text-2xl font-bold mb-6">Must-visit tourist spots</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {attractions.map((attraction, index) => (
-                  <div 
-                    key={attraction.id} 
+                  <div
+                    key={attraction.id}
                     className={`group cursor-pointer scroll-scale-in ${isAnimated ? 'animate' : ''}`}
                     style={{ animationDelay: `${0.3 + index * 0.1}s` }}
                   >
@@ -310,7 +310,7 @@ const DestinationDetail = () => {
                 <Filter className="h-5 w-5 text-brand-primary" />
                 <h2 className="text-2xl font-bold">Things to do</h2>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                 <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
@@ -327,7 +327,7 @@ const DestinationDetail = () => {
                 </Select>
               </div>
             </div>
-            
+
             <div className="flex flex-wrap gap-3 mb-8">
               <Button
                 variant={selectedCategory === null ? "default" : "outline"}
@@ -370,7 +370,7 @@ const DestinationDetail = () => {
             ) : experiences && experiences.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {experiences.map((experience, index) => (
-                  <div 
+                  <div
                     key={experience.id}
                     className={`scroll-scale-in ${isAnimated ? 'animate' : ''}`}
                     style={{ animationDelay: `${0.6 + index * 0.05}s` }}

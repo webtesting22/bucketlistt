@@ -119,7 +119,7 @@ export function TestimonialCarousel() {
   return (
     <section className="py-5 md:py-24 px-4 " style={{ background: "rgb(39 28 55)" }}>
       <div className=" max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row overflow-x-auto items-start justify-between gap-8">
+        <div className="flex flex-col lg:flex-row  items-start justify-between gap-8">
           {/* Left Side - Title and Navigation */}
           <div className="flex-shrink-0 lg:w-80 w-full text-center lg:text-left" id="GapAddedForTestimonial">
             <h1 className="text-white CommonH1 leading-tight">
@@ -151,7 +151,7 @@ export function TestimonialCarousel() {
           </div>
 
           {/* Right Side - Horizontal Scrollable Testimonials */}
-          <div className="flex-1 relative w-full">
+          <div className="flex-1 relative w-full overflow-x-auto">
             <div
               ref={scrollContainerRef}
               className="flex gap-6  scrollbar-hide pb-4"

@@ -13,12 +13,12 @@ import { RecentBookingsTable } from "@/components/RecentBookingsTable"
 import { useAuth } from "@/contexts/AuthContext"
 import { ArrowLeft, Star, Clock, Users, MapPin, Calendar, Route } from "lucide-react"
 import { useState, useRef } from "react"
-import { saveAs } from "file-saver"
+// import { saveAs } from "file-saver"
 import { useUserRole } from "@/hooks/useUserRole"
 import { BulkBookingPaymentDialog } from "@/components/BulkBookingPaymentDialog"
 import { ExperienceVendorAnalytics } from "@/components/ExperienceVendorAnalytics"
 import { CertificationBadges } from "@/components/CertificationBadges"
-
+import "../Styles/ExperienceDetail.css"
 const ExperienceDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -38,7 +38,7 @@ const ExperienceDetail = () => {
         .select('*')
         .eq('id', id)
         .single()
-      
+
       if (error) throw error
       return data
     },
@@ -53,7 +53,7 @@ const ExperienceDetail = () => {
         .select('*')
         .eq('experience_id', id)
         .order('display_order')
-      
+
       if (error) throw error
       return data || []
     },
@@ -64,7 +64,7 @@ const ExperienceDetail = () => {
     queryKey: ['user-experience-bookings', user?.id, id],
     queryFn: async () => {
       if (!user || !id) return []
-      
+
       const { data, error } = await supabase
         .from('bookings')
         .select(`
@@ -78,7 +78,7 @@ const ExperienceDetail = () => {
         .eq('user_id', user.id)
         .eq('experience_id', id)
         .order('created_at', { ascending: false })
-      
+
       if (error) throw error
       return data || []
     },
@@ -114,17 +114,17 @@ const ExperienceDetail = () => {
   const bookingButtonText = hasExistingBookings ? "Book Another" : "Book Now"
 
   // Combine main image with gallery images, prioritizing gallery images
-  const galleryImages = images && images.length > 0 
-    ? images 
-    : experience?.image_url 
-    ? [{
+  const galleryImages = images && images.length > 0
+    ? images
+    : experience?.image_url
+      ? [{
         id: 'main',
         image_url: experience.image_url,
         alt_text: experience.title,
         display_order: 0,
         is_primary: true
       }]
-    : []
+      : []
 
   // Bulk Booking CSV Download
   const handleDownloadBulkBookingCSV = () => {
@@ -166,7 +166,7 @@ const ExperienceDetail = () => {
     try {
       const text = await file.text()
       const lines = text.split('\n').filter(line => line.trim())
-      
+
       if (lines.length < 2) {
         alert('CSV file must contain at least a header and one data row')
         return
@@ -181,7 +181,7 @@ const ExperienceDetail = () => {
       for (let i = 0; i < dataRows.length; i++) {
         const line = dataRows[i]
         const [bookingDate, noteForGuide, participantName, participantEmail, participantPhone] = line.split(',').map(field => field.trim())
-        
+
         if (!bookingDate || !participantName || !participantEmail) {
           errors.push(`Row ${i + 2}: Missing required fields (booking_date, participant_name, participant_email)`)
           continue
@@ -236,7 +236,7 @@ const ExperienceDetail = () => {
 
         // Generate a unique booking ID
         const bookingId = crypto.randomUUID()
-        
+
         // Create booking record with time slot
         bookingsToInsert.push({
           id: bookingId,
@@ -276,7 +276,7 @@ const ExperienceDetail = () => {
       setBulkBookingsData(bookingsToInsert)
       setBulkParticipantsData(participantsToInsert)
       setIsBulkPaymentDialogOpen(true)
-      
+
     } catch (error) {
       console.error('Error processing CSV:', error)
       alert('Error processing CSV file: ' + error.message)
@@ -316,178 +316,178 @@ const ExperienceDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container py-8 px-4">
-        <Button 
+        {/* <Button 
           variant="ghost" 
           onClick={() => navigate('/')}
           className="mb-6 hover:bg-accent"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Home
-        </Button>
+          Back to Homefsa
+        </Button> */}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Image Gallery Section */}
-            <ImageGallery 
-              images={galleryImages}
-              experienceTitle={experience.title}
-            />
+        <div >
+          {/* Image Gallery Section */}
+          <ImageGallery
+            images={galleryImages}
+            experienceTitle={experience.title}
+          />
 
-            {/* Details Section */}
-            <div className="space-y-6">
-              <div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                  <span>{experience.category}</span>
-                  {experience.location && (
-                    <>
-                      <span>•</span>
-                      <MapPin className="h-4 w-4" />
-                      <span>{experience.location}</span>
-                    </>
-                  )}
-                </div>
-                
-                <h1 className="text-3xl font-bold mb-4">{experience.title}</h1>
-                
-                {experience.is_special_offer && (
-                  <Badge className="mb-4 bg-orange-500 hover:bg-orange-600">
-                    Special Offer
-                  </Badge>
+          {/* Details Section */}
+          <div className="space-y-6 container PaddingSectionTop">
+            <div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                <span>{experience.category}</span>
+                {experience.location && (
+                  <>
+                    <span>•</span>
+                    <MapPin className="h-4 w-4" />
+                    <span>{experience.location}</span>
+                  </>
                 )}
+              </div>
 
-                <div className="flex items-center gap-4 mb-4">
+              <h1 className="text-3xl font-bold mb-4">{experience.title}</h1>
+
+              {experience.is_special_offer && (
+                <Badge className="mb-4 bg-orange-500 hover:bg-orange-600">
+                  Special Offer
+                </Badge>
+              )}
+
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center gap-1">
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <span className="font-semibold">{experience.rating}</span>
+                </div>
+                <span className="text-muted-foreground">
+                  ({experience.reviews_count?.toLocaleString()} reviews)
+                </span>
+              </div>
+
+              <div className="flex items-center gap-6 text-sm text-muted-foreground mb-4">
+                {experience.duration && (
                   <div className="flex items-center gap-1">
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{experience.rating}</span>
-                  </div>
-                  <span className="text-muted-foreground">
-                    ({experience.reviews_count?.toLocaleString()} reviews)
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-6 text-sm text-muted-foreground mb-4">
-                  {experience.duration && (
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      <span>{experience.duration}</span>
-                    </div>
-                  )}
-                  {experience.group_size && (
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      <span>{experience.group_size}</span>
-                    </div>
-                  )}
-                </div>
-
-                {getDistanceDisplay() && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 p-3 bg-muted rounded-lg">
-                    {experience.distance_km === 0 ? (
-                      <MapPin className="h-4 w-4 text-orange-500" />
-                    ) : (
-                      <Route className="h-4 w-4 text-orange-500" />
-                    )}
-                    <span className="font-medium">{getDistanceDisplay()}</span>
+                    <Clock className="h-4 w-4" />
+                    <span>{experience.duration}</span>
                   </div>
                 )}
-
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="text-3xl font-bold text-orange-500">
-                    {experience.currency === 'USD' ? '₹' : experience.currency} {experience.price}
-                  </span>
-                  {experience.original_price && (
-                    <span className="text-lg text-muted-foreground line-through">
-                      {experience.currency === 'USD' ? '₹' : experience.currency} {experience.original_price}
-                    </span>
-                  )}
-                </div>
-
-                <Button 
-                  size="lg" 
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-                  onClick={() => setIsBookingDialogOpen(true)}
-                >
-                  {bookingButtonText}
-                </Button>
-
-                {/* Bulk Booking Buttons for Vendor */}
-                {isVendor && (
-                  <div className="flex flex-col gap-2 mt-2">
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={handleDownloadBulkBookingCSV}
-                    >
-                      Bulk Booking (Download CSV Template)
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={handleBulkUploadClick}
-                    >
-                      Bulk Upload (Upload CSV)
-                    </Button>
-                    <input
-                      type="file"
-                      accept=".csv"
-                      style={{ display: 'none' }}
-                      ref={fileInputRef}
-                      onChange={handleBulkUploadFile}
-                    />
+                {experience.group_size && (
+                  <div className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    <span>{experience.group_size}</span>
                   </div>
                 )}
               </div>
 
-              {experience.description && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-3">About this experience</h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {experience.description}
-                  </p>
+              {getDistanceDisplay() && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 p-3 bg-muted rounded-lg">
+                  {experience.distance_km === 0 ? (
+                    <MapPin className="h-4 w-4 text-orange-500" />
+                  ) : (
+                    <Route className="h-4 w-4 text-orange-500" />
+                  )}
+                  <span className="font-medium">{getDistanceDisplay()}</span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-3xl font-bold text-orange-500">
+                  {experience.currency === 'USD' ? '₹' : experience.currency} {experience.price}
+                </span>
+                {experience.original_price && (
+                  <span className="text-lg text-muted-foreground line-through">
+                    {experience.currency === 'USD' ? '₹' : experience.currency} {experience.original_price}
+                  </span>
+                )}
+              </div>
+
+              <Button
+                size="lg"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                onClick={() => setIsBookingDialogOpen(true)}
+              >
+                {bookingButtonText}
+              </Button>
+
+              {/* Bulk Booking Buttons for Vendor */}
+              {isVendor && (
+                <div className="flex flex-col gap-2 mt-2">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleDownloadBulkBookingCSV}
+                  >
+                    Bulk Booking (Download CSV Template)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleBulkUploadClick}
+                  >
+                    Bulk Upload (Upload CSV)
+                  </Button>
+                  <input
+                    type="file"
+                    accept=".csv"
+                    style={{ display: 'none' }}
+                    ref={fileInputRef}
+                    onChange={handleBulkUploadFile}
+                  />
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Vendor Analytics Section - Only show if user is the vendor who created this experience */}
-          {user && isVendor && experience.vendor_id === user.id && (
-            <div className="mt-12">
-              <div className="border-t pt-8">
-                <ExperienceVendorAnalytics 
-                  experienceId={experience.id}
-                  experienceTitle={experience.title}
-                  experiencePrice={experience.price || 0}
-                />
+            {experience.description && (
+              <div>
+                <h2 className="text-xl font-semibold mb-3">About this experience</h2>
+                <p className="text-muted-foreground leading-relaxed">
+                  {experience.description}
+                </p>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
 
-          {/* Certification Badges */}
+        {/* Vendor Analytics Section - Only show if user is the vendor who created this experience */}
+        {user && isVendor && experience.vendor_id === user.id && (
           <div className="mt-12">
             <div className="border-t pt-8">
-              <CertificationBadges />
+              <ExperienceVendorAnalytics
+                experienceId={experience.id}
+                experienceTitle={experience.title}
+                experiencePrice={experience.price || 0}
+              />
             </div>
           </div>
+        )}
 
-          {/* Recent Bookings for this Experience */}
-          {user && (
-            <div className="mt-12">
-              <div className="border-t pt-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <Calendar className="h-5 w-5 text-orange-600" />
-                  <h2 className="text-2xl font-bold text-orange-800 dark:text-orange-200">
-                    {isVendor && experience.vendor_id === user.id ? 'All Bookings for this Experience' : 'Your Bookings for this Experience'}
-                  </h2>
-                </div>
-                <RecentBookingsTable 
-                  experienceId={id} 
-                  limit={10} 
-                  isVendorView={isVendor && experience.vendor_id === user.id}
-                />
+        {/* Certification Badges */}
+        <div className="mt-12">
+          <div className="border-t pt-8">
+            <CertificationBadges />
+          </div>
+        </div>
+
+        {/* Recent Bookings for this Experience */}
+        {user && (
+          <div className="mt-12">
+            <div className="border-t pt-8">
+              <div className="flex items-center gap-3 mb-6">
+                <Calendar className="h-5 w-5 text-orange-600" />
+                <h2 className="text-2xl font-bold text-orange-800 dark:text-orange-200">
+                  {isVendor && experience.vendor_id === user.id ? 'All Bookings for this Experience' : 'Your Bookings for this Experience'}
+                </h2>
               </div>
+              <RecentBookingsTable
+                experienceId={id}
+                limit={10}
+                isVendorView={isVendor && experience.vendor_id === user.id}
+              />
             </div>
-          )}
+          </div>
+        )}
 
         {/* Booking Dialog */}
         <BookingDialog

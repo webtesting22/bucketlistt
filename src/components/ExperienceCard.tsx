@@ -119,7 +119,7 @@ export function ExperienceCard({
           />
         </div>
 
-        <div className="p-3  space-y-3">
+        <div className="p-3 space-y-1" >
           <div>
             {displayCategories.length > 0 && (
               <div>
@@ -150,7 +150,7 @@ export function ExperienceCard({
           <h3 className="CommonH3 text-start FontAdjustForMobile">
             {title}
           </h3>
-          <div>
+          <div className="OnlyMobile">
             <div id="PriceContainerOfferHomePageCards">
               <div>
                 <span className="FromText">from</span> {originalPrice && (
