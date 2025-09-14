@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          created_at: string
+          currency: string
+          display_order: number
+          distance: string
+          duration: string
+          experience_id: string
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          display_order?: number
+          distance: string
+          duration: string
+          experience_id: string
+          id?: string
+          is_active?: boolean
+          name: string
+          price: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          display_order?: number
+          distance?: string
+          duration?: string
+          experience_id?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attractions: {
         Row: {
           category: string | null
@@ -499,6 +549,7 @@ export type Database = {
       }
       time_slots: {
         Row: {
+          activity_id: string | null
           capacity: number
           created_at: string
           end_time: string
@@ -508,6 +559,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          activity_id?: string | null
           capacity?: number
           created_at?: string
           end_time: string
@@ -517,6 +569,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          activity_id?: string | null
           capacity?: number
           created_at?: string
           end_time?: string
@@ -526,6 +579,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "time_slots_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "time_slots_experience_id_fkey"
             columns: ["experience_id"]
