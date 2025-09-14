@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast"
 import { SlotSelector } from "@/components/SlotSelector"
 import { useNavigate } from "react-router-dom"
 import { useRazorpay } from "@/hooks/useRazorpay"
+import { useQuery } from "@tanstack/react-query"
 
 const participantSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -51,6 +52,7 @@ export const BookingDialog = ({ isOpen, onClose, experience, onBookingSuccess }:
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [selectedSlotId, setSelectedSlotId] = useState<string | undefined>(undefined)
   const [bypassPayment, setBypassPayment] = useState(false)
+  const [selectedActivityId, setSelectedActivityId] = useState<string>();
   const { user } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
@@ -388,6 +390,27 @@ export const BookingDialog = ({ isOpen, onClose, experience, onBookingSuccess }:
     }
   }
 
+  // Add query for selected activity details
+  const { data: selectedActivity } = useQuery({
+    queryKey: ['activity', selectedActivityId],
+    queryFn: async () => {
+      if (!selectedActivityId) return null;
+      
+      const { data, error } = await supabase
+        .from('activities')
+        .select('*')
+        .eq('id', selectedActivityId)
+        .single();
+        
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedActivityId
+  });
+
+  // Update price calculation to use activity price
+  const totalActivityPrice = selectedActivity ? selectedActivity.price * participants.length : 0;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -398,16 +421,18 @@ export const BookingDialog = ({ isOpen, onClose, experience, onBookingSuccess }:
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column: Date and Time Selection */}
+              {/* Left Column: Activity, Date and Time Selection */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Select Date & Time</h3>
+                <h3 className="text-lg font-semibold mb-4">Select Activity & Time</h3>
                 <SlotSelector
                   experienceId={experience.id}
                   selectedDate={selectedDate}
                   selectedSlotId={selectedSlotId}
+                  selectedActivityId={selectedActivityId}
                   participantCount={participants.length}
                   onDateChange={handleDateChange}
                   onSlotChange={handleSlotChange}
+                  onActivityChange={setSelectedActivityId}
                 />
               </div>
 
@@ -563,13 +588,20 @@ export const BookingDialog = ({ isOpen, onClose, experience, onBookingSuccess }:
                 <Card className="bg-muted">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-lg font-semibold">Total Cost</span>
+                      <div>
+                        <span className="text-lg font-semibold">Total Cost</span>
+                        {selectedActivity && (
+                          <div className="text-sm text-muted-foreground">
+                            {selectedActivity.name}
+                          </div>
+                        )}
+                      </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-orange-500">
-                          {experience.currency === 'USD' ? '₹' : experience.currency} {totalPrice}
+                          {selectedActivity?.currency} {totalActivityPrice}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {participants.length} participant{participants.length > 1 ? 's' : ''} × {experience.currency === 'USD' ? '₹' : experience.currency}{experience.price}
+                          {participants.length} participant{participants.length > 1 ? 's' : ''} × {selectedActivity?.currency} {selectedActivity?.price}
                         </div>
                       </div>
                     </div>
