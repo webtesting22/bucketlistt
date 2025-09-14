@@ -34,7 +34,7 @@ export function AIChatbot() {
   // Use environment variable or fallback API key
   const apiKey =
     import.meta.env.VITE_GROQ_API_KEY ||
-    "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";
+    "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";
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
