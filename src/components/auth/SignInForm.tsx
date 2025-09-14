@@ -1,53 +1,72 @@
-
-import React, { useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
-import { Apple, Chrome } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+import React, { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SignInFormProps {
-  onToggleMode: () => void
-  onResetMode?: () => void
-  onForgotPassword?: () => void
+  onToggleMode: () => void;
+  onResetMode?: () => void;
+  onForgotPassword?: () => void;
 }
 
-export function SignInForm({ onToggleMode, onResetMode, onForgotPassword }: SignInFormProps) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const { signIn } = useAuth()
-  const { toast } = useToast()
+export function SignInForm({
+  onToggleMode,
+  onResetMode,
+  onForgotPassword,
+}: SignInFormProps) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      const { error } = await signIn(email, password)
+      const { error } = await signIn(email, password);
 
       if (error) {
         toast({
           title: "Sign in failed",
           description: error.message,
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
       toast({
         title: "An error occurred",
         description: "Please try again later",
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-
+  };
+  const handleGoogleLogin = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: "http://localhost:3000/dashboard",
+      },
+    });
+    console.log(data);
+    if (error) console.error(error.message);
+  };
   return (
     <>
       <Card className="w-full shadow-lg">
@@ -57,7 +76,7 @@ export function SignInForm({ onToggleMode, onResetMode, onForgotPassword }: Sign
             Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
-        <div className='GoogleAndAppleButtonsSignInForm space-y-4'>
+        <div className="GoogleAndAppleButtonsSignInForm space-y-4">
           {/* Heading and Description */}
           {/* <div className="text-center space-y-2">
             <h3 className="text-lg font-semibold">Continue with</h3>
@@ -78,13 +97,18 @@ export function SignInForm({ onToggleMode, onResetMode, onForgotPassword }: Sign
               className="w-full h-12 flex items-center justify-center space-x-3 border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
               onClick={() => {
                 // TODO: Implement Google sign-in
+                handleGoogleLogin();
                 toast({
                   title: "Google Sign-in",
                   description: "Google authentication coming soon!",
-                })
+                });
               }}
             >
-              <img src="https://s3.ap-south-1.amazonaws.com/prepseed/prod/ldoc/media/GoogleIcon.png" alt="" style={{ width: "20px" }} />
+              <img
+                src="https://s3.ap-south-1.amazonaws.com/prepseed/prod/ldoc/media/GoogleIcon.png"
+                alt=""
+                style={{ width: "20px" }}
+              />
               <span className="font-medium">Continue with Google</span>
             </Button>
 
@@ -98,10 +122,14 @@ export function SignInForm({ onToggleMode, onResetMode, onForgotPassword }: Sign
                 toast({
                   title: "Apple Sign-in",
                   description: "Apple authentication coming soon!",
-                })
+                });
               }}
             >
-              <img src="https://s3.ap-south-1.amazonaws.com/prepseed/prod/ldoc/media/AppleLog.png" alt="" style={{ width: "20px" }} />
+              <img
+                src="https://s3.ap-south-1.amazonaws.com/prepseed/prod/ldoc/media/AppleLog.png"
+                alt=""
+                style={{ width: "20px" }}
+              />
               <span className="font-medium">Continue with Apple</span>
             </Button>
           </div>
@@ -179,7 +207,7 @@ export function SignInForm({ onToggleMode, onResetMode, onForgotPassword }: Sign
             </Button>
             <div className="text-center text-sm">
               <span className="text-gray-600 dark:text-gray-400">
-                Don't have an account?{' '}
+                Don't have an account?{" "}
               </span>
               <Button
                 type="button"
@@ -193,7 +221,6 @@ export function SignInForm({ onToggleMode, onResetMode, onForgotPassword }: Sign
           </CardFooter>
         </form>
       </Card>
-
     </>
-  )
+  );
 }
