@@ -85,6 +85,7 @@ const DestinationDetail = () => {
           )
         `)
         .eq('destination_id', id)
+        .eq("is_active", true)
 
       if (selectedCategory) {
         // Filter by category using the junction table

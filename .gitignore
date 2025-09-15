@@ -116,3 +116,5 @@ temp/
 # Temporary files
 *.tmp
 *.temp
+package-lock.json
+schema.sql
