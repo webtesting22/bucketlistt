@@ -858,20 +858,20 @@ export function CreateExperienceForm({
               onChange={(e) => handleInputChange("location", e.target.value)}
               required
               placeholder="Paste Google Maps link to meeting point/location"
-              className={
-                !formData.location.includes("maps.google.com") ||
-                !formData.location.includes("maps.app.goo")
-                  ? "border-red-500"
-                  : ""
-              }
+              // className={
+              //   !formData.location.includes("maps.google.com") ||
+              //   !formData.location.includes("maps.app.goo")
+              //     ? "border-red-500"
+              //     : ""
+              // }
             />
-            {formData.location &&
+            {/* {formData.location &&
               (!formData.location.includes("maps.google.com") ||
                 !formData.location.includes("maps.app.goo")) && (
                 <p className="text-sm text-red-500">
                   Please enter a valid Google Maps link
                 </p>
-              )}
+              )} */}
           </div>
 
           <div>

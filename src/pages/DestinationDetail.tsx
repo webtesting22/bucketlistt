@@ -538,8 +538,10 @@ const DestinationDetail = () => {
                         }
                         rating={Number(experience.rating)}
                         reviews={experience.reviews_count?.toString() || "0"}
-                        price={`From ${
+                        price={`${
                           experience.currency === "USD"
+                            ? "₹"
+                            : experience.currency == "INR"
                             ? "₹"
                             : experience.currency
                         } ${experience.price}`}
@@ -547,6 +549,8 @@ const DestinationDetail = () => {
                           experience.original_price
                             ? `${
                                 experience.currency === "USD"
+                                  ? "₹"
+                                  : experience.currency == "INR"
                                   ? "₹"
                                   : experience.currency
                               } ${experience.original_price}`
