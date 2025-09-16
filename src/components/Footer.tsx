@@ -13,7 +13,7 @@ export function Footer() {
           <div className="">
             <div className="flex items-center space-x-2">
               <img
-                src="https://prepseed.s3.ap-south-1.amazonaws.com/Bucketlistt+(3).png"
+                src="https://prepseed.s3.ap-south-1.amazonaws.com/Bucketlistt.png"
                 alt="bucketlistt Logo"
                 className=" w-auto FooterLogoStyles"
               />

@@ -371,27 +371,26 @@ const Index = () => {
                             id={experience.id}
                             image={getExperienceImage(experience)}
                             title={experience.title}
+                            description={experience.description || undefined}
                             category={experience.category}
                             rating={Number(experience.rating)}
                             reviews={
                               experience.reviews_count?.toString() || "0"
                             }
-                            price={`${
-                              experience.currency === "USD"
-                                ? "₹"
-                                : experience.currency == "INR"
+                            price={`${experience.currency === "USD"
+                              ? "₹"
+                              : experience.currency == "INR"
                                 ? "₹"
                                 : experience.currency
-                            } ${experience.price}`}
+                              } ${experience.price}`}
                             originalPrice={
                               experience.original_price
-                                ? `${
-                                    experience.currency === "USD"
-                                      ? "₹"
-                                      : experience.currency == "INR"
-                                      ? "₹"
-                                      : experience.currency
-                                  } ${experience.original_price}`
+                                ? `${experience.currency === "USD"
+                                  ? "₹"
+                                  : experience.currency == "INR"
+                                    ? "₹"
+                                    : experience.currency
+                                } ${experience.original_price}`
                                 : undefined
                             }
                             duration={experience.duration || undefined}
@@ -538,7 +537,7 @@ const Index = () => {
                     className="LogoATOAIStyles"
                     src="/ATOAI_logo.jpg"
                     alt="ATOAI Logo"
-                    // className="mx-auto w-32 md:w-48 h-auto rounded-lg"
+                  // className="mx-auto w-32 md:w-48 h-auto rounded-lg"
                   />
                 </BidirectionalAnimatedSection>
 

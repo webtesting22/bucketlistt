@@ -71,6 +71,7 @@
 }
 
 @media (max-width:900px) {
+    
     #IndianFlagStyles {
         width: 100% !important;
     }
@@ -89,7 +90,7 @@
     }
 
     #LogoADjustContainer {
-        margin-left: -10px;
+        margin-left: -5px;
     }
 
     #LogoADjustContainer img {

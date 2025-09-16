@@ -299,7 +299,7 @@ const DestinationDetail = () => {
       {/* Destination Info Section */}
       <section
         className="section-wrapper section-bg-primary"
-        style={{ marginTop: "-20px" }}
+        style={{ marginTop: "-20px", paddingBottom: "10px" }}
       >
         <div className="container">
           <div
@@ -332,6 +332,53 @@ const DestinationDetail = () => {
           </div>
         </div>
       </section>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 container">
+        {destination.best_time_to_visit && (
+          <div className="flex items-center gap-3  bg-white dark:bg-gray-800 rounded-lg shadow-sm CardStyles">
+            <Calendar className="h-6 w-6 text-brand-primary flex-shrink-0 text-orange-500" />
+            <div>
+              <p className="text-sm text-muted-foreground textStart md:textsm">
+                Best time to visit
+              </p>
+              <p className="font-medium textStart adjustFontSize">{destination.best_time_to_visit}</p>
+            </div>
+          </div>
+        )}
+
+        {destination.recommended_duration && (
+          <div className="flex items-center gap-3  bg-white dark:bg-gray-800 rounded-lg shadow-sm CardStyles">
+            <Clock className="h-6 w-6 text-brand-primary flex-shrink-0 text-orange-500" />
+            <div>
+              <p className="text-sm text-muted-foreground textStart">
+                Recommended duration
+              </p>
+              <p className="font-medium textStart adjustFontSize">{destination.recommended_duration}</p>
+            </div>
+          </div>
+        )}
+
+        {destination.timezone && (
+          <div className="flex items-center gap-3  bg-white dark:bg-gray-800 rounded-lg shadow-sm CardStyles">
+            <MapPin className="h-6 w-6 text-brand-primary flex-shrink-0 text-orange-500" />
+            <div>
+              <p className="text-sm text-muted-foreground textStart">Timezone</p>
+              <p className="font-medium textStart adjustFontSize">{destination.timezone}</p>
+            </div>
+          </div>
+        )}
+
+        {weatherInfo && (
+          <div className="flex items-center gap-3  bg-white dark:bg-gray-800 rounded-lg shadow-sm CardStyles">
+            <Thermometer className="h-6 w-6 text-brand-primary flex-shrink-0 text-orange-500" />
+            <div>
+              <p className="text-sm text-muted-foreground textStart">Weather</p>
+              <p className="font-medium textStart adjustFontSize">
+                {weatherInfo.nov_apr?.temp} (Cool season)
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
       <section
         className="section-wrapper section-bg-primary"
         id="TopActivitiesToDo"
@@ -433,10 +480,10 @@ const DestinationDetail = () => {
                     {experiences.map((experience, index) => (
                       <SwiperSlide key={experience.id}>
                         <div
-                          className={`scroll-scale-in ${
-                            isAnimated ? "animate" : ""
-                          }`}
+                          className={`scroll-scale-in ${isAnimated ? "animate" : ""
+                            }`}
                           style={{ animationDelay: `${0.6 + index * 0.05}s` }}
+        
                         >
                           <ExperienceCard
                             id={experience.id}
@@ -451,20 +498,18 @@ const DestinationDetail = () => {
                             reviews={
                               experience.reviews_count?.toString() || "0"
                             }
-                            price={`${
-                              experience.currency === "USD"
-                                ? "₹"
-                                : experience.currency == "INR"
+                            price={`${experience.currency === "USD"
+                              ? "₹"
+                              : experience.currency == "INR"
                                 ? "₹"
                                 : experience.currency
-                            } ${experience.price}`}
+                              } ${experience.price}`}
                             originalPrice={
                               experience.original_price
-                                ? `${
-                                    experience.currency === "USD"
-                                      ? "₹"
-                                      : experience.currency
-                                  } ${experience.original_price}`
+                                ? `${experience.currency === "USD"
+                                  ? "₹"
+                                  : experience.currency
+                                } ${experience.original_price}`
                                 : undefined
                             }
                             duration={experience.duration || undefined}
@@ -522,10 +567,10 @@ const DestinationDetail = () => {
                   {experiences.map((experience, index) => (
                     <div
                       key={experience.id}
-                      className={`scroll-scale-in ${
-                        isAnimated ? "animate" : ""
-                      }`}
+                      className={`scroll-scale-in ${isAnimated ? "animate" : ""
+                        }`}
                       style={{ animationDelay: `${0.6 + index * 0.05}s` }}
+                                        id="ExperienceCardContainerSpecificDestinationDetail"
                     >
                       <ExperienceCard
                         id={experience.id}
@@ -583,7 +628,7 @@ const DestinationDetail = () => {
         </div>
       </section>
       {/* Must-Visit Attractions */}
-      {attractions && attractions.length > 0 && (
+      {/* {attractions && attractions.length > 0 && (
         <section className="section-wrapper section-bg-secondary">
           <div className="container">
             <div
@@ -597,9 +642,8 @@ const DestinationDetail = () => {
                 {attractions.map((attraction, index) => (
                   <div
                     key={attraction.id}
-                    className={`group cursor-pointer scroll-scale-in ${
-                      isAnimated ? "animate" : ""
-                    }`}
+                    className={`group cursor-pointer scroll-scale-in ${isAnimated ? "animate" : ""
+                      }`}
                     style={{ animationDelay: `${0.3 + index * 0.1}s` }}
                   >
                     <LazyImage
@@ -618,56 +662,10 @@ const DestinationDetail = () => {
             </div>
           </div>
         </section>
-      )}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {destination.best_time_to_visit && (
-          <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <Calendar className="h-6 w-6 text-brand-primary flex-shrink-0" />
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Best time to visit
-              </p>
-              <p className="font-medium">{destination.best_time_to_visit}</p>
-            </div>
-          </div>
-        )}
+      )} */}
 
-        {destination.recommended_duration && (
-          <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <Clock className="h-6 w-6 text-brand-primary flex-shrink-0" />
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Recommended duration
-              </p>
-              <p className="font-medium">{destination.recommended_duration}</p>
-            </div>
-          </div>
-        )}
-
-        {destination.timezone && (
-          <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <MapPin className="h-6 w-6 text-brand-primary flex-shrink-0" />
-            <div>
-              <p className="text-sm text-muted-foreground">Timezone</p>
-              <p className="font-medium">{destination.timezone}</p>
-            </div>
-          </div>
-        )}
-
-        {weatherInfo && (
-          <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <Thermometer className="h-6 w-6 text-brand-primary flex-shrink-0" />
-            <div>
-              <p className="text-sm text-muted-foreground">Weather</p>
-              <p className="font-medium">
-                {weatherInfo.nov_apr?.temp} (Cool season)
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
       {/* Detailed Itinerary */}
-      <section className="section-wrapper section-bg-tertiary">
+      {/* <section className="section-wrapper section-bg-tertiary">
         <div className="container">
           <div
             className={`scroll-fade-in ${isAnimated ? "animate" : ""}`}
@@ -676,7 +674,7 @@ const DestinationDetail = () => {
             <DetailedItinerary destinationName={destination.title} />
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Things to Do Section */}
     </div>
