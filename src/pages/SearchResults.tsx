@@ -132,8 +132,8 @@ const SearchResults = () => {
                         categories={experience.experience_categories?.map(ec => ec.categories) || []}
                         rating={Number(experience.rating)}
                         reviews={experience.reviews_count?.toString() || '0'}
-                        price={`From ${experience.currency === 'USD' ? '₹' : experience.currency} ${experience.price}`}
-                        originalPrice={experience.original_price ? `${experience.currency === 'USD' ? '₹' : experience.currency} ${experience.original_price}` : undefined}
+                        price={`${experience.currency === 'USD' ? '₹' : experience.currency == 'INR' ? '₹' : experience.currency} ${experience.price}`}
+                        originalPrice={experience.original_price ? `${experience.currency === 'USD' ? '₹' : experience.currency == 'INR' ? '₹' : experience.currency} ${experience.original_price}` : undefined}
                         duration={experience.duration || undefined}
                         groupSize={experience.group_size || undefined}
                         isSpecialOffer={experience.is_special_offer || false}

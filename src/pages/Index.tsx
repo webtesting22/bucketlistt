@@ -17,11 +17,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import RotatingText from "@/components/ui/RotatingText";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, FreeMode } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/free-mode';
-import "../Styles/Index.css"
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, FreeMode } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/free-mode";
+import "../Styles/Index.css";
 const Index = () => {
   const navigate = useNavigate();
 
@@ -86,39 +86,40 @@ const Index = () => {
       {
         "@type": "WebSite",
         "@id": "https://www.bucketlistt.com/#website",
-        "url": "https://www.bucketlistt.com/",
-        "name": "BucketListt",
-        "description": "India's premier adventure tourism platform offering curated experiences",
-        "potentialAction": [
+        url: "https://www.bucketlistt.com/",
+        name: "BucketListt",
+        description:
+          "India's premier adventure tourism platform offering curated experiences",
+        potentialAction: [
           {
             "@type": "SearchAction",
-            "target": {
+            target: {
               "@type": "EntryPoint",
-              "urlTemplate": "https://www.bucketlistt.com/search?q={search_term_string}"
+              urlTemplate:
+                "https://www.bucketlistt.com/search?q={search_term_string}",
             },
-            "query-input": "required name=search_term_string"
-          }
-        ]
+            "query-input": "required name=search_term_string",
+          },
+        ],
       },
       {
         "@type": "TravelAgency",
         "@id": "https://www.bucketlistt.com/#organization",
-        "name": "BucketListt",
-        "url": "https://www.bucketlistt.com/",
-        "logo": {
+        name: "BucketListt",
+        url: "https://www.bucketlistt.com/",
+        logo: {
           "@type": "ImageObject",
-          "url": "https://www.bucketlistt.com/bucket-list-icon.png"
+          url: "https://www.bucketlistt.com/bucket-list-icon.png",
         },
-        "description": "ATOAI certified adventure tourism company offering premium travel experiences across India",
-        "address": {
+        description:
+          "ATOAI certified adventure tourism company offering premium travel experiences across India",
+        address: {
           "@type": "PostalAddress",
-          "addressCountry": "IN"
+          addressCountry: "IN",
         },
-        "sameAs": [
-          "https://www.atoai.org/"
-        ]
-      }
-    ]
+        sameAs: ["https://www.atoai.org/"],
+      },
+    ],
   };
 
   return (
@@ -140,7 +141,6 @@ const Index = () => {
           <Hero />
         </div>
       </BidirectionalAnimatedSection>
-
 
       {/* Popular Destinations */}
       <BidirectionalAnimatedSection
@@ -267,7 +267,10 @@ const Index = () => {
                   >
                     {destinations?.slice(0, 8).map((destination) => (
                       <SwiperSlide key={destination.id}>
-                        <div className="card-hover" id="DestinationsSwiperCardStyles">
+                        <div
+                          className="card-hover"
+                          id="DestinationsSwiperCardStyles"
+                        >
                           <DestinationCard
                             id={destination.id}
                             image={destination.image_url || ""}
@@ -317,9 +320,7 @@ const Index = () => {
               duration={600}
             >
               <div className="flex items-center gap-3 mb-6 md:mb-8">
-                <h2 className="CommonH2">
-                  Top Experiences
-                </h2>
+                <h2 className="CommonH2">Top Experiences</h2>
               </div>
             </BidirectionalAnimatedSection>
 
@@ -364,6 +365,7 @@ const Index = () => {
                   >
                     {experiences?.map((experience) => (
                       <SwiperSlide key={experience.id}>
+                        {/* console.log(experience.currency) */}
                         <div className="card-hover">
                           <ExperienceCard
                             id={experience.id}
@@ -371,22 +373,32 @@ const Index = () => {
                             title={experience.title}
                             category={experience.category}
                             rating={Number(experience.rating)}
-                            reviews={experience.reviews_count?.toString() || "0"}
-                            price={`From ${experience.currency === "USD"
-                              ? "₹"
-                              : experience.currency
-                              } ${experience.price}`}
+                            reviews={
+                              experience.reviews_count?.toString() || "0"
+                            }
+                            price={`${
+                              experience.currency === "USD"
+                                ? "₹"
+                                : experience.currency == "INR"
+                                ? "₹"
+                                : experience.currency
+                            } ${experience.price}`}
                             originalPrice={
                               experience.original_price
-                                ? `${experience.currency === "USD"
-                                  ? "₹"
-                                  : experience.currency
-                                } ${experience.original_price}`
+                                ? `${
+                                    experience.currency === "USD"
+                                      ? "₹"
+                                      : experience.currency == "INR"
+                                      ? "₹"
+                                      : experience.currency
+                                  } ${experience.original_price}`
                                 : undefined
                             }
                             duration={experience.duration || undefined}
                             groupSize={experience.group_size || undefined}
-                            isSpecialOffer={experience.is_special_offer || false}
+                            isSpecialOffer={
+                              experience.is_special_offer || false
+                            }
                           />
                         </div>
                       </SwiperSlide>
@@ -442,13 +454,14 @@ const Index = () => {
               delay={100}
               duration={600}
             >
-              <h2 className="CommonH2">
-                Why Choose BucketListt?
-              </h2>
+              <h2 className="CommonH2">Why Choose BucketListt?</h2>
             </BidirectionalAnimatedSection>
             {/* <br />
 <br /> */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 " id="WhyChooseUsGrid">
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 "
+              id="WhyChooseUsGrid"
+            >
               {[
                 {
                   icon: Star,
@@ -487,15 +500,19 @@ const Index = () => {
                     delay={300 + index * 100}
                     duration={600}
                   >
-                    <div className="text-center group md:p-0" id="WhyChooseUsCard">
+                    <div
+                      className="text-center group md:p-0"
+                      id="WhyChooseUsCard"
+                    >
                       <div
-
                         className={`w-12 BorderGrdientContainer h-12 md:w-16 md:h-16  mb-3 md:mb-4  ${feature.gradient} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
                       >
                         <IconComponent className="h-6 w-6 md:h-8 md:w-8 text-white" />
                       </div>
-                      <h3 className="CommonH3 text-start text_Adjust_For_Mobile
-                      ">
+                      <h3
+                        className="CommonH3 text-start text_Adjust_For_Mobile
+                      "
+                      >
                         {feature.title}
                       </h3>
                       <p className="text-start text-sm">
@@ -521,7 +538,7 @@ const Index = () => {
                     className="LogoATOAIStyles"
                     src="/ATOAI_logo.jpg"
                     alt="ATOAI Logo"
-                  // className="mx-auto w-32 md:w-48 h-auto rounded-lg"
+                    // className="mx-auto w-32 md:w-48 h-auto rounded-lg"
                   />
                 </BidirectionalAnimatedSection>
 
@@ -533,8 +550,8 @@ const Index = () => {
                   >
                     <p className="TextAlignment text-sm">
                       <span className="font-bold">bucketlistt</span> strictly
-                      adheres to the safety, ethical, and operational standards set
-                      by the{" "}
+                      adheres to the safety, ethical, and operational standards
+                      set by the{" "}
                       <a
                         href="https://www.atoai.org/"
                         target="_blank"
@@ -543,11 +560,12 @@ const Index = () => {
                       >
                         Adventure Tour Operators Association of India (ATOAI)
                       </a>
-                      . All activities offered on our platform comply with the Basic
-                      Minimum Standards prescribed for adventure tourism, ensuring
-                      responsible practices, trained staff, certified equipment, and
-                      a strong commitment to environmental sustainability. Your
-                      safety and experience are our top priorities.
+                      . All activities offered on our platform comply with the
+                      Basic Minimum Standards prescribed for adventure tourism,
+                      ensuring responsible practices, trained staff, certified
+                      equipment, and a strong commitment to environmental
+                      sustainability. Your safety and experience are our top
+                      priorities.
                     </p>
                   </BidirectionalAnimatedSection>
                   <br />
@@ -557,9 +575,7 @@ const Index = () => {
                     duration={600}
                   >
                     <div className="FlexTestContainerEdit">
-                      <h2 className="CommonH2">
-                        Proudly Made in
-                      </h2>
+                      <h2 className="CommonH2">Proudly Made in</h2>
                       <div style={{ minWidth: "100px" }}>
                         <RotatingText
                           texts={["India", "भारत", "ભારત"]}
