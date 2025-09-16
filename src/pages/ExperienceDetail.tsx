@@ -363,16 +363,16 @@ const ExperienceDetail = () => {
     );
   }
 
-  if(experience.is_active === false) { 
-    return(
+  if (experience.is_active === false) {
+    return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container py-16 px-4">
           <div className="text-center">This experience is not active.</div>
         </div>
       </div>
-    )
-  } 
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -454,13 +454,22 @@ const ExperienceDetail = () => {
               )}
 
               <div className="flex items-center gap-3 mb-6">
+                <span style={{ color: "grey" }}>From</span>
                 <span className="text-3xl font-bold text-orange-500">
-                  {experience.currency === "USD" ? "₹" : experience.currency == "INR" ? "₹" : experience.currency}{" "}
+                  {experience.currency === "USD"
+                    ? "₹"
+                    : experience.currency == "INR"
+                    ? "₹"
+                    : experience.currency}{" "}
                   {experience.price}
                 </span>
                 {experience.original_price && (
                   <span className="text-lg text-muted-foreground line-through">
-                    {experience.currency === "USD" ? "₹" : experience.currency == "INR" ? "₹" : experience.currency}{" "}
+                    {experience.currency === "USD"
+                      ? "₹"
+                      : experience.currency == "INR"
+                      ? "₹"
+                      : experience.currency}{" "}
                     {experience.original_price}
                   </span>
                 )}

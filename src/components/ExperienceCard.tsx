@@ -1,39 +1,38 @@
-
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Star, Clock, Users, MapPin, Route } from "lucide-react"
-import { useNavigate } from "react-router-dom"
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { LazyImage } from "./LazyImage"
-import { FavoriteButton } from "./FavoriteButton"
-import { useState } from "react"
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Star, Clock, Users, MapPin, Route } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { LazyImage } from "./LazyImage";
+import { FavoriteButton } from "./FavoriteButton";
+import { useState } from "react";
 
 interface Category {
-  id: string
-  name: string
-  icon?: string
-  color?: string
+  id: string;
+  name: string;
+  icon?: string;
+  color?: string;
 }
 
 interface ExperienceCardProps {
-  id: string
-  image: string
-  title: string
-  category?: string // Keep for backward compatibility
-  categories?: Category[] // New prop for multiple categories
-  rating: number
-  reviews: string
-  price: string
-  originalPrice?: string
-  duration?: string
-  groupSize?: string
-  isSpecialOffer?: boolean
-  distanceKm?: number
-  startPoint?: string
-  endPoint?: string
-  index?: number // New prop for index number
-  description?: string // New prop for description
+  id: string;
+  image: string;
+  title: string;
+  category?: string; // Keep for backward compatibility
+  categories?: Category[]; // New prop for multiple categories
+  rating: number;
+  reviews: string;
+  price: string;
+  originalPrice?: string;
+  duration?: string;
+  groupSize?: string;
+  isSpecialOffer?: boolean;
+  distanceKm?: number;
+  startPoint?: string;
+  endPoint?: string;
+  index?: number; // New prop for index number
+  description?: string; // New prop for description
 }
 
 export function ExperienceCard({
@@ -53,57 +52,65 @@ export function ExperienceCard({
   startPoint,
   endPoint,
   index,
-  description
+  description,
 }: ExperienceCardProps) {
-  const navigate = useNavigate()
-  const [isClicked, setIsClicked] = useState(false)
+  const navigate = useNavigate();
+  const [isClicked, setIsClicked] = useState(false);
 
   // Fetch primary image from experience_images if main image is not available
   const { data: primaryImage } = useQuery({
-    queryKey: ['experience-primary-image', id],
+    queryKey: ["experience-primary-image", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('experience_images')
-        .select('image_url')
-        .eq('experience_id', id)
-        .eq('is_primary', true)
-        .single()
+        .from("experience_images")
+        .select("image_url")
+        .eq("experience_id", id)
+        .eq("is_primary", true)
+        .single();
 
-      if (error) return null
-      return data?.image_url || null
+      if (error) return null;
+      return data?.image_url || null;
     },
-    enabled: !image || image === '' // Only fetch if main image is not available
-  })
+    enabled: !image || image === "", // Only fetch if main image is not available
+  });
 
   const handleClick = () => {
-    setIsClicked(true)
+    setIsClicked(true);
 
     // Add a small delay for the animation to be visible before navigation
     setTimeout(() => {
-      navigate(`/experience/${id}`)
-    }, 200)
-  }
+      navigate(`/experience/${id}`);
+    }, 200);
+  };
 
   // Use categories if available, otherwise fall back to single category
-  const displayCategories = categories && categories.length > 0 ? categories : (category ? [{ id: 'fallback', name: category }] : [])
+  const displayCategories =
+    categories && categories.length > 0
+      ? categories
+      : category
+      ? [{ id: "fallback", name: category }]
+      : [];
 
   const getDistanceDisplay = () => {
-    if (distanceKm === 0) return "On spot"
+    if (distanceKm === 0) return "On spot";
     if (distanceKm && startPoint && endPoint) {
-      return `${distanceKm}km (${startPoint} to ${endPoint})`
+      return `${distanceKm}km (${startPoint} to ${endPoint})`;
     }
-    if (distanceKm) return `${distanceKm}km`
-    return null
-  }
+    if (distanceKm) return `${distanceKm}km`;
+    return null;
+  };
 
   // Determine which image to use
-  const displayImage = image && image !== '' ? image : primaryImage || '/placeholder.svg'
+  const displayImage =
+    image && image !== "" ? image : primaryImage || "/placeholder.svg";
 
   return (
     <Card
-      className={`group cursor-pointer overflow-hidden border-0 transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${isClicked ? 'zoom-in-click' : ''} ExperienceCardMobileLayout`}
+      className={`group cursor-pointer overflow-hidden border-0 transition-all duration-300 transform hover:-translate-y-2 zoom-click-animation ${
+        isClicked ? "zoom-in-click" : ""
+      } ExperienceCardMobileLayout`}
       onClick={handleClick}
-      style={{ boxShadow: 'none', borderRadius: '5px' }}
+      style={{ boxShadow: "none", borderRadius: "5px" }}
     >
       <CardContent className="p-0">
         {/* Desktop Layout */}
@@ -130,32 +137,41 @@ export function ExperienceCard({
               {displayCategories.length > 0 && (
                 <div>
                   {displayCategories.slice(0, 2).map((cat, index) => (
-                    <span key={cat.id || index} className="flex items-center gap-1">
+                    <span
+                      key={cat.id || index}
+                      className="flex items-center gap-1"
+                    >
                       {cat.icon && <span>{cat.icon}</span>}
                       <div id="FlexContainerRowBetween">
                         <span className="fontSizeSm">{cat.name}</span>
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 fontSizeSm" />
-                            <span className="font-medium fontSizeSm">{rating}</span>
+                            <span className="font-medium fontSizeSm">
+                              {rating}
+                            </span>
                           </div>
-                          <span className="text-sm text-muted-foreground fontSizeSm">({reviews})</span>
+                          <span className="text-sm text-muted-foreground fontSizeSm">
+                            ({reviews})
+                          </span>
                         </div>
                       </div>
 
-                      {index < Math.min(displayCategories.length, 2) - 1 && <span>•</span>}
+                      {index < Math.min(displayCategories.length, 2) - 1 && (
+                        <span>•</span>
+                      )}
                     </span>
                   ))}
                   {displayCategories.length > 2 && (
-                    <span className="text-xs">+{displayCategories.length - 2} more</span>
+                    <span className="text-xs">
+                      +{displayCategories.length - 2} more
+                    </span>
                   )}
                 </div>
               )}
             </div>
 
-            <h3 className="CommonH3 text-start FontAdjustForMobile">
-              {title}
-            </h3>
+            <h3 className="CommonH3 text-start FontAdjustForMobile">{title}</h3>
             <div className="flex items-center gap-4 text-sm text-muted-foreground marginUnset">
               {duration && (
                 <div className="flex items-center gap-1">
@@ -183,9 +199,16 @@ export function ExperienceCard({
             )}
             <div>
               <div id="PriceContainerOfferHomePageCards">
-                <span className="text-lg font-bold fontSizeMd" style={{ color: 'var(--brand-color)' }}>{price}</span>
+                <span
+                  className="text-lg font-bold fontSizeMd"
+                  style={{ color: "var(--brand-color)" }}
+                >
+                  <span style={{ color: "grey" }}>From</span> {price}
+                </span>
                 {originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through fontSizeSm">{originalPrice}</span>
+                  <span className="text-sm text-muted-foreground line-through fontSizeSm">
+                    {originalPrice}
+                  </span>
                 )}
               </div>
             </div>
@@ -200,7 +223,7 @@ export function ExperienceCard({
                 Special offer
               </Badge>
             )}
-           
+
             {/* Index Number - Only on Mobile */}
             {index !== undefined && (
               <div className="absolute top-2 right-2 z-20 ExperienceCardIndexNumber">
@@ -220,16 +243,23 @@ export function ExperienceCard({
               {displayCategories.length > 0 && (
                 <div>
                   {displayCategories.slice(0, 1).map((cat, index) => (
-                    <span key={cat.id || index} className="flex items-center gap-1">
+                    <span
+                      key={cat.id || index}
+                      className="flex items-center gap-1"
+                    >
                       {cat.icon && <span>{cat.icon}</span>}
                       <div id="FlexContainerRowBetween">
                         <span className="fontSizeSm">{cat.name}</span>
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1">
                             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 fontSizeSm" />
-                            <span className="font-medium fontSizeSm">{rating}</span>
+                            <span className="font-medium fontSizeSm">
+                              {rating}
+                            </span>
                           </div>
-                          <span className="text-xs text-muted-foreground fontSizeSm">({reviews})</span>
+                          <span className="text-xs text-muted-foreground fontSizeSm">
+                            ({reviews})
+                          </span>
                         </div>
                       </div>
                     </span>
@@ -237,33 +267,44 @@ export function ExperienceCard({
                 </div>
               )}
             </div>
-            <div className={`absolute z-10 ${index !== undefined ? 'top-0 right-0' : 'top-2 right-2'}`} style={{marginTop:"-2px"}}>
+            <div
+              className={`absolute z-10 ${
+                index !== undefined ? "top-0 right-0" : "top-2 right-2"
+              }`}
+              style={{ marginTop: "-2px" }}
+            >
               <FavoriteButton experienceId={id} />
             </div>
-            <h3 className="CommonH3 text-start FontAdjustForMobile">
-              {title}
-            </h3>
+            <h3 className="CommonH3 text-start FontAdjustForMobile">{title}</h3>
             <p className="DescriptionContainer">
               {description && (
                 <>
-                  {description.split(' ').slice(0, 10).join(' ')}
-                  {description.split(' ').length > 20 && '...'}
+                  {description.split(" ").slice(0, 10).join(" ")}
+                  {description.split(" ").length > 20 && "..."}
                 </>
               )}
             </p>
             <div id="PriceContainerOfferHomePageCards">
               <div>
-                <span className="FromText">from</span> {originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through fontSizeSm">{originalPrice}</span>
+                <span className="FromText">from</span>{" "}
+                {originalPrice && (
+                  <span className="text-sm text-muted-foreground line-through fontSizeSm">
+                    {originalPrice}
+                  </span>
                 )}
               </div>
-              <div style={{ marginTop: '-5px' }}>
-                <span className="text-lg font-bold fontSizeMd" style={{ color: 'var(--brand-color)' }}>{price}</span>
+              <div style={{ marginTop: "-5px" }}>
+                <span
+                  className="text-lg font-bold fontSizeMd"
+                  style={{ color: "var(--brand-color)" }}
+                >
+                  {price}
+                </span>
               </div>
             </div>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
