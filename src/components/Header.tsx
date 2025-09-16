@@ -168,14 +168,14 @@ export function Header() {
           >
             {/* First logo - shown by default */}
             <img
-              src="https://s3.ap-south-1.amazonaws.com/prepseed/prod/ldoc/media/Bucketlistt.png"
+              src="https://prepseed.s3.ap-south-1.amazonaws.com/Bucketlistt+(1).png"
               alt="bucketlistt Logo"
               className={`h-20 w-auto transition-opacity duration-300 ${isScrolled ? 'opacity-0 absolute' : 'opacity-100'
                 }`}
             />
             {/* Second logo - shown after scroll */}
             <img
-              src="https://prepseed.s3.ap-south-1.amazonaws.com/Bucketlistt+(3).png"
+              src="https://prepseed.s3.ap-south-1.amazonaws.com/Bucketlistt.png"
               alt="bucketlistt Logo"
               className={`h-20 w-auto transition-opacity duration-300 ${isScrolled ? 'opacity-100' : 'opacity-0 absolute'
                 }`}
