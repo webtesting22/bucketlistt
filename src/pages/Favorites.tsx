@@ -1,9 +1,9 @@
 
-import { Header } from "@/components/Header"
 import { ExperienceCard } from "@/components/ExperienceCard"
-import { useFavorites } from "@/hooks/useFavorites"
-import { useAuth } from "@/contexts/AuthContext"
+import { Header } from "@/components/Header"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/contexts/AuthContext"
+import { useFavorites } from "@/hooks/useFavorites"
 import { Heart, LogIn } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
@@ -74,7 +74,7 @@ const Favorites = () => {
             <p className="text-muted-foreground mb-6">
               Start exploring and save experiences you love!
             </p>
-            <Button onClick={() => navigate('/experiences')} size="lg">
+            <Button onClick={() => navigate('/experiences')} size="lg" style={{ background: "var(--brand-color)" }}>
               Browse Experiences
             </Button>
           </div>

@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { DestinationDropdown } from "@/components/DestinationDropdown";
+import { TimeSlotManager } from "@/components/TimeSlotManager";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -14,12 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { X, Upload } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { TimeSlotManager } from "@/components/TimeSlotManager";
-import { DestinationDropdown } from "@/components/DestinationDropdown";
-import { Plus, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Plus, Trash2, Upload, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Category {
   id: string;
@@ -753,6 +752,7 @@ const updateActivities = async (experienceId: string) => {
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
                 required
+                placeholder="Enter experience title"
               />
             </div>
 
@@ -843,6 +843,7 @@ const updateActivities = async (experienceId: string) => {
               onChange={(e) => handleInputChange("description", e.target.value)}
               rows={4}
               required
+              placeholder="Describe the experience.."
             />
           </div>
 
@@ -853,7 +854,7 @@ const updateActivities = async (experienceId: string) => {
               value={formData.location}
               onChange={(e) => handleInputChange("location", e.target.value)}
               required
-              placeholder="https://maps.google.com/..."
+              placeholder="Paste Google Maps link to meeting point/location"
               className={
                 !formData.location.includes("maps.google.com")
                   ? "border-red-500"

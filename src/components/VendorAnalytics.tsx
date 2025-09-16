@@ -1,41 +1,32 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  TrendingUp,
-  Calendar,
-  DollarSign,
-  BarChart3,
-  Eye,
-  Edit,
-  Star,
-  Users,
-  IndianRupee,
-  Plus,
-} from "lucide-react";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { format, subDays } from "date-fns";
+import {
+  BarChart3,
+  Calendar,
+  Eye,
+  IndianRupee,
+  TrendingUp
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis
+} from "recharts";
 
 const chartConfig = {
   income: {
@@ -274,7 +265,7 @@ export const VendorAnalytics = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-4 md:p-6 text-white shadow-xl">
+<div className="relative overflow-hidden bg-gradient-to-br from-[#fe6bc7] to-[#e865b3] rounded-2xl p-4 md:p-6 text-white shadow-xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 md:gap-3 mb-2">

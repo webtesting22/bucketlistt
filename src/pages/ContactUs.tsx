@@ -30,92 +30,103 @@ const ContactUs = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       {/* Hero Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20">
+      <section className="py-20 px-4 bg-gradient-to-br from-[#940fdb]/10 to-[#6a0fb5]/10 dark:from-[#940fdb]/30 dark:to-[#6a0fb5]/30">
         <div className="container text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#940fdb] to-[#6a0fb5] bg-clip-text text-transparent">
             Get in Touch
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Have questions about your next adventure? We're here to help you create unforgettable experiences.
+            Have questions about your next adventure? We're here to help you
+            create unforgettable experiences.
           </p>
         </div>
       </section>
 
-        {/* Contact Information */}
-        <section className="py-16 px-4">
-          <div className="container">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-              <Card className="text-center">
-                <CardHeader>
-                  <div className="w-12 h-12 mx-auto mb-4 bg-orange-100 dark:bg-orange-900/20 rounded-lg flex items-center justify-center">
-                    <Mail className="h-6 w-6 text-orange-500" />
-                  </div>
-                  <CardTitle>Email Us</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">contact@bucketlistt.com</p>
-                </CardContent>
-              </Card>
+      {/* Contact Information */}
+      <section className="pt-16 px-4">
+        <div className="container">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-12 h-12 mx-auto mb-4 bg-white border-2 border-purple-500 rounded-lg flex items-center justify-center">
+                  <Mail className="h-6 w-6 text-purple-500" />
+                </div>
+                <CardTitle>Email Us</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <a
+                  href="mailto:contact@bucketlistt.com"
+                  className="text-muted-foreground hover:underline"
+                >
+                  contact@bucketlistt.com
+                </a>
+              </CardContent>
+            </Card>
 
-              <Card className="text-center">
-                <CardHeader>
-                  <div className="w-12 h-12 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                    <Phone className="h-6 w-6 text-blue-500" />
-                  </div>
-                  <CardTitle>Call Us</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">+91 820 036 2890</p>
-                  <p className="text-muted-foreground">Mon-Fri, 9AM-6PM IST</p>
-                </CardContent>
-              </Card>
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-12 h-12 mx-auto mb-4 bg-white border-2 border-purple-500 rounded-lg flex items-center justify-center">
+                  <Phone className="h-6 w-6 text-purple-500" />
+                </div>
+                <CardTitle>Call Us</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <a
+                  href="tel:+918200362890"
+                  className="text-muted-foreground hover:underline"
+                >
+                  +91 820 036 2890
+                </a>
+                <p className="text-muted-foreground">Mon-Fri, 9AM-6PM IST</p>
+              </CardContent>
+            </Card>
 
-              <Card className="text-center">
-                <CardHeader>
-                  <div className="w-12 h-12 mx-auto mb-4 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                    <MapPin className="h-6 w-6 text-green-500" />
-                  </div>
-                  <CardTitle>Visit Us</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Ahmedabad, Gujarat</p>
-                  <p className="text-muted-foreground">India</p>
-                </CardContent>
-              </Card>
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-12 h-12 mx-auto mb-4 bg-white border-2 border-purple-500 rounded-lg flex items-center justify-center">
+                  <MapPin className="h-6 w-6 text-purple-500" />
+                </div>
+                <CardTitle>Visit Us</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Ahmedabad, Gujarat</p>
+                <p className="text-muted-foreground">India</p>
+              </CardContent>
+            </Card>
 
-              <Card className="text-center">
-                <CardHeader>
-                  <div className="w-12 h-12 mx-auto mb-4 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
-                    <Clock className="h-6 w-6 text-purple-500" />
-                  </div>
-                  <CardTitle>Response Time</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Within 24 hours</p>
-                  <p className="text-muted-foreground">Usually same day</p>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-12 h-12 mx-auto mb-4 bg-white border-2 border-purple-500 rounded-lg flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-purple-500" />
+                </div>
+                <CardTitle>Response Time</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Within 24 hours</p>
+                <p className="text-muted-foreground">Usually same day</p>
+              </CardContent>
+            </Card>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Testimonials Section */}
-        <section className="py-16 px-4">
-          <div className="container">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Our Team</h2>
-              <p className="text-muted-foreground">
-                Here is the team behind the bucketlistt.
-              </p>
-            </div>
-            <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
+      {/* Testimonials Section */}
+      <section className="py-8 px-4">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Our Team</h2>
+            <p className="text-muted-foreground">
+              Here is the team behind the bucketlistt.
+            </p>
           </div>
-        </section>
+          <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
+        </div>
+      </section>
 
-                {/* Contact Form Section */}
-        <section className="py-16 px-4 bg-muted/30">
+      {/* Contact Form Section */}
+      {/* <section className="py-16 px-4 bg-muted/30">
           <div className="container">
             <div className="max-w-2xl mx-auto">
               <div className="text-center mb-12">
@@ -188,9 +199,9 @@ const ContactUs = () => {
               </Card>
             </div>
           </div>
-        </section>
+        </section> */}
     </div>
-  )
+  );
 }
 
 export default ContactUs
