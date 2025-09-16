@@ -368,155 +368,158 @@ export function CreateExperienceForm({
     }
   };
 
-const updateActivities = async (experienceId: string) => {
-  // Separate existing and new activities
-  const existingActivities = activities.filter((a) => a.id.length > 20); // Supabase UUIDs are longer
-  const newActivities = activities.filter((a) => a.id.length <= 20); // Client-side IDs are timestamps
+  const updateActivities = async (experienceId: string) => {
+    // Separate existing and new activities
+    const existingActivities = activities.filter((a) => a.id.length > 20); // Supabase UUIDs are longer
+    const newActivities = activities.filter((a) => a.id.length <= 20); // Client-side IDs are timestamps
 
-  // console.log("Existing activities to update:", existingActivities);
-  // console.log("New activities to create:", newActivities);
+    // console.log("Existing activities to update:", existingActivities);
+    // console.log("New activities to create:", newActivities);
 
-  // Update existing activities
-  for (const activity of existingActivities) {
-    const updateData = {
-      name: activity.name,
-      distance: activity.distance || null,
-      duration: activity.duration || null,
-      price: activity.price,
-      currency: activity.currency,
-      display_order: activities.indexOf(activity),
-      is_active: true,
-    };
+    // Update existing activities
+    for (const activity of existingActivities) {
+      const updateData = {
+        name: activity.name,
+        distance: activity.distance || null,
+        duration: activity.duration || null,
+        price: activity.price,
+        currency: activity.currency,
+        display_order: activities.indexOf(activity),
+        is_active: true,
+      };
 
-    // console.log(`Updating activity ${activity.id} with data:`, updateData);
+      // console.log(`Updating activity ${activity.id} with data:`, updateData);
 
-    const { error: updateError } = await supabase
-      .from("activities")
-      .update(updateData)
-      .eq("id", activity.id);
+      const { error: updateError } = await supabase
+        .from("activities")
+        .update(updateData)
+        .eq("id", activity.id);
 
-    if (updateError) {
-      console.error("Error updating activity:", updateError);
-      throw updateError;
-    }
+      if (updateError) {
+        console.error("Error updating activity:", updateError);
+        throw updateError;
+      }
 
-    // Update time slots for existing activity
-    // First delete existing time slots
-    const { error: deleteTimeSlotsError } = await supabase
-      .from("time_slots")
-      .delete()
-      .eq("activity_id", activity.id);
-
-    if (deleteTimeSlotsError) {
-      console.error("Error deleting time slots:", deleteTimeSlotsError);
-      throw deleteTimeSlotsError;
-    }
-
-    // Create new time slots
-    if (activity.timeSlots.length > 0) {
-      const timeSlotData = activity.timeSlots.map((slot) => ({
-        experience_id: experienceId,
-        activity_id: activity.id,
-        start_time: slot.start_time,
-        end_time: slot.end_time,
-        capacity: slot.capacity,
-      }));
-
-      const { error: createTimeSlotsError } = await supabase
+      // Update time slots for existing activity
+      // First delete existing time slots
+      const { error: deleteTimeSlotsError } = await supabase
         .from("time_slots")
-        .insert(timeSlotData);
+        .delete()
+        .eq("activity_id", activity.id);
 
-      if (createTimeSlotsError) {
-        console.error("Error creating time slots:", createTimeSlotsError);
-        throw createTimeSlotsError;
+      if (deleteTimeSlotsError) {
+        console.error("Error deleting time slots:", deleteTimeSlotsError);
+        throw deleteTimeSlotsError;
+      }
+
+      // Create new time slots
+      if (activity.timeSlots.length > 0) {
+        const timeSlotData = activity.timeSlots.map((slot) => ({
+          experience_id: experienceId,
+          activity_id: activity.id,
+          start_time: slot.start_time,
+          end_time: slot.end_time,
+          capacity: slot.capacity,
+        }));
+
+        const { error: createTimeSlotsError } = await supabase
+          .from("time_slots")
+          .insert(timeSlotData);
+
+        if (createTimeSlotsError) {
+          console.error("Error creating time slots:", createTimeSlotsError);
+          throw createTimeSlotsError;
+        }
       }
     }
-  }
 
-  // Create new activities
-  if (newActivities.length > 0) {
-    const newActivitiesData = newActivities.map((activity, index) => ({
-      experience_id: experienceId,
-      name: activity.name,
-      distance: activity.distance,
-      duration: activity.duration,
-      price: activity.price,
-      currency: activity.currency,
-      display_order: existingActivities.length + index,
-      is_active: true,
-    }));
-
-    console.log("Creating new activities:", newActivitiesData);
-
-    const { data: createdActivities, error: createError } = await supabase
-      .from("activities")
-      .insert(newActivitiesData)
-      .select("*");
-
-    if (createError) {
-      console.error("Error creating activities:", createError);
-      throw createError;
-    }
-
-    // Create time slots for new activities
-    const newTimeSlots = newActivities.flatMap((activity, index) => {
-      const createdActivity = createdActivities[index];
-      return activity.timeSlots.map((slot) => ({
+    // Create new activities
+    if (newActivities.length > 0) {
+      const newActivitiesData = newActivities.map((activity, index) => ({
         experience_id: experienceId,
-        activity_id: createdActivity.id,
-        start_time: slot.start_time,
-        end_time: slot.end_time,
-        capacity: slot.capacity,
+        name: activity.name,
+        distance: activity.distance,
+        duration: activity.duration,
+        price: activity.price,
+        currency: activity.currency,
+        display_order: existingActivities.length + index,
+        is_active: true,
       }));
-    });
 
-    if (newTimeSlots.length > 0) {
-      const { error: timeSlotsError } = await supabase
-        .from("time_slots")
-        .insert(newTimeSlots);
+      console.log("Creating new activities:", newActivitiesData);
 
-      if (timeSlotsError) {
-        console.error("Error creating time slots for new activities:", timeSlotsError);
-        throw timeSlotsError;
+      const { data: createdActivities, error: createError } = await supabase
+        .from("activities")
+        .insert(newActivitiesData)
+        .select("*");
+
+      if (createError) {
+        console.error("Error creating activities:", createError);
+        throw createError;
+      }
+
+      // Create time slots for new activities
+      const newTimeSlots = newActivities.flatMap((activity, index) => {
+        const createdActivity = createdActivities[index];
+        return activity.timeSlots.map((slot) => ({
+          experience_id: experienceId,
+          activity_id: createdActivity.id,
+          start_time: slot.start_time,
+          end_time: slot.end_time,
+          capacity: slot.capacity,
+        }));
+      });
+
+      if (newTimeSlots.length > 0) {
+        const { error: timeSlotsError } = await supabase
+          .from("time_slots")
+          .insert(newTimeSlots);
+
+        if (timeSlotsError) {
+          console.error(
+            "Error creating time slots for new activities:",
+            timeSlotsError
+          );
+          throw timeSlotsError;
+        }
       }
     }
-  }
 
-  // Handle deleted activities - Using a simpler approach
-  // First get all activities for this experience
-  const { data: allExistingActivities, error: fetchError } = await supabase
-    .from("activities")
-    .select("id")
-    .eq("experience_id", experienceId);
-
-  if (fetchError) {
-    console.error("Error fetching existing activities:", fetchError);
-    throw fetchError;
-  }
-
-  // Find activities to delete (those not in our current activities list)
-  const currentActivityIds = existingActivities.map((a) => a.id);
-  const activitiesToDelete = (allExistingActivities || []).filter(
-    (existing) => !currentActivityIds.includes(existing.id)
-  );
-
-  // console.log("Activities to delete:", activitiesToDelete);
-
-  // Delete activities that are no longer needed
-  for (const activityToDelete of activitiesToDelete) {
-    const { error: deleteError } = await supabase
+    // Handle deleted activities - Using a simpler approach
+    // First get all activities for this experience
+    const { data: allExistingActivities, error: fetchError } = await supabase
       .from("activities")
-      .delete()
-      .eq("id", activityToDelete.id);
+      .select("id")
+      .eq("experience_id", experienceId);
 
-    if (deleteError) {
-      console.error("Error deleting activity:", deleteError);
-      throw deleteError;
+    if (fetchError) {
+      console.error("Error fetching existing activities:", fetchError);
+      throw fetchError;
     }
-  }
 
-  // console.log("Activities update completed successfully");
-};
+    // Find activities to delete (those not in our current activities list)
+    const currentActivityIds = existingActivities.map((a) => a.id);
+    const activitiesToDelete = (allExistingActivities || []).filter(
+      (existing) => !currentActivityIds.includes(existing.id)
+    );
+
+    // console.log("Activities to delete:", activitiesToDelete);
+
+    // Delete activities that are no longer needed
+    for (const activityToDelete of activitiesToDelete) {
+      const { error: deleteError } = await supabase
+        .from("activities")
+        .delete()
+        .eq("id", activityToDelete.id);
+
+      if (deleteError) {
+        console.error("Error deleting activity:", deleteError);
+        throw deleteError;
+      }
+    }
+
+    // console.log("Activities update completed successfully");
+  };
 
   const createExperienceCategories = async (
     experienceId: string,
@@ -856,13 +859,15 @@ const updateActivities = async (experienceId: string) => {
               required
               placeholder="Paste Google Maps link to meeting point/location"
               className={
-                !formData.location.includes("maps.google.com")
+                !formData.location.includes("maps.google.com") ||
+                !formData.location.includes("maps.app.goo")
                   ? "border-red-500"
                   : ""
               }
             />
             {formData.location &&
-              !formData.location.includes("maps.google.com") && (
+              (!formData.location.includes("maps.google.com") ||
+                !formData.location.includes("maps.app.goo")) && (
                 <p className="text-sm text-red-500">
                   Please enter a valid Google Maps link
                 </p>
