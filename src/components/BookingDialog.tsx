@@ -657,9 +657,14 @@ export const BookingDialog = ({
                   name="referral_code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Referal Code</FormLabel>
+                      <FormLabel>Referral Code (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="Referal Code" {...field} />
+                        <Input
+                          placeholder="Referral Code"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                          value={field.value?.toUpperCase() || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
