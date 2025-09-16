@@ -583,16 +583,22 @@ const DestinationDetail = () => {
                         }
                         rating={Number(experience.rating)}
                         reviews={experience.reviews_count?.toString() || "0"}
-                        price={`From ${experience.currency === "USD"
-                          ? "₹"
-                          : experience.currency
-                          } ${experience.price}`}
+                        price={`${
+                          experience.currency === "USD"
+                            ? "₹"
+                            : experience.currency == "INR"
+                            ? "₹"
+                            : experience.currency
+                        } ${experience.price}`}
                         originalPrice={
                           experience.original_price
-                            ? `${experience.currency === "USD"
-                              ? "₹"
-                              : experience.currency
-                            } ${experience.original_price}`
+                            ? `${
+                                experience.currency === "USD"
+                                  ? "₹"
+                                  : experience.currency == "INR"
+                                  ? "₹"
+                                  : experience.currency
+                              } ${experience.original_price}`
                             : undefined
                         }
                         duration={experience.duration || undefined}

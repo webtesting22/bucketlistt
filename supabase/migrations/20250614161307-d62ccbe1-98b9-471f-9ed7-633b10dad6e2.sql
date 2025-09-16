@@ -9,6 +9,7 @@ CREATE TABLE public.bookings (
   total_participants INTEGER NOT NULL DEFAULT 1,
   status TEXT NOT NULL DEFAULT 'confirmed',
   terms_accepted BOOLEAN NOT NULL DEFAULT true,
+  referral_code TEXT,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );

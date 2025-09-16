@@ -30,7 +30,8 @@ import { SlotSelector } from "@/components/SlotSelector";
 import { useNavigate } from "react-router-dom";
 import { useRazorpay } from "@/hooks/useRazorpay";
 import { SendWhatsappMessage } from "@/utils/whatsappUtil";
-import moment from "moment";import { useQuery } from "@tanstack/react-query"
+import moment from "moment";
+import { useQuery } from "@tanstack/react-query";
 
 const participantSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -48,6 +49,7 @@ const bookingSchema = z.object({
     .refine((val) => val === true, "You must accept the terms and conditions"),
   booking_date: z.date({ required_error: "Please select a date" }),
   time_slot_id: z.string().min(1, "Please select a time slot"),
+  referral_code: z.string().optional(),
 });
 
 type BookingFormData = z.infer<typeof bookingSchema>;
@@ -88,6 +90,7 @@ export const BookingDialog = ({
       participants: [{ name: "", email: "", phone_number: "" }],
       note_for_guide: "",
       terms_accepted: false,
+      referral_code: "",
     },
   });
 
@@ -157,7 +160,7 @@ export const BookingDialog = ({
                 timeSlot?.end_time,
                 "HH:mm"
               ).format("hh:mm A")}`,
-              "4":experience?.location,
+              "4": experience?.location,
             },
           },
         ],
@@ -225,6 +228,7 @@ export const BookingDialog = ({
           note_for_guide: data.note_for_guide || null,
           total_participants: data.participants.length,
           terms_accepted: data.terms_accepted,
+          referral_code: data?.referral_code,
         })
         .select()
         .single();
@@ -302,6 +306,7 @@ export const BookingDialog = ({
           note_for_guide: data.note_for_guide || null,
           total_participants: data.participants.length,
           terms_accepted: data.terms_accepted,
+          referral_code: data?.referral_code,
         })
         .select()
         .single();
@@ -400,6 +405,7 @@ export const BookingDialog = ({
           booking_date: selectedDate.toISOString(),
           participants: data.participants,
           note_for_guide: data.note_for_guide,
+          referral_code: data?.referral_code,
         },
       };
       console.log("Order payload:", orderPayload);
@@ -471,24 +477,26 @@ export const BookingDialog = ({
 
   // Add query for selected activity details
   const { data: selectedActivity } = useQuery({
-    queryKey: ['activity', selectedActivityId],
+    queryKey: ["activity", selectedActivityId],
     queryFn: async () => {
       if (!selectedActivityId) return null;
-      
+
       const { data, error } = await supabase
-        .from('activities')
-        .select('*')
-        .eq('id', selectedActivityId)
+        .from("activities")
+        .select("*")
+        .eq("id", selectedActivityId)
         .single();
-        
+
       if (error) throw error;
       return data;
     },
-    enabled: !!selectedActivityId
+    enabled: !!selectedActivityId,
   });
 
   // Update price calculation to use activity price
-  const totalActivityPrice = selectedActivity ? selectedActivity.price * participants.length : 0;
+  const totalActivityPrice = selectedActivity
+    ? selectedActivity.price * participants.length
+    : 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -502,7 +510,9 @@ export const BookingDialog = ({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column: Activity, Date and Time Selection */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Select Activity & Time</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Select Activity & Time
+                </h3>
                 <SlotSelector
                   experienceId={experience.id}
                   selectedDate={selectedDate}
@@ -642,6 +652,19 @@ export const BookingDialog = ({
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="referral_code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Referal Code</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Referal Code" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 {/* Terms and Conditions */}
                 <FormField
@@ -678,7 +701,9 @@ export const BookingDialog = ({
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center">
                       <div>
-                        <span className="text-lg font-semibold">Total Cost</span>
+                        <span className="text-lg font-semibold">
+                          Total Cost
+                        </span>
                         {selectedActivity && (
                           <div className="text-sm text-muted-foreground">
                             {selectedActivity.name}
@@ -690,7 +715,9 @@ export const BookingDialog = ({
                           {selectedActivity?.currency} {totalActivityPrice}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {participants.length} participant{participants.length > 1 ? 's' : ''} × {selectedActivity?.currency} {selectedActivity?.price}
+                          {participants.length} participant
+                          {participants.length > 1 ? "s" : ""} ×{" "}
+                          {selectedActivity?.currency} {selectedActivity?.price}
                         </div>
                       </div>
                     </div>
