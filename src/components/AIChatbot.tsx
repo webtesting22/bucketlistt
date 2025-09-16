@@ -70,7 +70,7 @@ export function AIChatbot() {
     setIsLoading(true);
 
     try {
-      const apiKey = await getApiKey();
+      const apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
       if (!apiKey) {
         throw new Error("API key not available");
@@ -85,7 +85,7 @@ export function AIChatbot() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "llama3-8b-8192",
+            model: "llama-3.3-70b-versatile",
             messages: [
               {
                 role: "system",
