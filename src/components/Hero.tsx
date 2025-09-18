@@ -236,21 +236,14 @@ export function Hero() {
       </div>
 
       {/* Content - Perfectly centered */}
-      <div
-        id="MobileChangeAlignment"
-        className="relative max-w-7xl z-20 w-full px-4 text-center flex flex-col items-center justify-center"
-      >
+      <div id="MobileChangeAlignment" className="relative max-w-7xl z-20 w-full px-4 text-center flex flex-col items-center justify-center">
         <div className=" MobileChangeAlignmentContainer">
           {/* Main Heading */}
           <div>
-            <h1
-              id="MobileTextFontSize"
-              className={`CommonH1  text-white leading-tight mb-4 ${
-                isMobile ? "text-start" : ""
-              }`}
-            >
-              India's best experiences curated just for you
+            <h1 id="MobileTextFontSize" className={`CommonH1  text-white leading-tight mb-4 ${isMobile ? "text-start" : ""}`}>
+              India's best experiences  curated just for you
               {/* <br /> */}
+
             </h1>
           </div>
 
@@ -264,32 +257,18 @@ export function Hero() {
           >
             <form onSubmit={handleSearch}>
               <div className="relative" ref={searchContainerRef}>
-                <div
-                  className={`flex items-stretch bg-white/95 backdrop-blur-sm shadow-2xl transition-all duration-300 ${
-                    isMobile
-                      ? "flex-col rounded-0xl p-0 gap-4 border border-white/20"
-                      : "flex-row rounded-lg p-2 gap-2 sm:gap-0"
-                  }`}
-                >
-                  <div
-                    className={`flex items-center flex-1 ${
-                      isMobile
-                        ? "px-4 py-1 bg-gray-50/80 border border-gray-200/50"
-                        : "px-4 py-2 sm:py-0"
-                    }`}
-                  >
-                    <Search
-                      id="SearchBarAdjustContainerIcon"
-                      className={`text-gray-400 mr-3 flex-shrink-0  ${
-                        isMobile ? "h-6 w-6" : "h-5 w-5"
-                      }`}
-                    />
+                <div className={`flex items-stretch bg-white/95 backdrop-blur-sm shadow-2xl transition-all duration-300 ${isMobile
+                  ? "flex-col rounded-0xl p-0 gap-4 border border-white/20"
+                  : "flex-row rounded-lg p-2 gap-2 sm:gap-0"
+                  }`}>
+                  <div className={`flex items-center flex-1 ${isMobile
+                    ? "px-4 py-1 bg-gray-50/80 border border-gray-200/50"
+                    : "px-4 py-2 sm:py-0"
+                    }`}>
+                    <Search id="SearchBarAdjustContainerIcon" className={`text-gray-400 mr-3 flex-shrink-0  ${isMobile ? "h-6 w-6" : "h-5 w-5"
+                      }`} />
                     <Input
-                      placeholder={
-                        isMobile
-                          ? "Search for experiences and cities..."
-                          : "Search for experiences and cities..."
-                      }
+                      placeholder={isMobile ? "Search for experiences and cities..." : "Search for experiences and cities..."}
                       value={searchQuery}
                       onChange={handleInputChange}
                       onFocus={() => {
@@ -306,9 +285,8 @@ export function Hero() {
                           }
                         }
                       }}
-                      className={`border-0 bg-transparent text-gray-800 placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0 font-medium !border-none !outline-none w-full ${
-                        isMobile ? " py-1" : "text-base"
-                      }`}
+                      className={`border-0 bg-transparent text-gray-800 placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0 font-medium !border-none !outline-none w-full ${isMobile ? " py-1" : "text-base"
+                        }`}
                     />
                   </div>
                   {/* <Button

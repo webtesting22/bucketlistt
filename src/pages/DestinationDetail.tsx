@@ -340,9 +340,7 @@ const DestinationDetail = () => {
               <p className="text-sm text-muted-foreground textStart md:textsm">
                 Best time to visit
               </p>
-              <p className="font-medium textStart adjustFontSize">
-                {destination.best_time_to_visit}
-              </p>
+              <p className="font-medium textStart adjustFontSize">{destination.best_time_to_visit}</p>
             </div>
           </div>
         )}
@@ -354,9 +352,7 @@ const DestinationDetail = () => {
               <p className="text-sm text-muted-foreground textStart">
                 Recommended duration
               </p>
-              <p className="font-medium textStart adjustFontSize">
-                {destination.recommended_duration}
-              </p>
+              <p className="font-medium textStart adjustFontSize">{destination.recommended_duration}</p>
             </div>
           </div>
         )}
@@ -365,12 +361,8 @@ const DestinationDetail = () => {
           <div className="flex items-center gap-3  bg-white dark:bg-gray-800 rounded-lg shadow-sm CardStyles">
             <MapPin className="h-6 w-6 text-brand-primary flex-shrink-0 text-orange-500" />
             <div>
-              <p className="text-sm text-muted-foreground textStart">
-                Timezone
-              </p>
-              <p className="font-medium textStart adjustFontSize">
-                {destination.timezone}
-              </p>
+              <p className="text-sm text-muted-foreground textStart">Timezone</p>
+              <p className="font-medium textStart adjustFontSize">{destination.timezone}</p>
             </div>
           </div>
         )}
@@ -488,10 +480,10 @@ const DestinationDetail = () => {
                     {experiences.map((experience, index) => (
                       <SwiperSlide key={experience.id}>
                         <div
-                          className={`scroll-scale-in ${
-                            isAnimated ? "animate" : ""
-                          }`}
+                          className={`scroll-scale-in ${isAnimated ? "animate" : ""
+                            }`}
                           style={{ animationDelay: `${0.6 + index * 0.05}s` }}
+        
                         >
                           <ExperienceCard
                             id={experience.id}
@@ -506,20 +498,18 @@ const DestinationDetail = () => {
                             reviews={
                               experience.reviews_count?.toString() || "0"
                             }
-                            price={`${
-                              experience.currency === "USD"
-                                ? "₹"
-                                : experience.currency == "INR"
+                            price={`${experience.currency === "USD"
+                              ? "₹"
+                              : experience.currency == "INR"
                                 ? "₹"
                                 : experience.currency
-                            } ${experience.price}`}
+                              } ${experience.price}`}
                             originalPrice={
                               experience.original_price
-                                ? `${
-                                    experience.currency === "USD"
-                                      ? "₹"
-                                      : experience.currency
-                                  } ${experience.original_price}`
+                                ? `${experience.currency === "USD"
+                                  ? "₹"
+                                  : experience.currency
+                                } ${experience.original_price}`
                                 : undefined
                             }
                             duration={experience.duration || undefined}
@@ -577,11 +567,10 @@ const DestinationDetail = () => {
                   {experiences.map((experience, index) => (
                     <div
                       key={experience.id}
-                      className={`scroll-scale-in ${
-                        isAnimated ? "animate" : ""
-                      }`}
+                      className={`scroll-scale-in ${isAnimated ? "animate" : ""
+                        }`}
                       style={{ animationDelay: `${0.6 + index * 0.05}s` }}
-                      id="ExperienceCardContainerSpecificDestinationDetail"
+                                        id="ExperienceCardContainerSpecificDestinationDetail"
                     >
                       <ExperienceCard
                         id={experience.id}

@@ -13,7 +13,7 @@ import {
   Calendar,
   Eye,
   IndianRupee,
-  TrendingUp,
+  TrendingUp
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -25,7 +25,7 @@ import {
   PieChart,
   ResponsiveContainer,
   XAxis,
-  YAxis,
+  YAxis
 } from "recharts";
 
 const chartConfig = {
@@ -265,7 +265,7 @@ export const VendorAnalytics = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#fe6bc7] to-[#e865b3] rounded-2xl p-4 md:p-6 text-white shadow-xl">
+<div className="relative overflow-hidden bg-gradient-to-br from-[#fe6bc7] to-[#e865b3] rounded-2xl p-4 md:p-6 text-white shadow-xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 md:gap-3 mb-2">
