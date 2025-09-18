@@ -9,6 +9,8 @@ import { BookingDialog } from "@/components/BookingDialog";
 import { BookingSuccessAnimation } from "@/components/BookingSuccessAnimation";
 import { UserBookings } from "@/components/UserBookings";
 import { RecentBookingsTable } from "@/components/RecentBookingsTable";
+import { CouponInput } from "@/components/CouponInput";
+import { CouponManager } from "@/components/CouponManager";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   ArrowLeft,
@@ -18,6 +20,7 @@ import {
   MapPin,
   Calendar,
   Route,
+  Tag,
 } from "lucide-react";
 import { useState, useRef } from "react";
 // import { saveAs } from "file-saver"
@@ -25,6 +28,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { BulkBookingPaymentDialog } from "@/components/BulkBookingPaymentDialog";
 import { ExperienceVendorAnalytics } from "@/components/ExperienceVendorAnalytics";
 import { CertificationBadges } from "@/components/CertificationBadges";
+import { CouponValidationResult } from "@/hooks/useDiscountCoupon";
 import "../Styles/ExperienceDetail.css";
 const ExperienceDetail = () => {
   const { id } = useParams();
@@ -36,6 +40,9 @@ const ExperienceDetail = () => {
   const [isBulkPaymentDialogOpen, setIsBulkPaymentDialogOpen] = useState(false);
   const [bulkBookingsData, setBulkBookingsData] = useState([]);
   const [bulkParticipantsData, setBulkParticipantsData] = useState([]);
+  const [appliedCoupon, setAppliedCoupon] =
+    useState<CouponValidationResult | null>(null);
+  const [showCouponInput, setShowCouponInput] = useState(false);
 
   const {
     data: experience,
@@ -125,6 +132,22 @@ const ExperienceDetail = () => {
     refetchBookings();
     setBulkBookingsData([]);
     setBulkParticipantsData([]);
+  };
+
+  const handleCouponApplied = (result: CouponValidationResult) => {
+    setAppliedCoupon(result);
+    setShowCouponInput(false);
+  };
+
+  const handleCouponRemoved = () => {
+    setAppliedCoupon(null);
+  };
+
+  const formatCurrency = (amount: number) => {
+    const currency = experience?.currency || "INR";
+    return currency === "USD"
+      ? `$${amount.toFixed(2)}`
+      : `₹${amount.toFixed(2)}`;
   };
 
   const hasExistingBookings = userBookings && userBookings.length > 0;
@@ -455,32 +478,100 @@ const ExperienceDetail = () => {
 
               <div className="flex items-center gap-3 mb-6">
                 <span style={{ color: "grey" }}>From</span>
-                <span className="text-3xl font-bold text-orange-500">
-                  {experience.currency === "USD"
-                    ? "₹"
-                    : experience.currency == "INR"
-                    ? "₹"
-                    : experience.currency}{" "}
-                  {experience.price}
+                <span
+                  className={`text-3xl font-bold ${
+                    appliedCoupon
+                      ? "line-through text-muted-foreground"
+                      : "text-orange-500"
+                  }`}
+                >
+                  {formatCurrency(experience.price)}
                 </span>
-                {experience.original_price && (
+                {appliedCoupon && appliedCoupon.discount_calculation && (
+                  <>
+                    <span className="text-3xl font-bold text-green-600">
+                      {formatCurrency(
+                        appliedCoupon.discount_calculation.final_amount
+                      )}
+                    </span>
+                    <Badge
+                      variant="secondary"
+                      className="bg-green-100 text-green-800"
+                    >
+                      Save{" "}
+                      {appliedCoupon.discount_calculation.savings_percentage.toFixed(
+                        1
+                      )}
+                      %
+                    </Badge>
+                  </>
+                )}
+                {experience.original_price && !appliedCoupon && (
                   <span className="text-lg text-muted-foreground line-through">
-                    {experience.currency === "USD"
-                      ? "₹"
-                      : experience.currency == "INR"
-                      ? "₹"
-                      : experience.currency}{" "}
-                    {experience.original_price}
+                    {formatCurrency(experience.original_price)}
                   </span>
                 )}
               </div>
+
+              {/* Coupon Section */}
+              {!isVendor && (
+                <div className="mb-4">
+                  {!showCouponInput && !appliedCoupon && (
+                    <Button
+                      variant="outline"
+                      className="w-full mb-2"
+                      onClick={() => setShowCouponInput(true)}
+                    >
+                      <Tag className="h-4 w-4 mr-2" />
+                      Have a coupon code?
+                    </Button>
+                  )}
+
+                  {showCouponInput && (
+                    <CouponInput
+                      experienceId={experience.id}
+                      bookingAmount={experience.price}
+                      currency={experience.currency || "INR"}
+                      onCouponApplied={handleCouponApplied}
+                      onCouponRemoved={handleCouponRemoved}
+                      className="mb-4"
+                    />
+                  )}
+
+                  {appliedCoupon && (
+                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Tag className="h-4 w-4 text-green-600" />
+                          <span className="font-medium text-green-800">
+                            Coupon Applied: {appliedCoupon.coupon?.coupon_code}
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleCouponRemoved}
+                          className="text-green-600 hover:text-green-800"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <Button
                 size="lg"
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white"
                 onClick={() => setIsBookingDialogOpen(true)}
               >
-                {bookingButtonText}
+                {bookingButtonText} -{" "}
+                {appliedCoupon?.discount_calculation?.final_amount
+                  ? formatCurrency(
+                      appliedCoupon.discount_calculation.final_amount
+                    )
+                  : formatCurrency(experience.price)}
               </Button>
 
               {/* Bulk Booking Buttons for Vendor */}
@@ -523,6 +614,18 @@ const ExperienceDetail = () => {
             )}
           </div>
         </div>
+
+        {/* Coupon Management Section - Show for all vendors */}
+        {user && isVendor && (
+          <div className="mt-12">
+            <div className="border-t pt-8">
+              <CouponManager
+                experienceId={experience.id}
+                experienceTitle={experience.title}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Vendor Analytics Section - Only show if user is the vendor who created this experience */}
         {user && isVendor && experience.vendor_id === user.id && (
@@ -572,10 +675,10 @@ const ExperienceDetail = () => {
           experience={{
             id: experience.id,
             title: experience.title,
-            price: experience.price || 0,
+            price: experience.price || 0, // Always use original price for coupon validation
             currency: experience.currency || "INR",
-            location: experience.location || "",
           }}
+          appliedCoupon={appliedCoupon}
           onBookingSuccess={handleBookingSuccess}
         />
 

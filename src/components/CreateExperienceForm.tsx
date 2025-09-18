@@ -98,11 +98,11 @@ export function CreateExperienceForm({
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
-    category_ids: initialData?.category_ids || ([] as string[]),
+    category_ids: initialData?.category_ids || [],
     location: initialData?.location || "",
     start_point: initialData?.start_point || "",
     end_point: initialData?.end_point || "",
-    days_open: initialData?.days_open || ([] as string[]),
+    days_open: initialData?.days_open || [],
     destination_id: initialData?.destination_id || "",
   });
 

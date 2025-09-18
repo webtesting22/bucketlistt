@@ -286,6 +286,59 @@ export type Database = {
         };
         Relationships: [];
       };
+      discount_coupons: {
+        Row: {
+          id: string;
+          coupon_code: string;
+          is_active: boolean;
+          experience_id: string;
+          type: string;
+          discount_value: number;
+          max_uses: number | null;
+          used_count: number;
+          valid_from: string;
+          valid_until: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          coupon_code: string;
+          is_active?: boolean;
+          experience_id: string;
+          type: string;
+          discount_value: number;
+          max_uses?: number | null;
+          used_count?: number;
+          valid_from?: string;
+          valid_until?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          coupon_code?: string;
+          is_active?: boolean;
+          experience_id?: string;
+          type?: string;
+          discount_value?: number;
+          max_uses?: number | null;
+          used_count?: number;
+          valid_from?: string;
+          valid_until?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "discount_coupons_experience_id_fkey";
+            columns: ["experience_id"];
+            isOneToOne: false;
+            referencedRelation: "experiences";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       experience_categories: {
         Row: {
           category_id: string;

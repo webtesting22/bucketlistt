@@ -22,7 +22,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, X, Tag, CheckCircle, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +33,7 @@ import { useRazorpay } from "@/hooks/useRazorpay";
 import { SendWhatsappMessage } from "@/utils/whatsappUtil";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
+import { useDiscountCoupon } from "@/hooks/useDiscountCoupon";
 
 const participantSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -50,6 +52,7 @@ const bookingSchema = z.object({
   booking_date: z.date({ required_error: "Please select a date" }),
   time_slot_id: z.string().min(1, "Please select a time slot"),
   referral_code: z.string().optional(),
+  coupon_code: z.string().optional(),
 });
 
 type BookingFormData = z.infer<typeof bookingSchema>;
@@ -64,6 +67,19 @@ interface BookingDialogProps {
     currency: string;
   };
   onBookingSuccess: () => void;
+  appliedCoupon?: {
+    coupon: {
+      coupon_code: string;
+      type: string;
+      discount_value: number;
+    };
+    discount_calculation: {
+      original_amount: number;
+      discount_amount: number;
+      final_amount: number;
+      savings_percentage: number;
+    };
+  } | null;
 }
 
 export const BookingDialog = ({
@@ -71,6 +87,7 @@ export const BookingDialog = ({
   onClose,
   experience,
   onBookingSuccess,
+  appliedCoupon,
 }: BookingDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -79,10 +96,17 @@ export const BookingDialog = ({
   );
   const [bypassPayment, setBypassPayment] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState<string>();
+  const [couponCode, setCouponCode] = useState("");
+  const [couponValidation, setCouponValidation] = useState<{
+    isValid: boolean;
+    message: string;
+    coupon?: any;
+  } | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { openRazorpay } = useRazorpay();
+  const { validateCoupon } = useDiscountCoupon();
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
@@ -91,11 +115,31 @@ export const BookingDialog = ({
       note_for_guide: "",
       terms_accepted: false,
       referral_code: "",
+      coupon_code: "",
     },
   });
 
   const participants = form.watch("participants");
   const totalPrice = experience.price * participants.length;
+
+  // Calculate final price with coupon discount
+  const calculateFinalPrice = () => {
+    // Use local coupon validation result if available, otherwise use appliedCoupon from props
+    const activeCoupon =
+      couponValidation?.isValid && couponValidation.coupon
+        ? couponValidation.coupon
+        : appliedCoupon;
+
+    if (activeCoupon && activeCoupon.discount_calculation) {
+      // The discount_calculation.final_amount is per person, so multiply by participants
+      return (
+        activeCoupon.discount_calculation.final_amount * participants.length
+      );
+    }
+    return totalPrice;
+  };
+
+  const finalPrice = calculateFinalPrice();
 
   const addParticipant = () => {
     const currentParticipants = form.getValues("participants");
@@ -125,6 +169,64 @@ export const BookingDialog = ({
   const handleSlotChange = (slotId: string | undefined) => {
     setSelectedSlotId(slotId);
     form.setValue("time_slot_id", slotId || "");
+  };
+
+  const handleCouponValidation = async () => {
+    if (!couponCode.trim()) {
+      setCouponValidation({
+        isValid: false,
+        message: "Please enter a coupon code",
+      });
+      return;
+    }
+
+    try {
+      const result = await validateCoupon(
+        couponCode,
+        experience.id,
+        experience.price
+      );
+
+      if (result.valid && result.discount_calculation) {
+        const discountType =
+          result.coupon?.type === "percentage" ? "%" : "flat amount";
+        const discountText =
+          result.coupon?.type === "percentage"
+            ? `${result.discount_calculation.savings_percentage.toFixed(1)}%`
+            : `${experience.currency} ${result.discount_calculation.discount_amount}`;
+
+        setCouponValidation({
+          isValid: true,
+          message: `Coupon applied! You save ${discountText}`,
+          coupon: result,
+        });
+        form.setValue("coupon_code", couponCode);
+        toast({
+          title: "Coupon Applied!",
+          description: `You saved ${discountText} on your booking!`,
+        });
+      } else {
+        // Show generic error message for all validation failures
+        setCouponValidation({
+          isValid: false,
+          message: "Invalid coupon code",
+        });
+      }
+    } catch (error) {
+      console.error("Coupon validation error:", error);
+      setCouponValidation({
+        isValid: false,
+        message: "Error validating coupon. Please try again.",
+      });
+    }
+  };
+
+  const handleCouponCodeChange = (value: string) => {
+    setCouponCode(value.toUpperCase());
+    // Clear validation when user types
+    if (couponValidation) {
+      setCouponValidation(null);
+    }
   };
 
   const sendBookingConfirmationEmail = async (
@@ -160,7 +262,7 @@ export const BookingDialog = ({
                 timeSlot?.end_time,
                 "HH:mm"
               ).format("hh:mm A")}`,
-              "4": experience?.location,
+              "4": "Experience Location",
             },
           },
         ],
@@ -396,7 +498,7 @@ export const BookingDialog = ({
     try {
       console.log("Creating Razorpay order...");
       const orderPayload = {
-        amount: totalPrice,
+        amount: finalPrice,
         currency: experience.currency,
         experienceTitle: experience.title,
         bookingData: {
@@ -406,6 +508,7 @@ export const BookingDialog = ({
           participants: data.participants,
           note_for_guide: data.note_for_guide,
           referral_code: data?.referral_code,
+          coupon_code: data?.coupon_code,
         },
       };
       console.log("Order payload:", orderPayload);
@@ -662,7 +765,9 @@ export const BookingDialog = ({
                         <Input
                           placeholder="Referral Code"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                          onChange={(e) =>
+                            field.onChange(e.target.value.toUpperCase())
+                          }
                           value={field.value?.toUpperCase() || ""}
                         />
                       </FormControl>
@@ -670,6 +775,128 @@ export const BookingDialog = ({
                     </FormItem>
                   )}
                 />
+
+                {/* Coupon Code Section */}
+                <div className="space-y-3">
+                  <FormField
+                    control={form.control}
+                    name="coupon_code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Coupon Code (Optional)</FormLabel>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input
+                              placeholder="Enter coupon code"
+                              value={couponCode}
+                              onChange={(e) =>
+                                handleCouponCodeChange(e.target.value)
+                              }
+                            />
+                          </FormControl>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleCouponValidation}
+                            disabled={!couponCode.trim()}
+                            className="flex items-center gap-2"
+                          >
+                            <Tag className="h-4 w-4" />
+                            Apply
+                          </Button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Coupon Validation Status - Only show error messages */}
+                  {couponValidation && !couponValidation.isValid && (
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                      <span className="text-sm text-red-800">
+                        {couponValidation.message}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Applied Coupon Display */}
+                  {((couponValidation?.isValid && couponValidation.coupon) ||
+                    appliedCoupon) && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Tag className="h-4 w-4 text-green-600" />
+                          <span className="font-medium text-green-800">
+                            Coupon Applied:{" "}
+                            {couponValidation?.isValid &&
+                            couponValidation.coupon
+                              ? couponValidation.coupon.coupon.coupon_code
+                              : appliedCoupon.coupon.coupon_code}
+                          </span>
+                        </div>
+                        <Badge
+                          variant="secondary"
+                          className="bg-green-100 text-green-800"
+                        >
+                          {(() => {
+                            const activeCoupon =
+                              couponValidation?.isValid &&
+                              couponValidation.coupon
+                                ? couponValidation.coupon
+                                : appliedCoupon;
+                            return activeCoupon.coupon.type === "percentage"
+                              ? `Save ${activeCoupon.discount_calculation.savings_percentage.toFixed(
+                                  1
+                                )}%`
+                              : `Save ${experience.currency} ${activeCoupon.discount_calculation.discount_amount}`;
+                          })()}
+                        </Badge>
+                      </div>
+                      {/* <div className="mt-2 text-sm text-green-700"> */}
+                      {/* {(() => {
+                          const activeCoupon =
+                            couponValidation?.isValid && couponValidation.coupon
+                              ? couponValidation.coupon
+                              : appliedCoupon;
+                          return (
+                            <>
+                              <div>
+                                Original Price: {experience.currency}{" "}
+                                {
+                                  activeCoupon.discount_calculation
+                                    .original_amount
+                                }
+                              </div>
+                              <div>
+                                Discount: -{experience.currency}{" "}
+                                {
+                                  activeCoupon.discount_calculation
+                                    .discount_amount
+                                }
+                              </div>
+                              <div className="font-semibold">
+                                Final Price: {experience.currency}{" "}
+                                {activeCoupon.discount_calculation.final_amount}
+                              </div>
+                              {activeCoupon.coupon.type === "flat" && (
+                                <div className="text-xs text-green-600 mt-1">
+                                  Flat discount of {experience.currency}{" "}
+                                  {activeCoupon.coupon.discount_value}
+                                </div>
+                              )}
+                              {activeCoupon.coupon.type === "percentage" && (
+                                <div className="text-xs text-green-600 mt-1">
+                                  {activeCoupon.coupon.discount_value}% discount
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()} */}
+                      {/* </div> */}
+                    </div>
+                  )}
+                </div>
 
                 {/* Terms and Conditions */}
                 <FormField
@@ -716,9 +943,42 @@ export const BookingDialog = ({
                         )}
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-orange-500">
-                          {selectedActivity?.currency} {totalActivityPrice}
-                        </div>
+                        {(() => {
+                          const activeCoupon =
+                            couponValidation?.isValid && couponValidation.coupon
+                              ? couponValidation.coupon
+                              : appliedCoupon;
+
+                          if (activeCoupon) {
+                            return (
+                              <div>
+                                <div className="text-lg text-muted-foreground line-through">
+                                  {selectedActivity?.currency}{" "}
+                                  {totalActivityPrice}
+                                </div>
+                                <div className="text-2xl font-bold text-green-600">
+                                  {selectedActivity?.currency} {finalPrice}
+                                </div>
+                                <div className="text-sm text-green-600">
+                                  {activeCoupon.coupon.type === "percentage"
+                                    ? `Save ${activeCoupon.discount_calculation.savings_percentage.toFixed(
+                                        1
+                                      )}%`
+                                    : `Save ${selectedActivity?.currency} ${
+                                        totalActivityPrice - finalPrice
+                                      }`}
+                                </div>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div className="text-2xl font-bold text-orange-500">
+                                {selectedActivity?.currency}{" "}
+                                {totalActivityPrice}
+                              </div>
+                            );
+                          }
+                        })()}
                         <div className="text-sm text-muted-foreground">
                           {participants.length} participant
                           {participants.length > 1 ? "s" : ""} ×{" "}
