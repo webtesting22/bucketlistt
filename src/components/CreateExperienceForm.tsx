@@ -401,15 +401,57 @@ export function CreateExperienceForm({
       }
 
       // Update time slots for existing activity
-      // First delete existing time slots
-      const { error: deleteTimeSlotsError } = await supabase
+      // First check if there are any bookings for this activity's time slots
+      const { data: existingTimeSlots, error: timeSlotsError } = await supabase
         .from("time_slots")
-        .delete()
+        .select("id")
         .eq("activity_id", activity.id);
 
-      if (deleteTimeSlotsError) {
-        console.error("Error deleting time slots:", deleteTimeSlotsError);
-        throw deleteTimeSlotsError;
+      if (timeSlotsError) {
+        console.error("Error fetching existing time slots:", timeSlotsError);
+        throw timeSlotsError;
+      }
+
+      if (existingTimeSlots && existingTimeSlots.length > 0) {
+        const timeSlotIds = existingTimeSlots.map((ts) => ts.id);
+
+        // Check if any of these time slots have bookings
+        const { data: existingBookings, error: bookingsCheckError } =
+          await supabase
+            .from("bookings")
+            .select("id, time_slot_id")
+            .in("time_slot_id", timeSlotIds);
+
+        if (bookingsCheckError) {
+          console.error(
+            "Error checking existing bookings:",
+            bookingsCheckError
+          );
+          throw bookingsCheckError;
+        }
+
+        // If there are existing bookings, we can't delete the time slots
+        // Instead, we'll create new time slots with different IDs
+        if (existingBookings && existingBookings.length > 0) {
+          console.log(
+            `Found ${existingBookings.length} existing bookings for activity ${activity.id}. Keeping old time slots and creating new ones.`
+          );
+          // Don't delete the old time slots - just create new ones
+        } else {
+          // No existing bookings, safe to delete time slots
+          console.log(
+            `No existing bookings found for activity ${activity.id}. Deleting old time slots.`
+          );
+          const { error: deleteTimeSlotsError } = await supabase
+            .from("time_slots")
+            .delete()
+            .eq("activity_id", activity.id);
+
+          if (deleteTimeSlotsError) {
+            console.error("Error deleting time slots:", deleteTimeSlotsError);
+            throw deleteTimeSlotsError;
+          }
+        }
       }
 
       // Create new time slots

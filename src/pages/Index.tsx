@@ -377,20 +377,22 @@ const Index = () => {
                             reviews={
                               experience.reviews_count?.toString() || "0"
                             }
-                            price={`${experience.currency === "USD"
-                              ? "₹"
-                              : experience.currency == "INR"
+                            price={`${
+                              experience.currency === "USD"
+                                ? "₹"
+                                : experience.currency == "INR"
                                 ? "₹"
                                 : experience.currency
-                              } ${experience.price}`}
+                            } ${experience.price}`}
                             originalPrice={
                               experience.original_price
-                                ? `${experience.currency === "USD"
-                                  ? "₹"
-                                  : experience.currency == "INR"
-                                    ? "₹"
-                                    : experience.currency
-                                } ${experience.original_price}`
+                                ? `${
+                                    experience.currency === "USD"
+                                      ? "₹"
+                                      : experience.currency == "INR"
+                                      ? "₹"
+                                      : experience.currency
+                                  } ${experience.original_price}`
                                 : undefined
                             }
                             duration={experience.duration || undefined}
