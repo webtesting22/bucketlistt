@@ -617,10 +617,11 @@ const DestinationDetail = () => {
                   className={`scroll-fade-in ${isAnimated ? "animate" : ""}`}
                   style={{ animationDelay: "0.6s" }}
                 >
-                  <p className="text-muted-foreground">
-                    No activities found for this category. But we'll surely add
-                    some later.
-                  </p>
+                  <h2 className="text-muted-foreground text-4xl">
+                    {/* No activities found for this category. But we'll surely add
+                    some later. */}
+                    Coming soon...
+                  </h2>
                 </div>
               </div>
             )}

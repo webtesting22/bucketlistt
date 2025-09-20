@@ -112,8 +112,8 @@ export const RecentBookingsTable = ({ experienceId, limit = 10, isVendorView = f
   if (!bookings || bookings.length === 0) {
     return (
       <div className="text-center py-12 bg-muted/30 rounded-lg border-2 border-dashed border-muted-foreground/20">
-        <div className="w-16 h-16 mx-auto mb-4 bg-orange-100 dark:bg-orange-950/30 rounded-full flex items-center justify-center">
-          <Calendar className="h-8 w-8 text-orange-500" />
+        <div className="w-16 h-16 mx-auto mb-4 bg-brand-primary-light dark:bg-orange-950/30 rounded-full flex items-center justify-center">
+          <Calendar className="h-8 w-8 text-brand-primary" />
         </div>
         <h3 className="text-lg font-semibold mb-2 text-muted-foreground">
           No recent bookings

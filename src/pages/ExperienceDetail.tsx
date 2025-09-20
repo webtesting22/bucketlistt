@@ -652,8 +652,8 @@ const ExperienceDetail = () => {
           <div className="mt-12">
             <div className="border-t pt-8">
               <div className="flex items-center gap-3 mb-6">
-                <Calendar className="h-5 w-5 text-orange-600" />
-                <h2 className="text-2xl font-bold text-orange-800 dark:text-orange-200">
+                <Calendar className="h-5 w-5 text-brand-primary" />
+                <h2 className="text-2xl font-bold text-brand-primary">
                   {isVendor && experience.vendor_id === user.id
                     ? "All Bookings for this Experience"
                     : "Your Bookings for this Experience"}

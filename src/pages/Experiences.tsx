@@ -125,8 +125,8 @@ const Experiences = () => {
   const experiencesStructuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "name": "Adventure Experiences in India - BucketListt",
-    "description": "Browse all adventure experiences and activities in India. From bungee jumping to river rafting, find your next thrill with BucketListt.",
+    "name": "Adventure Experiences in India - bucketlistt",
+    "description": "Browse all adventure experiences and activities in India. From bungee jumping to river rafting, find your next thrill with bucketlistt.",
     "url": "https://www.bucketlistt.com/experiences",
     "mainEntity": {
       "@type": "ItemList",
@@ -135,7 +135,7 @@ const Experiences = () => {
         "@type": "TouristAttraction",
         "position": index + 1,
         "name": experience.title,
-        "description": experience.description || `Experience ${experience.title} with BucketListt`,
+        "description": experience.description || `Experience ${experience.title} with bucketlistt`,
         "image": experience.image_url,
         "url": `https://www.bucketlistt.com/experience/${experience.id}`,
         "offers": {
@@ -150,8 +150,8 @@ const Experiences = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Adventure Experiences in India - BucketListt | Book Now"
-        description="Browse all adventure experiences and activities in India. From bungee jumping to river rafting, find your next thrill with BucketListt. ATOAI certified tours."
+        title="Adventure Experiences in India - bucketlistt | Book Now"
+        description="Browse all adventure experiences and activities in India. From bungee jumping to river rafting, find your next thrill with bucketlistt. ATOAI certified tours."
         keywords="adventure experiences India, bungee jumping, river rafting, trekking, adventure activities, ATOAI certified, adventure tours India"
         structuredData={experiencesStructuredData}
       />

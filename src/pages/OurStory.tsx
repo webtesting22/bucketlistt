@@ -121,12 +121,12 @@ const OurStory = () => {
                     <Mountain className="h-6 w-6 text-green-500" />
                   </div>
                   <h2 className="text-2xl md:text-3xl font-bold">
-                    The Birth of BucketListt
+                    The Birth of bucketlistt
                   </h2>
                 </div>
                 <p className="text-lg text-muted-foreground leading-relaxed mb-6">
                   And thus,{" "}
-                  <strong className="text-orange-500">BucketListt</strong> was
+                  <strong className="text-orange-500">bucketlistt</strong> was
                   born—a platform where people could browse, book, and enjoy
                   thrilling adventure activities like bungee jumping,
                   paragliding, and river rafting, all with verified vendors and
@@ -217,9 +217,9 @@ const OurStory = () => {
                 </div>
 
                 <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                  Soon, BucketListt became the go-to place for explorers across
+                  Soon, bucketlistt became the go-to place for explorers across
                   India. From students ticking off their first solo adventure to
-                  families looking for a fun weekend escape, BucketListt changed
+                  families looking for a fun weekend escape, bucketlistt changed
                   the way people experienced life.
                 </p>
 
@@ -248,7 +248,7 @@ const OurStory = () => {
                 Ready to Start Your Adventure?
               </h2>
               <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Join thousands of adventurers who trust BucketListt for their
+                Join thousands of adventurers who trust bucketlistt for their
                 next epic experience
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
