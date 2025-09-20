@@ -225,7 +225,7 @@ export const SlotSelector = ({
             {activities?.map((activity) => (
               <SelectItem key={activity.id} value={activity.id}>
                 <div className="flex justify-between items-center w-full">
-                  <span>{activity.name}</span>
+                  <span>{activity.name} - </span>
                   <span className="text-muted-foreground">
                     {activity.currency} {activity.price}
                   </span>
