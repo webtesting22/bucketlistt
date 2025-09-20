@@ -40,16 +40,20 @@ interface Activity {
   distance?: string;
   duration: string;
   price: number;
+  discount_percentage: number | null;
   currency: string;
   timeSlots: TimeSlot[];
+  discounted_price: number;
 }
 
 interface ExperienceData {
+  discounted_price: number;
   id?: string;
   title: string;
   description: string;
   category_ids: string[];
   original_price: number;
+  discount_percentage : number | null;
   currency: string;
   duration: string;
   group_size: string;
@@ -145,6 +149,8 @@ export function CreateExperienceForm({
               : `${initialData.distance_km}km`,
           duration: initialData.duration || "Not specified",
           price: initialData.price || 0,
+          discount_percentage: initialData.discount_percentage || 0,
+          discounted_price: initialData.discounted_price || 0,
           currency: initialData.currency || "INR",
           timeSlots: initialData.legacyTimeSlots || [], // Use legacy time slots if available
         };
@@ -195,9 +201,11 @@ export function CreateExperienceForm({
       distance: "",
       duration: "",
       price: 0,
+      discount_percentage: null,
       currency: "INR",
       timeSlots: [],
-    };
+      discounted_price: 0,
+      };
     setActivities((prev) => [...prev, newActivity]);
   };
 
@@ -325,6 +333,8 @@ export function CreateExperienceForm({
       distance: activity.distance,
       duration: activity.duration,
       price: activity.price,
+      discount_percentage: activity.discount_percentage,
+      discounted_price: activity.discounted_price,
       currency: activity.currency,
       display_order: index,
       is_active: true,
@@ -383,6 +393,8 @@ export function CreateExperienceForm({
         distance: activity.distance || null,
         duration: activity.duration || null,
         price: activity.price,
+        discount_percentage: activity.discount_percentage,
+        discounted_price: activity.discounted_price,
         currency: activity.currency,
         display_order: activities.indexOf(activity),
         is_active: true,
@@ -441,6 +453,8 @@ export function CreateExperienceForm({
         distance: activity.distance,
         duration: activity.duration,
         price: activity.price,
+        discount_percentage: activity.discount_percentage,
+        discounted_price: activity.discounted_price,
         currency: activity.currency,
         display_order: existingActivities.length + index,
         is_active: true,
@@ -520,6 +534,8 @@ export function CreateExperienceForm({
 
     // console.log("Activities update completed successfully");
   };
+
+  console.log("activities", activities);
 
   const createExperienceCategories = async (
     experienceId: string,
@@ -603,13 +619,13 @@ export function CreateExperienceForm({
 
     // Validate activity data
     const invalidActivities = activities.filter(
-      (activity) => !activity.name.trim() || activity.price <= 0
+      (activity) => !activity.name.trim() || activity.price <= 0 || activity.discount_percentage <= 0 || activity.discount_percentage > 100
     );
     if (invalidActivities.length > 0) {
       toast({
         title: "Invalid activity data",
         description:
-          "Please ensure all activities have valid name, distance, duration, and price.",
+          "Please ensure all activities have valid name, distance, duration, price, and discount percentage.",
         variant: "destructive",
       });
       return;
@@ -637,11 +653,15 @@ export function CreateExperienceForm({
       const minPrice =
         activities.length > 0 ? Math.min(...activities.map((a) => a.price)) : 0;
 
+        const minDiscountPercentage =
+        activities.length > 0 ? Math.min(...activities.map((a) => a.discount_percentage)) : 0;
+
       const experienceData = {
         title: formData.title,
         description: formData.description,
         category: primaryCategory?.name || "General", // Legacy field - use first selected category
         price: minPrice,
+        discount_percentage: minDiscountPercentage,
         original_price: null, // No longer used
         currency: activities.length > 0 ? activities[0].currency : "INR", // Use first activity's currency
         duration: null, // Legacy field - no longer used
@@ -654,6 +674,10 @@ export function CreateExperienceForm({
         vendor_id: user.id,
         destination_id: formData.destination_id,
       };
+
+
+      console.log("experienceData", experienceData);
+
 
       if (isEditing && initialData?.id) {
         // Update existing experience
@@ -995,6 +1019,32 @@ export function CreateExperienceForm({
                       required
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`activity-discount-percentage-${activity.id}`}>
+                      Discount Percentage
+                    </Label>
+                    <Input
+                      id={`activity-discount-percentage-${activity.id}`}
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={activity.discount_percentage}
+                      onChange={(e) =>{
+                        updateActivity(activity.id, "discount_percentage", parseFloat(e.target.value) || 0)
+                        updateActivity(activity.id, "discounted_price", activity.price - (activity.price * parseFloat(e.target.value) / 100) || 0)
+                      }
+                      }
+                      placeholder="0.00"
+                    />
+                  </div>  
+
+                  <div className="space-y-2">
+                    <section>Discounted Price</section>
+                    <section> {activity.currency} {activity.price - (activity.price * activity.discount_percentage / 100) || 0}</section>
+                  </div>
+
+
                 </div>
 
                 {/* Time Slots for this activity */}

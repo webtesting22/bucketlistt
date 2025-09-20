@@ -100,6 +100,9 @@ const EditExperience = () => {
     enabled: !!id
   });
 
+
+  console.log("experience", experience);
+
   if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
