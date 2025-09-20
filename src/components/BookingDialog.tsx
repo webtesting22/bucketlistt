@@ -21,8 +21,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, X, Tag, CheckCircle, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +42,7 @@ import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import { Modal } from "antd";
 import { format } from "date-fns";
+import { useDiscountCoupon } from "@/hooks/useDiscountCoupon";
 
 const participantSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -42,9 +51,11 @@ const participantSchema = z.object({
 });
 
 const bookingSchema = z.object({
-  participants: z
-    .array(participantSchema)
-    .min(1, "At least one participant is required"),
+  participant: participantSchema,
+  participant_count: z
+    .number()
+    .min(1, "At least one participant is required")
+    .max(6, "Maximum 6 participants allowed"),
   note_for_guide: z.string().optional(),
   terms_accepted: z
     .boolean()
@@ -52,6 +63,7 @@ const bookingSchema = z.object({
   booking_date: z.date({ required_error: "Please select a date" }),
   time_slot_id: z.string().min(1, "Please select a time slot"),
   referral_code: z.string().optional(),
+  coupon_code: z.string().optional(),
 });
 
 type BookingFormData = z.infer<typeof bookingSchema>;
@@ -66,6 +78,19 @@ interface BookingDialogProps {
     currency: string;
   };
   onBookingSuccess: () => void;
+  appliedCoupon?: {
+    coupon: {
+      coupon_code: string;
+      type: string;
+      discount_value: number;
+    };
+    discount_calculation: {
+      original_amount: number;
+      discount_amount: number;
+      final_amount: number;
+      savings_percentage: number;
+    };
+  } | null;
 }
 
 export const BookingDialog = ({
@@ -73,6 +98,7 @@ export const BookingDialog = ({
   onClose,
   experience,
   onBookingSuccess,
+  appliedCoupon,
 }: BookingDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -82,41 +108,52 @@ export const BookingDialog = ({
   const [bypassPayment, setBypassPayment] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState<string>();
   const [currentStep, setCurrentStep] = useState(1); // 1: Selection, 2: Participants
+  const [couponCode, setCouponCode] = useState("");
+  const [couponValidation, setCouponValidation] = useState<{
+    isValid: boolean;
+    message: string;
+    coupon?: any;
+  } | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { openRazorpay } = useRazorpay();
+  const { validateCoupon } = useDiscountCoupon();
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
-      participants: [{ name: "", email: "", phone_number: "" }],
+      participant: { name: "", email: "", phone_number: "" },
+      participant_count: 1,
       note_for_guide: "",
       terms_accepted: false,
       referral_code: "",
+      coupon_code: "",
     },
   });
 
-  const participants = form.watch("participants");
-  const totalPrice = experience.price * participants.length;
+  const participantCount = form.watch("participant_count");
+  const totalPrice = experience.price * participantCount;
 
-  const addParticipant = () => {
-    const currentParticipants = form.getValues("participants");
-    form.setValue("participants", [
-      ...currentParticipants,
-      { name: "", email: "", phone_number: "" },
-    ]);
-  };
+  // Calculate final price with coupon discount
+  const calculateFinalPrice = () => {
+    // Use local coupon validation result if available, otherwise use appliedCoupon from props
+    const activeCoupon =
+      couponValidation?.isValid && couponValidation.coupon
+        ? couponValidation.coupon
+        : appliedCoupon;
 
-  const removeParticipant = (index: number) => {
-    const currentParticipants = form.getValues("participants");
-    if (currentParticipants.length > 1) {
-      form.setValue(
-        "participants",
-        currentParticipants.filter((_, i) => i !== index)
+    if (activeCoupon && activeCoupon.discount_calculation) {
+      // The discount_calculation.final_amount is per person, so multiply by participant count
+      return (
+        activeCoupon.discount_calculation.final_amount * participantCount
       );
     }
+    return totalPrice;
   };
+
+  const finalPrice = calculateFinalPrice();
+
   console.log("experience", experience);
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date);
@@ -158,6 +195,64 @@ export const BookingDialog = ({
     onClose();
   };
 
+  const handleCouponValidation = async () => {
+    if (!couponCode.trim()) {
+      setCouponValidation({
+        isValid: false,
+        message: "Please enter a coupon code",
+      });
+      return;
+    }
+
+    try {
+      const result = await validateCoupon(
+        couponCode,
+        experience.id,
+        experience.price
+      );
+
+      if (result.valid && result.discount_calculation) {
+        const discountType =
+          result.coupon?.type === "percentage" ? "%" : "flat amount";
+        const discountText =
+          result.coupon?.type === "percentage"
+            ? `${result.discount_calculation.savings_percentage.toFixed(1)}%`
+            : `${experience.currency} ${result.discount_calculation.discount_amount}`;
+
+        setCouponValidation({
+          isValid: true,
+          message: `Coupon applied! You save ${discountText}`,
+          coupon: result,
+        });
+        form.setValue("coupon_code", couponCode);
+        toast({
+          title: "Coupon Applied!",
+          description: `You saved ${discountText} on your booking!`,
+        });
+      } else {
+        // Show generic error message for all validation failures
+        setCouponValidation({
+          isValid: false,
+          message: "Invalid coupon code",
+        });
+      }
+    } catch (error) {
+      console.error("Coupon validation error:", error);
+      setCouponValidation({
+        isValid: false,
+        message: "Error validating coupon. Please try again.",
+      });
+    }
+  };
+
+  const handleCouponCodeChange = (value: string) => {
+    setCouponCode(value.toUpperCase());
+    // Clear validation when user types
+    if (couponValidation) {
+      setCouponValidation(null);
+    }
+  };
+
   const sendBookingConfirmationEmail = async (
     data: BookingFormData,
     bookingId: string,
@@ -180,9 +275,9 @@ export const BookingDialog = ({
         type: "text",
         data: [
           {
-            mobile: data.participants[0].phone_number,
+            mobile: data.participant.phone_number,
             bodyValues: {
-              "1": data.participants[0].name,
+              "1": data.participant.name,
               "2": experience.title,
               "3": `${moment(selectedDate).format("DD/MM/YYYY")} - ${moment(
                 timeSlot?.start_time,
@@ -191,7 +286,7 @@ export const BookingDialog = ({
                 timeSlot?.end_time,
                 "HH:mm"
               ).format("hh:mm A")}`,
-              "4": experience?.location,
+              "4": "Experience Location",
             },
           },
         ],
@@ -206,17 +301,17 @@ export const BookingDialog = ({
         "send-booking-confirmation",
         {
           body: {
-            customerEmail: data.participants[0].email,
-            customerName: data.participants[0].name,
+            customerEmail: data.participant.email,
+            customerName: data.participant.name,
             experienceTitle: experience.title,
             bookingDate: selectedDate?.toISOString(),
             timeSlot: timeSlot
               ? `${timeSlot.start_time} - ${timeSlot.end_time}`
               : "Time slot details unavailable",
-            totalParticipants: data.participants.length,
+            totalParticipants: data.participant_count,
             totalAmount: totalPrice,
             currency: experience.currency,
-            participants: data.participants,
+            participants: Array.from({ length: data.participant_count }, () => data.participant),
             bookingId: bookingId,
             noteForGuide: data.note_for_guide,
             paymentId: paymentId || "BYPASSED",
@@ -257,7 +352,7 @@ export const BookingDialog = ({
           time_slot_id: selectedSlotId,
           booking_date: selectedDate.toISOString(),
           note_for_guide: data.note_for_guide || null,
-          total_participants: data.participants.length,
+          total_participants: data.participant_count,
           terms_accepted: data.terms_accepted,
           referral_code: data?.referral_code,
         })
@@ -271,12 +366,12 @@ export const BookingDialog = ({
 
       console.log("Booking created successfully:", booking.id);
 
-      // Create participants
-      const participantsData = data.participants.map((participant) => ({
+      // Create participants - duplicate the primary participant data for each participant
+      const participantsData = Array.from({ length: data.participant_count }, () => ({
         booking_id: booking.id,
-        name: participant.name,
-        email: participant.email,
-        phone_number: participant.phone_number,
+        name: data.participant.name,
+        email: data.participant.email,
+        phone_number: data.participant.phone_number,
       }));
 
       const { error: participantsError } = await supabase
@@ -331,7 +426,7 @@ export const BookingDialog = ({
           time_slot_id: selectedSlotId,
           booking_date: selectedDate.toISOString(),
           note_for_guide: data.note_for_guide || null,
-          total_participants: data.participants.length,
+          total_participants: data.participant_count,
           terms_accepted: data.terms_accepted,
           referral_code: data?.referral_code,
         })
@@ -345,12 +440,12 @@ export const BookingDialog = ({
 
       console.log("Booking created successfully:", booking.id);
 
-      // Create participants
-      const participantsData = data.participants.map((participant) => ({
+      // Create participants - duplicate the primary participant data for each participant
+      const participantsData = Array.from({ length: data.participant_count }, () => ({
         booking_id: booking.id,
-        name: participant.name,
-        email: participant.email,
-        phone_number: participant.phone_number,
+        name: data.participant.name,
+        email: data.participant.email,
+        phone_number: data.participant.phone_number,
       }));
 
       const { error: participantsError } = await supabase
@@ -419,16 +514,18 @@ export const BookingDialog = ({
     try {
       console.log("Creating Razorpay order...");
       const orderPayload = {
-        amount: totalPrice,
+        amount: finalPrice,
         currency: experience.currency,
         experienceTitle: experience.title,
         bookingData: {
           experience_id: experience.id,
           time_slot_id: selectedSlotId,
           booking_date: selectedDate.toISOString(),
-          participants: data.participants,
+          participant: data.participant,
+          participant_count: data.participant_count,
           note_for_guide: data.note_for_guide,
           referral_code: data?.referral_code,
+          coupon_code: data?.coupon_code,
         },
       };
       console.log("Order payload:", orderPayload);
@@ -466,9 +563,9 @@ export const BookingDialog = ({
           await createBookingAfterPayment(data, response.razorpay_payment_id);
         },
         prefill: {
-          name: data.participants[0].name,
-          email: data.participants[0].email,
-          contact: data.participants[0].phone_number,
+          name: data.participant.name,
+          email: data.participant.email,
+          contact: data.participant.phone_number,
         },
         theme: {
           color: "hsl(var(--brand-primary))",
@@ -546,7 +643,7 @@ export const BookingDialog = ({
 
   // Update price calculation to use activity price
   const totalActivityPrice = selectedActivity
-    ? selectedActivity.price * participants.length
+    ? selectedActivity.price * participantCount
     : 0;
 
   return (
@@ -648,90 +745,92 @@ export const BookingDialog = ({
 
                 {/* Participants Section */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Participants</h3>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={addParticipant}
-                      className="flex items-center gap-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add Person
-                    </Button>
-                  </div>
+                  <h3 className="text-lg font-semibold">Participants</h3>
+                  
+                  {/* Participant Count Selector */}
+                  <FormField
+                    control={form.control}
+                    name="participant_count"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Number of Participants</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(parseInt(value))}
+                          value={field.value.toString()}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select number of participants" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {[1, 2, 3, 4, 5, 6].map((count) => (
+                              <SelectItem key={count} value={count.toString()}>
+                                {count} {count === 1 ? 'Person' : 'People'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  {participants.map((_, index) => (
-                    <Card key={index} className="relative">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-medium">Person {index + 1}</h4>
-                          {participants.length > 1 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeParticipant(index)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
+                  {/* Single Participant Form */}
+                  <Card>
+                    <CardContent className="p-4">
+                      <h4 className="font-medium mb-4">Primary Contact Details</h4>
+                      <div className="grid grid-cols-1 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="participant.name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Full name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
                           )}
-                        </div>
+                        />
 
-                        <div className="grid grid-cols-1 gap-4">
-                          <FormField
-                            control={form.control}
-                            name={`participants.${index}.name`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="Full name" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <FormField
+                          control={form.control}
+                          name="participant.email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="email@example.com"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                          <FormField
-                            control={form.control}
-                            name={`participants.${index}.email`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="email@example.com"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name={`participants.${index}.phone_number`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Phone</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Phone number"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        <FormField
+                          control={form.control}
+                          name="participant.phone_number"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Phone</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Phone number"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 {/* Note for Guide */}
@@ -756,14 +855,143 @@ export const BookingDialog = ({
                   name="referral_code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Referal Code</FormLabel>
+                      <FormLabel>Referral Code (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="Referal Code" {...field} />
+                        <Input
+                          placeholder="Referral Code"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(e.target.value.toUpperCase())
+                          }
+                          value={field.value?.toUpperCase() || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                {/* Coupon Code Section */}
+                <div className="space-y-3">
+                  <FormField
+                    control={form.control}
+                    name="coupon_code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Coupon Code (Optional)</FormLabel>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input
+                              placeholder="Enter coupon code"
+                              value={couponCode}
+                              onChange={(e) =>
+                                handleCouponCodeChange(e.target.value)
+                              }
+                            />
+                          </FormControl>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleCouponValidation}
+                            disabled={!couponCode.trim()}
+                            className="flex items-center gap-2"
+                          >
+                            <Tag className="h-4 w-4" />
+                            Apply
+                          </Button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Coupon Validation Status - Only show error messages */}
+                  {couponValidation && !couponValidation.isValid && (
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                      <span className="text-sm text-red-800">
+                        {couponValidation.message}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Applied Coupon Display */}
+                  {((couponValidation?.isValid && couponValidation.coupon) ||
+                    appliedCoupon) && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Tag className="h-4 w-4 text-green-600" />
+                          <span className="font-medium text-green-800">
+                            Coupon Applied:{" "}
+                            {couponValidation?.isValid &&
+                            couponValidation.coupon
+                              ? couponValidation.coupon.coupon.coupon_code
+                              : appliedCoupon.coupon.coupon_code}
+                          </span>
+                        </div>
+                        <Badge
+                          variant="secondary"
+                          className="bg-green-100 text-green-800"
+                        >
+                          {(() => {
+                            const activeCoupon =
+                              couponValidation?.isValid &&
+                              couponValidation.coupon
+                                ? couponValidation.coupon
+                                : appliedCoupon;
+                            return activeCoupon.coupon.type === "percentage"
+                              ? `Save ${activeCoupon.discount_calculation.savings_percentage.toFixed(
+                                  1
+                                )}%`
+                              : `Save ${experience.currency} ${activeCoupon.discount_calculation.discount_amount}`;
+                          })()}
+                        </Badge>
+                      </div>
+                      {/* <div className="mt-2 text-sm text-green-700"> */}
+                      {/* {(() => {
+                          const activeCoupon =
+                            couponValidation?.isValid && couponValidation.coupon
+                              ? couponValidation.coupon
+                              : appliedCoupon;
+                          return (
+                            <>
+                              <div>
+                                Original Price: {experience.currency}{" "}
+                                {
+                                  activeCoupon.discount_calculation
+                                    .original_amount
+                                }
+                              </div>
+                              <div>
+                                Discount: -{experience.currency}{" "}
+                                {
+                                  activeCoupon.discount_calculation
+                                    .discount_amount
+                                }
+                              </div>
+                              <div className="font-semibold">
+                                Final Price: {experience.currency}{" "}
+                                {activeCoupon.discount_calculation.final_amount}
+                              </div>
+                              {activeCoupon.coupon.type === "flat" && (
+                                <div className="text-xs text-green-600 mt-1">
+                                  Flat discount of {experience.currency}{" "}
+                                  {activeCoupon.coupon.discount_value}
+                                </div>
+                              )}
+                              {activeCoupon.coupon.type === "percentage" && (
+                                <div className="text-xs text-green-600 mt-1">
+                                  {activeCoupon.coupon.discount_value}% discount
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()} */}
+                      {/* </div> */}
+                    </div>
+                  )}
+                </div>
 
                 {/* Terms and Conditions */}
                 <FormField
@@ -810,12 +1038,45 @@ export const BookingDialog = ({
                         )}
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-orange-500">
-                          {selectedActivity?.currency} {totalActivityPrice}
-                        </div>
+                        {(() => {
+                          const activeCoupon =
+                            couponValidation?.isValid && couponValidation.coupon
+                              ? couponValidation.coupon
+                              : appliedCoupon;
+
+                          if (activeCoupon) {
+                            return (
+                              <div>
+                                <div className="text-lg text-muted-foreground line-through">
+                                  {selectedActivity?.currency}{" "}
+                                  {totalActivityPrice}
+                                </div>
+                                <div className="text-2xl font-bold text-green-600">
+                                  {selectedActivity?.currency} {finalPrice}
+                                </div>
+                                <div className="text-sm text-green-600">
+                                  {activeCoupon.coupon.type === "percentage"
+                                    ? `Save ${activeCoupon.discount_calculation.savings_percentage.toFixed(
+                                        1
+                                      )}%`
+                                    : `Save ${selectedActivity?.currency} ${
+                                        totalActivityPrice - finalPrice
+                                      }`}
+                                </div>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div className="text-2xl font-bold text-orange-500">
+                                {selectedActivity?.currency}{" "}
+                                {totalActivityPrice}
+                              </div>
+                            );
+                          }
+                        })()}
                         <div className="text-sm text-muted-foreground">
-                          {participants.length} participant
-                          {participants.length > 1 ? "s" : ""} ×{" "}
+                          {participantCount} participant
+                          {participantCount > 1 ? "s" : ""} ×{" "}
                           {selectedActivity?.currency} {selectedActivity?.price}
                         </div>
                       </div>
