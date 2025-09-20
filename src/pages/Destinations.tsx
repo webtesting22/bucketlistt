@@ -32,8 +32,8 @@ const Destinations = () => {
   const destinationsStructuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "name": "Travel Destinations in India - BucketListt",
-    "description": "Explore top travel destinations in India. Discover Rishikesh, Goa, Dharoi and more amazing places for your next adventure with BucketListt.",
+    "name": "Travel Destinations in India - bucketlistt",
+    "description": "Explore top travel destinations in India. Discover Rishikesh, Goa, Dharoi and more amazing places for your next adventure with bucketlistt.",
     "url": "https://www.bucketlistt.com/destinations",
     "mainEntity": {
       "@type": "ItemList",
@@ -42,7 +42,7 @@ const Destinations = () => {
         "@type": "TouristDestination",
         "position": index + 1,
         "name": destination.title,
-        "description": destination.subtitle || `Discover ${destination.title} with BucketListt`,
+        "description": destination.subtitle || `Discover ${destination.title} with bucketlistt`,
         "image": destination.image_url,
         "url": `https://www.bucketlistt.com/destination/${destination.id}`,
         "address": {
@@ -57,8 +57,8 @@ const Destinations = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="Travel Destinations in India - BucketListt | Explore Now"
-        description="Explore top travel destinations in India. Discover Rishikesh, Goa, Dharoi and more amazing places for your next adventure with BucketListt."
+        title="Travel Destinations in India - bucketlistt | Explore Now"
+        description="Explore top travel destinations in India. Discover Rishikesh, Goa, Dharoi and more amazing places for your next adventure with bucketlistt."
         keywords="travel destinations India, Rishikesh, Goa, Dharoi, adventure destinations, tourist places India, travel India"
         structuredData={destinationsStructuredData}
       />

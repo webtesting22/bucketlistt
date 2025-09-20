@@ -282,14 +282,15 @@ export function ExperienceCard({
 
             <h3 className="CommonH3 text-start FontAdjustForMobile">{title}</h3>
 
-            <p className="DescriptionContainer">
-              {description && (
-                <>
-                  {description.split(" ").slice(0, 10).join(" ")}
-                  {description.split(" ").length > 20 && "..."}
-                </>
-              )}
-            </p>
+            <div
+              className="DescriptionContainer"
+              dangerouslySetInnerHTML={{
+                __html: description ?
+                  description.replace(/<[^>]*>/g, '').split(" ").slice(0, 10).join(" ") +
+                  (description.replace(/<[^>]*>/g, '').split(" ").length > 20 ? "..." : "")
+                  : ""
+              }}
+            />
             <div id="PriceContainerOfferHomePageCards">
               <div>
                 <span className="FromText">from</span>{" "}

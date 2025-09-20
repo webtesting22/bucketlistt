@@ -195,9 +195,9 @@ Always aim to inspire users to explore and book amazing experiences through buck
         <Button
           onClick={() => setIsOpen(true)}
           size="lg"
-          className="rounded-full h-16 w-16 bg-[url('https://pixie.haus/static/uploads/a_dude_with_a_brown_beard_who_is_wearing_a_backwards_baseball_hat_that_is_blue_with_a_yellow_brim__1a883b34.webp')] bg-center bg-cover shadow-lg hover:shadow-xl transition-all duration-300 group flex items-center justify-center
+          className="rounded-full h-16 w-16  bg-white bg-[url('/bucketlistt_chatbot_logo.svg')] bg-center bg-cover shadow-lg hover:shadow-xl transition-all duration-300 group flex items-center justify-center
           /* Light mode: Dark circular background */
-          bg-neutral-800 border-2 border-neutral-700
+            border-none 
           /* Dark mode: Light background with transparency */
           dark:bg-white dark:bg-opacity-10 dark:backdrop-blur-md dark:border-white dark:border-opacity-20"
         >

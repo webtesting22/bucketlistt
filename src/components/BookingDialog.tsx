@@ -40,6 +40,8 @@ import { useRazorpay } from "@/hooks/useRazorpay";
 import { SendWhatsappMessage } from "@/utils/whatsappUtil";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
+import { Modal, Select as AntSelect } from "antd";
+import { format } from "date-fns";
 import { useDiscountCoupon } from "@/hooks/useDiscountCoupon";
 
 const participantSchema = z.object({
@@ -74,6 +76,7 @@ interface BookingDialogProps {
     title: string;
     price: number;
     currency: string;
+    image_url?: string;
   };
   onBookingSuccess: () => void;
   appliedCoupon?: {
@@ -106,6 +109,7 @@ export const BookingDialog = ({
   const [bypassPayment, setBypassPayment] = useState(false);
   const [partialPayment, setPartialPayment] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState<string>();
+  const [currentStep, setCurrentStep] = useState(1); // 1: Selection, 2: Participants
   const [couponCode, setCouponCode] = useState("");
   const [couponValidation, setCouponValidation] = useState<{
     isValid: boolean;
@@ -166,6 +170,34 @@ export const BookingDialog = ({
   const handleSlotChange = (slotId: string | undefined) => {
     setSelectedSlotId(slotId);
     form.setValue("time_slot_id", slotId || "");
+  };
+
+  // Step navigation functions
+  const handleNextStep = () => {
+    if (selectedActivityId && selectedDate && selectedSlotId) {
+      setCurrentStep(2);
+    } else {
+      toast({
+        title: "Missing information",
+        description: "Please select activity, date, and time slot",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePrevStep = () => {
+    setCurrentStep(1);
+  };
+
+  const handleClose = () => {
+    setCurrentStep(1);
+    form.reset();
+    setSelectedDate(undefined);
+    setSelectedSlotId(undefined);
+    setSelectedActivityId(undefined);
+    setBypassPayment(false);
+    setIsSubmitting(false);
+    onClose();
   };
 
   const handleCouponValidation = async () => {
@@ -372,11 +404,7 @@ export const BookingDialog = ({
       });
 
       onBookingSuccess();
-      onClose();
-      form.reset();
-      setSelectedDate(undefined);
-      setSelectedSlotId(undefined);
-      setIsSubmitting(false);
+      handleClose();
     } catch (error) {
       console.error("Direct booking creation error:", error);
       setIsSubmitting(false);
@@ -451,11 +479,7 @@ export const BookingDialog = ({
       });
 
       onBookingSuccess();
-      onClose();
-      form.reset();
-      setSelectedDate(undefined);
-      setSelectedSlotId(undefined);
-      setIsSubmitting(false);
+      handleClose();
     } catch (error) {
       console.error("Booking creation error:", error);
       setIsSubmitting(false);
@@ -609,42 +633,195 @@ export const BookingDialog = ({
   const upfrontAmount = partialPayment ? Math.round(finalPrice * 0.1) : finalPrice;
   const dueAmount = partialPayment ? finalPrice - upfrontAmount : 0;
 
+  // Get time slots for summary display
+  const { data: timeSlots } = useQuery({
+    queryKey: ['time-slots-summary', experience.id, selectedDate, selectedActivityId],
+    queryFn: async () => {
+      if (!selectedDate || !selectedActivityId) return [];
+
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('time_slots')
+        .select('*')
+        .eq('experience_id', experience.id)
+        .eq('activity_id', selectedActivityId);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!selectedDate && !!selectedActivityId,
+  });
+
+  // Format time function
+  const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(':');
+    const hour24 = parseInt(hours);
+    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+    const ampm = hour24 >= 12 ? 'PM' : 'AM';
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
   // Update price calculation to use activity price
   const totalActivityPrice = selectedActivity
     ? selectedActivity.price * participantCount
     : 0;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Book Experience: {experience.title}</DialogTitle>
-        </DialogHeader>
+    <Modal
+      open={isOpen}
+      onCancel={handleClose}
+      title={`Book Experience: ${experience.title} - Step ${currentStep} of 2`}
+      width={1000}
+      footer={null}
+      destroyOnClose={true}
+      maskClosable={false}
+    >
+      {currentStep === 1 ? (
+        // Step 1: Activity, Date, and Time Selection
+        <div className="space-y-6">
+          <SlotSelector
+            experienceId={experience.id}
+            selectedDate={selectedDate}
+            selectedSlotId={selectedSlotId}
+            selectedActivityId={selectedActivityId}
+            participantCount={participantCount}
+            onDateChange={handleDateChange}
+            onSlotChange={handleSlotChange}
+            onActivityChange={setSelectedActivityId}
+          />
 
+          {/* Step 1 Footer */}
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleNextStep}
+              disabled={!selectedActivityId || !selectedDate || !selectedSlotId}
+              className="flex-1 bg-orange-500 hover:bg-orange-600"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      ) : (
+        // Step 2: Participants and Payment Details
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column: Activity, Date and Time Selection */}
+              {/* Left Column: Activity Summary */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">
-                  Select Activity & Time
-                </h3>
-                <SlotSelector
-                  experienceId={experience.id}
-                  selectedDate={selectedDate}
-                  selectedSlotId={selectedSlotId}
-                  selectedActivityId={selectedActivityId}
-                  participantCount={participantCount}
-                  onDateChange={handleDateChange}
-                  onSlotChange={handleSlotChange}
-                  onActivityChange={setSelectedActivityId}
-                />
+                <h3 className="text-lg font-semibold mb-4">Booking Summary</h3>
+                <Card className="p-4">
+                  {/* Experience Image */}
+                  {experience.image_url && (
+                    <div className="mb-4">
+                      <img
+                        src={experience.image_url}
+                        alt={experience.title}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
+
+                  {/* Date Selection */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex flex-col items-center justify-center bg-gray-50 rounded-lg p-3 min-w-[90px]" style={{ border: '1px solid #e0e0e0' }}>
+                      <div className="text-red-500 text-sm font-medium">
+                        {selectedDate ? format(selectedDate, 'MMM') : '---'}
+                      </div>
+                      <div className="text-2xl font-bold text-gray-900">
+                        {selectedDate ? format(selectedDate, 'd') : '--'}
+                      </div>
+                      <div className="text-gray-500 text-xs">
+                        {selectedDate ? format(selectedDate, 'EEE') : '---'}
+                      </div>
+                    </div>
+
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-4 h-4 bg-gray-400 rounded-sm"></div>
+                        <span className="font-medium text-gray-900">
+                          {selectedActivity?.name || 'Select Activity'}
+                        </span>
+                        {/* <div className="ml-auto w-4 h-4 text-gray-400">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                        </div> */}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 text-gray-400">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12,6 12,12 16,14"></polyline>
+                          </svg>
+                        </div>
+                        <span className="text-gray-600">
+                          {timeSlots?.find(slot => slot.id === selectedSlotId) ?
+                            `${formatTime(timeSlots.find(slot => slot.id === selectedSlotId)!.start_time)}-${formatTime(timeSlots.find(slot => slot.id === selectedSlotId)!.end_time)}` :
+                            'Select Time Slot'
+                          }
+                        </span>
+                        {/* <div className="ml-auto w-4 h-4 text-gray-400">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                        </div> */}
+                      </div>
+                    </div>
+                  </div>
+
+                  <hr className="my-4" />
+
+                  {/* Pricing Breakdown */}
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-gray-600">
+                      {participantCount} {participantCount === 1 ? 'Person' : 'People'}
+                    </span>
+                    <span className="font-medium">
+                      {selectedActivity?.currency === 'INR' ? '₹' : selectedActivity?.currency}{totalActivityPrice}
+                    </span>
+                  </div>
+
+                  <hr className="my-4" />
+
+                  {/* Total Payable */}
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="font-bold text-lg">Total payable</div>
+                      <div className="text-sm text-gray-500 flex items-center gap-1">
+                        You'll pay ${(totalActivityPrice * 0.011).toFixed(2)}
+                        <div className="w-4 h-4 text-gray-400">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-orange-500">
+                        {selectedActivity?.currency === 'INR' ? '₹' : selectedActivity?.currency}{totalActivityPrice}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
               </div>
 
               {/* Right Column: Participants and Details */}
               <div className="space-y-6">
                 {/* Bypass Payment Toggle */}
-                <Card className="border-orange-200 bg-orange-50 dark:bg-orange-950/20">
+                {/* <Card className="border-orange-200 bg-orange-50 dark:bg-orange-950/20">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -661,12 +838,12 @@ export const BookingDialog = ({
                       />
                     </div>
                   </CardContent>
-                </Card>
+                </Card> */}
 
                 {/* Participants Section */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Participants</h3>
-                  
+
                   {/* Participant Count Selector */}
                   <FormField
                     control={form.control}
@@ -674,23 +851,19 @@ export const BookingDialog = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Number of Participants</FormLabel>
-                        <Select
-                          onValueChange={(value) => field.onChange(parseInt(value))}
-                          value={field.value.toString()}
+                        <AntSelect
+                          value={field.value}
+                          onChange={(value) => field.onChange(value)}
+                          placeholder="Select number of participants"
+                          className="w-full"
+                          size="large"
                         >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select number of participants" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {[1, 2, 3, 4, 5, 6].map((count) => (
-                              <SelectItem key={count} value={count.toString()}>
-                                {count} {count === 1 ? 'Person' : 'People'}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          {[1, 2, 3, 4, 5, 6].map((count) => (
+                            <AntSelect.Option key={count} value={count}>
+                              {count} {count === 1 ? 'Person' : 'People'}
+                            </AntSelect.Option>
+                          ))}
+                        </AntSelect>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -838,38 +1011,38 @@ export const BookingDialog = ({
                   {/* Applied Coupon Display */}
                   {((couponValidation?.isValid && couponValidation.coupon) ||
                     appliedCoupon) && (
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Tag className="h-4 w-4 text-green-600" />
-                          <span className="font-medium text-green-800">
-                            Coupon Applied:{" "}
-                            {couponValidation?.isValid &&
-                            couponValidation.coupon
-                              ? couponValidation.coupon.coupon.coupon_code
-                              : appliedCoupon.coupon.coupon_code}
-                          </span>
-                        </div>
-                        <Badge
-                          variant="secondary"
-                          className="bg-green-100 text-green-800"
-                        >
-                          {(() => {
-                            const activeCoupon =
-                              couponValidation?.isValid &&
-                              couponValidation.coupon
-                                ? couponValidation.coupon
-                                : appliedCoupon;
-                            return activeCoupon.coupon.type === "percentage"
-                              ? `Save ${activeCoupon.discount_calculation.savings_percentage.toFixed(
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Tag className="h-4 w-4 text-green-600" />
+                            <span className="font-medium text-green-800">
+                              Coupon Applied:{" "}
+                              {couponValidation?.isValid &&
+                                couponValidation.coupon
+                                ? couponValidation.coupon.coupon.coupon_code
+                                : appliedCoupon.coupon.coupon_code}
+                            </span>
+                          </div>
+                          <Badge
+                            variant="secondary"
+                            className="bg-green-100 text-green-800"
+                          >
+                            {(() => {
+                              const activeCoupon =
+                                couponValidation?.isValid &&
+                                  couponValidation.coupon
+                                  ? couponValidation.coupon
+                                  : appliedCoupon;
+                              return activeCoupon.coupon.type === "percentage"
+                                ? `Save ${activeCoupon.discount_calculation.savings_percentage.toFixed(
                                   1
                                 )}%`
-                              : `Save ${experience.currency} ${activeCoupon.discount_calculation.discount_amount}`;
-                          })()}
-                        </Badge>
-                      </div>
-                      {/* <div className="mt-2 text-sm text-green-700"> */}
-                      {/* {(() => {
+                                : `Save ${experience.currency} ${activeCoupon.discount_calculation.discount_amount}`;
+                            })()}
+                          </Badge>
+                        </div>
+                        {/* <div className="mt-2 text-sm text-green-700"> */}
+                        {/* {(() => {
                           const activeCoupon =
                             couponValidation?.isValid && couponValidation.coupon
                               ? couponValidation.coupon
@@ -908,9 +1081,9 @@ export const BookingDialog = ({
                             </>
                           );
                         })()} */}
-                      {/* </div> */}
-                    </div>
-                  )}
+                        {/* </div> */}
+                      </div>
+                    )}
                 </div>
 
                 {/* Terms and Conditions */}
@@ -1001,8 +1174,11 @@ export const BookingDialog = ({
                                 </div>
                                 <div className="text-sm text-green-600">
                                   {activeCoupon.coupon.type === "percentage"
-                                    ? `Save ${activeCoupon.discount_calculation.savings_percentage.toFixed(1)}%`
-                                    : `Save ${selectedActivity?.currency} ${totalActivityPrice - finalPrice}`}
+                                    ? `Save ${activeCoupon.discount_calculation.savings_percentage.toFixed(
+                                      1
+                                    )}%`
+                                    : `Save ${selectedActivity?.currency} ${totalActivityPrice - finalPrice
+                                    }`}
                                 </div>
                               </div>
                             );
@@ -1046,15 +1222,15 @@ export const BookingDialog = ({
               </CardContent>
             </Card>
 
-            {/* Submit Button */}
-            <div className="flex gap-3">
+            {/* Step 2 Footer */}
+            <div className="flex gap-3 pt-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={onClose}
+                onClick={handlePrevStep}
                 className="flex-1"
               >
-                Cancel
+                Back
               </Button>
               <Button
                 type="submit"
@@ -1071,7 +1247,7 @@ export const BookingDialog = ({
             </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      )}
+    </Modal>
   );
 };

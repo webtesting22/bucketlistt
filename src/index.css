@@ -172,16 +172,27 @@
     --ring: 222.2 84% 4.9%;
 
     /* Brand Colors - Light Theme */
-    --brand-primary: 24 100% 50%;
+    /* --brand-primary: 24 100% 50%; */
     /* Orange #ff6600 */
-    --brand-primary-light: 24 100% 60%;
+    /* --brand-primary-light: 24 100% 60%; */
     /* Light Orange #ff8533 */
-    --brand-primary-dark: 24 100% 40%;
+    /* --brand-primary-dark: 24 100% 40%; */
     /* Dark Orange #cc5200 */
-    --brand-secondary: 45 100% 50%;
+    /* --brand-secondary: 45 100% 50%; */
     /* Yellow #ffaa00 */
-    --brand-accent: 340 100% 50%;
+    /* --brand-accent: 340 100% 50%; */
     /* Pink #ff0066 */
+    /* Brand Colors - Light Theme */
+/* Brand Colors - Light Theme */
+--brand-primary: 276 85% 45%;       /* #940fdb */
+--brand-primary-light: 276 100% 88.02%; /* lighter purple */
+--brand-primary-dark: 276 85% 35%;  /* darker purple */
+
+--brand-secondary: 288 65% 60%;      /* #b84dff (softer magenta purple) */
+--brand-secondary-light: 288 65% 70%;/* #cc80ff (light pastel purple) */
+--brand-secondary-dark: 288 65% 50%; /* #9900ff (deep magenta purple) */
+
+
 
     /* Semantic Colors - Light Theme */
     --success: 142 76% 36%;

@@ -87,7 +87,7 @@ const Index = () => {
         "@type": "WebSite",
         "@id": "https://www.bucketlistt.com/#website",
         url: "https://www.bucketlistt.com/",
-        name: "BucketListt",
+        name: "bucketlistt",
         description:
           "India's premier adventure tourism platform offering curated experiences",
         potentialAction: [
@@ -105,11 +105,11 @@ const Index = () => {
       {
         "@type": "TravelAgency",
         "@id": "https://www.bucketlistt.com/#organization",
-        name: "BucketListt",
+        name: "bucketlistt",
         url: "https://www.bucketlistt.com/",
         logo: {
           "@type": "ImageObject",
-          url: "https://www.bucketlistt.com/bucket-list-icon.png",
+          url: "https://www.bucketlistt.com/bucketListt_logo.svg",
         },
         description:
           "ATOAI certified adventure tourism company offering premium travel experiences across India",
@@ -125,8 +125,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="BucketListt - Discover Adventures & Plan Your Dream Trips"
-        description="Discover India's best adventure experiences with BucketListt. Book bungee jumping, rafting, trekking & more. ATOAI certified tours with lowest prices guaranteed."
+        title="bucketlistt - Discover Adventures & Plan Your Dream Trips"
+        description="Discover India's best adventure experiences with bucketlistt. Book bungee jumping, rafting, trekking & more. ATOAI certified tours with lowest prices guaranteed."
         keywords="adventure tours, travel experiences, India tourism, bungee jumping, rafting, trekking, ATOAI certified, bucket list adventures, adventure activities India"
         structuredData={homepageStructuredData}
       />
@@ -377,20 +377,22 @@ const Index = () => {
                             reviews={
                               experience.reviews_count?.toString() || "0"
                             }
-                            price={`${experience.currency === "USD"
-                              ? "₹"
-                              : experience.currency == "INR"
+                            price={`${
+                              experience.currency === "USD"
+                                ? "₹"
+                                : experience.currency == "INR"
                                 ? "₹"
                                 : experience.currency
-                              } ${experience.price}`}
+                            } ${experience.price}`}
                             originalPrice={
                               experience.original_price
-                                ? `${experience.currency === "USD"
-                                  ? "₹"
-                                  : experience.currency == "INR"
-                                    ? "₹"
-                                    : experience.currency
-                                } ${experience.original_price}`
+                                ? `${
+                                    experience.currency === "USD"
+                                      ? "₹"
+                                      : experience.currency == "INR"
+                                      ? "₹"
+                                      : experience.currency
+                                  } ${experience.original_price}`
                                 : undefined
                             }
                             duration={experience.duration || undefined}
@@ -453,7 +455,7 @@ const Index = () => {
               delay={100}
               duration={600}
             >
-              <h2 className="CommonH2">Why Choose BucketListt?</h2>
+              <h2 className="CommonH2">Why Choose bucketlistt?</h2>
             </BidirectionalAnimatedSection>
             {/* <br />
 <br /> */}
@@ -537,7 +539,7 @@ const Index = () => {
                     className="LogoATOAIStyles"
                     src="/ATOAI_logo.jpg"
                     alt="ATOAI Logo"
-                  // className="mx-auto w-32 md:w-48 h-auto rounded-lg"
+                    // className="mx-auto w-32 md:w-48 h-auto rounded-lg"
                   />
                 </BidirectionalAnimatedSection>
 
