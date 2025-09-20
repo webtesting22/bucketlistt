@@ -92,6 +92,17 @@ const ExperienceDetail = () => {
             name,
             email,
             phone_number
+          ),
+          time_slots (
+            start_time,
+            end_time,
+            activity_id,
+            activities (
+              id,
+              name,
+              price,
+              currency
+            )
           )
         `
         )
