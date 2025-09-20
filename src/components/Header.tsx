@@ -335,7 +335,7 @@ export function Header() {
                     <Heart className="mr-2 h-4 w-4" />
                     Wishlists
                   </DropdownMenuItem>
-                  <DropdownMenuItem
+                  {/* <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("/coming-soon")}
                   >
@@ -355,7 +355,7 @@ export function Header() {
                   >
                     <CreditCard className="mr-2 h-4 w-4" />
                     Payment methods
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("/coming-soon")}

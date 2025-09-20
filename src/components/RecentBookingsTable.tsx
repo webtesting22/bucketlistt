@@ -132,7 +132,7 @@ export const RecentBookingsTable = ({ experienceId, limit = 10, isVendorView = f
         {/* Table Header */}
         <div className="bg-muted/50 px-6 py-4 border-b">
           {isVendorView ? (
-            <div className="grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground">
+            <div className="grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground text-left">
               <div className="col-span-2">Experience</div>
               <div className="col-span-2">Date & Time</div>
               <div className="col-span-2">Participants</div>
@@ -142,7 +142,7 @@ export const RecentBookingsTable = ({ experienceId, limit = 10, isVendorView = f
               <div className="col-span-1">Booked On</div>
             </div>
           ) : (
-            <div className="grid grid-cols-11 gap-4 text-sm font-medium text-muted-foreground">
+            <div className="grid grid-cols-11 gap-4 text-sm font-medium text-muted-foreground text-left">
               <div className="col-span-3">Experience</div>
               <div className="col-span-2">Date & Time</div>
               <div className="col-span-2">Participants</div>
@@ -157,7 +157,7 @@ export const RecentBookingsTable = ({ experienceId, limit = 10, isVendorView = f
           {bookings.map((booking) => (
             <div key={booking.id} className="px-6 py-4 hover:bg-muted/30 transition-colors">
               {isVendorView ? (
-                <div className="grid grid-cols-12 gap-4 items-center">
+                <div className="grid grid-cols-12 gap-4 items-center text-left">
                   {/* Experience Info - Vendor View */}
                   <div className="col-span-2">
                     <div className="flex items-center gap-2">
@@ -276,7 +276,7 @@ export const RecentBookingsTable = ({ experienceId, limit = 10, isVendorView = f
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-11 gap-4 items-center">
+                <div className="grid grid-cols-11 gap-4 items-center text-left">
                   {/* Experience Info - Regular View */}
                   <div className="col-span-3">
                     <div className="flex items-center gap-3">

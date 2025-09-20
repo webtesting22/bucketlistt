@@ -26,6 +26,7 @@ import {
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import TotalBookings from "./TotalBookings"
 
 const Profile = () => {
   const { user, loading } = useAuth()
@@ -110,14 +111,21 @@ const Profile = () => {
         icon: Plus, 
         title: "Create Experience", 
         description: "Add new experiences"
+      },
+      { 
+        id: 'total-bookings',
+        icon: Calendar, 
+        title: "Total Bookings", 
+        description: "Total bookings received"
       }
     ] : []),
-    { 
+    // Only for non-vendor users
+    ...(!isVendor ? [{
       id: 'bookings',
-      icon: Calendar, 
-      title: "My Bookings", 
+      icon: Calendar,
+      title: "My Bookings",
       description: "View your bookings"
-    },
+    }] : []),
     { 
       id: 'rewards',
       icon: Gift, 
@@ -167,6 +175,10 @@ const Profile = () => {
       navigate('/create-experience')
       return
     }
+    if (sectionId === 'total-bookings') {
+      setActiveSection('total-bookings')
+      return
+    }
     if (sectionId === 'my-experiences') {
       navigate('/vendor/experiences')
       return
@@ -184,6 +196,8 @@ const Profile = () => {
         return isVendor ? <VendorAnalytics /> : null
       case 'bookings':
         return <UserBookings />
+      case 'total-bookings':
+        return isVendor ? <TotalBookings /> : null
       default:
         return null
     }

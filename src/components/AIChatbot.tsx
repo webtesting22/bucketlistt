@@ -310,7 +310,7 @@ Always aim to inspire users to explore and book amazing experiences through buck
               </div>
             </ScrollArea>
 
-            <div className="p-4 border-t border-white/20 bg-white/10 backdrop-blur-md">
+            <div className="p-4 border-t border-white/20 bg-white/10 backdrop-blur-md mb-[8px] rounded-bl-[10px] rounded-br-[10px]">
               <div className="flex space-x-2">
                 <Input
                   placeholder="Ask me about travel experiences..."
@@ -330,7 +330,7 @@ Always aim to inspire users to explore and book amazing experiences through buck
                 </Button>
               </div>
               <div className="text-xs text-muted-foreground mt-2 text-center">
-                Created by Darshit Joshi
+                {/* Created by Darshit Joshi */}
               </div>
             </div>
           </CardContent>

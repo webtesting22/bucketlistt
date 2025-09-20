@@ -268,68 +268,82 @@ export const CouponManager: React.FC<CouponManagerProps> = ({
             to customers.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Coupon Code</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Discount</TableHead>
-                <TableHead>Usage</TableHead>
-                <TableHead>Valid Until</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {coupons.map((coupon) => (
-                <TableRow key={coupon.id}>
-                  <TableCell>
-                    <Badge variant="outline">{coupon.coupon_code}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      {coupon.type === "percentage" ? (
-                        <Percent className="h-4 w-4" />
-                      ) : (
-                        <DollarSign className="h-4 w-4" />
-                      )}
-                      <span className="capitalize">{coupon.type}</span>
+          <div className="space-y-4">
+            <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+              {/* Header */}
+              <div className="bg-muted/50 px-6 py-4 border-b">
+                <div className="grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground text-left">
+                  <div className="col-span-3">Coupon Code</div>
+                  <div className="col-span-2">Type</div>
+                  <div className="col-span-2">Discount</div>
+                  <div className="col-span-2">Usage</div>
+                  <div className="col-span-2">Valid Until</div>
+                  <div className="col-span-1">Actions</div>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="divide-y divide-border">
+                {coupons.map((coupon) => (
+                  <div key={coupon.id} className="px-6 py-4 hover:bg-muted/30 transition-colors">
+                    <div className="grid grid-cols-12 gap-4 items-center text-left">
+                      <div className="col-span-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline">{coupon.coupon_code}</Badge>
+                        </div>
+                      </div>
+
+                      <div className="col-span-2">
+                        <div className="flex items-center gap-1">
+                          {coupon.type === "percentage" ? (
+                            <Percent className="h-4 w-4" />
+                          ) : (
+                            <DollarSign className="h-4 w-4" />
+                          )}
+                          <span className="capitalize">{coupon.type}</span>
+                        </div>
+                      </div>
+
+                      <div className="col-span-2">
+                        {coupon.type === "percentage"
+                          ? `${coupon.discount_value}%`
+                          : formatCurrency(coupon.discount_value)}
+                      </div>
+
+                      <div className="col-span-2">
+                        <div className="flex items-center gap-1">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          <span>
+                            {coupon.used_count}
+                            {coupon.max_uses ? ` / ${coupon.max_uses}` : " / ∞"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="col-span-2">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>{formatDate(coupon.valid_until)}</span>
+                        </div>
+                      </div>
+
+                      <div className="col-span-1">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteCoupon(coupon.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    {coupon.type === "percentage"
-                      ? `${coupon.discount_value}%`
-                      : formatCurrency(coupon.discount_value)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      <span>
-                        {coupon.used_count}
-                        {coupon.max_uses ? ` / ${coupon.max_uses}` : " / ∞"}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      <span>{formatDate(coupon.valid_until)}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteCoupon(coupon.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>
