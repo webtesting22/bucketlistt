@@ -191,7 +191,7 @@ Always aim to inspire users to explore and book amazing experiences through buck
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 md:bottom-8 md:right-20 z-50">
         <Button
           onClick={() => setIsOpen(true)}
           size="lg"

@@ -31,6 +31,8 @@ import Partner from "./pages/Partner"
 import VendorExperiences from "./pages/VendorExperiences"
 import "./App.css"
 import { MobileFloatingButton } from './components/MobileFloatingButton'
+import Blogs from './pages/Blogs'
+import BlogDetail from './pages/BlogDetail'
 
 const queryClient = new QueryClient()
 
@@ -106,6 +108,8 @@ const App: React.FC = () => {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/blogs" element={<Blogs />} />
+                  <Route path="/blogs/:id" element={<BlogDetail />} />
                   <Route path="/email-confirmation" element={<EmailConfirmation />} />
                   <Route path="/experiences" element={<Experiences />} />
                   <Route path="/destinations" element={<Destinations />} />

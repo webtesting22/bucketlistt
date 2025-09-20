@@ -1,10 +1,8 @@
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Calendar, FileText, MapPin, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const UserBookings = () => {
@@ -24,15 +22,13 @@ export const UserBookings = () => {
           experiences (
             id,
             title,
-            image_url,
             location,
             price,
             currency
           ),
           booking_participants (
             name,
-            email,
-            phone_number
+            email
           )
         `
         )
@@ -45,122 +41,92 @@ export const UserBookings = () => {
     enabled: !!user,
   });
 
-  if (isLoading) {
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "confirmed":
+        return "bg-green-100 text-green-700";
+      case "pending":
+        return "bg-yellow-100 text-yellow-700";
+      case "cancelled":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  if (isLoading) return <p className="text-center py-10">Loading...</p>;
+
+  if (!bookings || bookings.length === 0)
     return (
-      <div className="space-y-4">
-        <div className="h-32 bg-muted animate-pulse rounded-lg"></div>
-        <div className="h-32 bg-muted animate-pulse rounded-lg"></div>
+      <div className="text-center py-10 text-muted-foreground">
+        No bookings yet!
       </div>
     );
-  }
-
-  if (!bookings || bookings.length === 0) {
-    return (
-      <Card>
-        <CardContent className="p-8 text-center">
-          <div className="w-24 h-24 mx-auto mb-4 bg-purple-100 dark:bg-purple-950/30 rounded-full flex items-center justify-center">
-            <Calendar className="h-12 w-12 text-purple-500" />
-          </div>
-          <h3 className="text-xl font-bold mb-2 text-gray-600 dark:text-gray-300">
-            No bookings yet!
-          </h3>
-          <p className="text-muted-foreground">
-            Your booked experiences will appear here.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
-    <div className="space-y-4">
-      {bookings.map((booking) => (
-        <Card
-          key={booking.id}
-          className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => navigate(`/experience/${booking.experiences?.id}`)}
-        >
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <CardTitle className="text-lg mb-1">
-                  {booking.experiences?.title}
-                </CardTitle>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      {format(new Date(booking.booking_date), "MMM d, yyyy")}
-                    </span>
-                  </div>
-                  {booking.experiences?.location && (
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      <span>{booking.experiences.location}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <Badge
-                variant="secondary"
-                className="bg-green-100 text-green-800"
+    <div className="overflow-x-auto">
+      <table className="min-w-full table-auto border-collapse border border-gray-200">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="px-4 py-2 border">Title</th>
+            <th className="px-4 py-2 border">Date</th>
+            <th className="px-4 py-2 border">Location</th>
+            <th className="px-4 py-2 border">Participants</th>
+            <th className="px-4 py-2 border">Price</th>
+            <th className="px-4 py-2 border">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {bookings.map((booking) => (
+            <tr
+              key={booking.id}
+              className="hover:bg-gray-50"
+              // onClick={() =>
+              //   navigate(`/experience/${booking.experiences?.id}`)
+              // }
+            >
+              <td
+                className="px-4 py-2 border cursor-pointer hover:text-brand-primary"
+                onClick={() =>
+                  navigate(`/experience/${booking.experiences?.id}`)
+                }
               >
-                {booking.status}
-              </Badge>
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">
-                    Participants ({booking.total_participants})
-                  </span>
-                </div>
-                <div className="space-y-1 text-sm text-muted-foreground">
-                  {booking.booking_participants?.map((participant, index) => (
-                    <div key={index} className="flex justify-between">
-                      <span>{participant.name}</span>
-                      <span>{participant.email}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="text-right">
-                <div className="text-2xl font-bold text-orange-500 mb-1">
-                  {booking.experiences?.currency === "USD"
-                    ? "₹"
-                    : booking.experiences?.currency}
-                  {(booking.experiences?.price || 0) *
-                    booking.total_participants}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {booking.total_participants} ×{" "}
-                  {booking.experiences?.currency === "USD"
-                    ? "₹"
-                    : booking.experiences?.currency}
-                  {booking.experiences?.price}
-                </div>
-              </div>
-            </div>
-
-            {booking.note_for_guide && (
-              <div className="border-t pt-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Note for Guide</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {booking.note_for_guide}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+                {booking.experiences?.title}
+              </td>
+              <td className="px-4 py-2 border">
+                {format(new Date(booking.booking_date), "MMM d, yyyy")}
+              </td>
+              <td className="px-4 py-2 border cursor-pointer hover:text-brand-primary">
+                {" "}
+                <a
+                  // href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                  //   booking.experiences?.location
+                  // )}`}
+                  href={booking.experiences?.location}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {booking.experiences?.location}
+                </a>
+              </td>
+              <td className="px-4 py-2 border">
+                {booking.booking_participants?.map((p) => p.name).join(", ")}
+              </td>
+              <td className="px-4 py-2 border text-right">
+                {booking.experiences?.currency === "USD"
+                  ? "₹"
+                  : booking.experiences?.currency}
+                {(booking.experiences?.price || 0) * booking.total_participants}
+              </td>
+              <td className="px-4 py-2 border">
+                <Badge className={`${getStatusColor(booking.status)}`}>
+                  {booking.status}
+                </Badge>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
