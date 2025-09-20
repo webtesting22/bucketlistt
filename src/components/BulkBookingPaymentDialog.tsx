@@ -245,6 +245,7 @@ export const BulkBookingPaymentDialog = ({
           {/* Booking Summary */}
           <Card>
             <CardContent className="p-6">
+              {/* <br /> */}
               <h3 className="text-lg font-semibold mb-4">Booking Summary</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">

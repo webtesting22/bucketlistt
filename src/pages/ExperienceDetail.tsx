@@ -554,103 +554,102 @@ const ExperienceDetail = () => {
                 </div>
               )} */}
 
-              <div className="flex items-center gap-3 mb-6">
-                <span style={{ color: "grey" }}>From</span>
-                <span
-                  className={`text-3xl font-bold ${
-                    appliedCoupon
-                      ? "line-through text-muted-foreground"
-                      : "text-orange-500"
-                  }`}
-                >
-                  {formatCurrency(experience.price)}
-                </span>
-                {appliedCoupon && appliedCoupon.discount_calculation && (
-                  <>
-                    <span className="text-3xl font-bold text-green-600">
-                      {formatCurrency(
-                        appliedCoupon.discount_calculation.final_amount
-                      )}
-                    </span>
-                    <Badge
-                      variant="secondary"
-                      className="bg-green-100 text-green-800"
-                    >
-                      Save{" "}
-                      {appliedCoupon.discount_calculation.savings_percentage.toFixed(
-                        1
-                      )}
-                      %
-                    </Badge>
-                  </>
-                )}
-                {experience.original_price && !appliedCoupon && (
-                  <span className="text-lg text-muted-foreground line-through">
-                    {formatCurrency(experience.original_price)}
-                  </span>
-                )}
-              </div>
-
-              {/* Coupon Section */}
-              {!isVendor && (
-                <div className="mb-4">
-                  {!showCouponInput && !appliedCoupon && (
-                    <Button
-                      variant="outline"
-                      className="w-full mb-2"
-                      onClick={() => setShowCouponInput(true)}
-                    >
-                      <Tag className="h-4 w-4 mr-2" />
-                      Have a coupon code?
-                    </Button>
-                  )}
-
-                  {showCouponInput && (
-                    <CouponInput
-                      experienceId={experience.id}
-                      bookingAmount={experience.price}
-                      currency={experience.currency || "INR"}
-                      onCouponApplied={handleCouponApplied}
-                      onCouponRemoved={handleCouponRemoved}
-                      className="mb-4"
-                    />
-                  )}
-
-                  {appliedCoupon && (
-                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Tag className="h-4 w-4 text-green-600" />
-                          <span className="font-medium text-green-800">
-                            Coupon Applied: {appliedCoupon.coupon?.coupon_code}
-                          </span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleCouponRemoved}
-                          className="text-green-600 hover:text-green-800"
+                      <div className="flex items-center gap-3 mb-6">
+                        <span style={{ color: "grey" }}>From</span>
+                        <span
+                          className={`text-3xl font-bold ${appliedCoupon
+                            ? "line-through text-muted-foreground"
+                            : "text-orange-500"
+                            }`}
                         >
-                          Remove
-                        </Button>
+                          {formatCurrency(experience.price)}
+                        </span>
+                        {appliedCoupon && appliedCoupon.discount_calculation && (
+                          <>
+                            <span className="text-3xl font-bold text-green-600">
+                              {formatCurrency(
+                                appliedCoupon.discount_calculation.final_amount
+                              )}
+                            </span>
+                            <Badge
+                              variant="secondary"
+                              className="bg-green-100 text-green-800"
+                            >
+                              Save{" "}
+                              {appliedCoupon.discount_calculation.savings_percentage.toFixed(
+                                1
+                              )}
+                              %
+                            </Badge>
+                          </>
+                        )}
+                        {experience.original_price && !appliedCoupon && (
+                          <span className="text-lg text-muted-foreground line-through">
+                            {formatCurrency(experience.original_price)}
+                          </span>
+                        )}
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
 
-              <Button
-                size="lg"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-                onClick={() => setIsBookingDialogOpen(true)}
-              >
-                {bookingButtonText} -{" "}
-                {appliedCoupon?.discount_calculation?.final_amount
-                  ? formatCurrency(
-                      appliedCoupon.discount_calculation.final_amount
-                    )
-                  : formatCurrency(experience.price)}
-              </Button>
+                      {/* Coupon Section */}
+                      {!isVendor && (
+                        <div className="mb-4">
+                          {!showCouponInput && !appliedCoupon && (
+                            <Button
+                              variant="outline"
+                              className="w-full mb-2"
+                              onClick={() => setShowCouponInput(true)}
+                            >
+                              <Tag className="h-4 w-4 mr-2" />
+                              Have a coupon code?
+                            </Button>
+                          )}
+
+                          {showCouponInput && (
+                            <CouponInput
+                              experienceId={experience.id}
+                              bookingAmount={experience.price}
+                              currency={experience.currency || "INR"}
+                              onCouponApplied={handleCouponApplied}
+                              onCouponRemoved={handleCouponRemoved}
+                              className="mb-4"
+                            />
+                          )}
+
+                          {appliedCoupon && (
+                            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Tag className="h-4 w-4 text-green-600" />
+                                  <span className="font-medium text-green-800">
+                                    Coupon Applied: {appliedCoupon.coupon?.coupon_code}
+                                  </span>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleCouponRemoved}
+                                  className="text-green-600 hover:text-green-800"
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <Button
+                        size="lg"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                        onClick={() => setIsBookingDialogOpen(true)}
+                      >
+                        {bookingButtonText} -{" "}
+                        {appliedCoupon?.discount_calculation?.final_amount
+                          ? formatCurrency(
+                            appliedCoupon.discount_calculation.final_amount
+                          )
+                          : formatCurrency(experience.price)}
+                      </Button>
 
                       {/* Bulk Booking Buttons for Vendor */}
                       {isVendor && (
@@ -758,6 +757,7 @@ const ExperienceDetail = () => {
             title: experience.title,
             price: experience.price || 0, // Always use original price for coupon validation
             currency: experience.currency || "INR",
+            image_url: experience.image_url,
           }}
           appliedCoupon={appliedCoupon}
           onBookingSuccess={handleBookingSuccess}
