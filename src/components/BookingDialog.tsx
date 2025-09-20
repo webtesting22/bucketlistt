@@ -21,6 +21,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, Tag, CheckCircle, AlertCircle } from "lucide-react";
@@ -42,9 +49,11 @@ const participantSchema = z.object({
 });
 
 const bookingSchema = z.object({
-  participants: z
-    .array(participantSchema)
-    .min(1, "At least one participant is required"),
+  participant: participantSchema,
+  participant_count: z
+    .number()
+    .min(1, "At least one participant is required")
+    .max(6, "Maximum 6 participants allowed"),
   note_for_guide: z.string().optional(),
   terms_accepted: z
     .boolean()
@@ -111,7 +120,8 @@ export const BookingDialog = ({
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
-      participants: [{ name: "", email: "", phone_number: "" }],
+      participant: { name: "", email: "", phone_number: "" },
+      participant_count: 1,
       note_for_guide: "",
       terms_accepted: false,
       referral_code: "",
@@ -119,8 +129,8 @@ export const BookingDialog = ({
     },
   });
 
-  const participants = form.watch("participants");
-  const totalPrice = experience.price * participants.length;
+  const participantCount = form.watch("participant_count");
+  const totalPrice = experience.price * participantCount;
 
   // Calculate final price with coupon discount
   const calculateFinalPrice = () => {
@@ -131,9 +141,9 @@ export const BookingDialog = ({
         : appliedCoupon;
 
     if (activeCoupon && activeCoupon.discount_calculation) {
-      // The discount_calculation.final_amount is per person, so multiply by participants
+      // The discount_calculation.final_amount is per person, so multiply by participant count
       return (
-        activeCoupon.discount_calculation.final_amount * participants.length
+        activeCoupon.discount_calculation.final_amount * participantCount
       );
     }
     return totalPrice;
@@ -141,23 +151,6 @@ export const BookingDialog = ({
 
   const finalPrice = calculateFinalPrice();
 
-  const addParticipant = () => {
-    const currentParticipants = form.getValues("participants");
-    form.setValue("participants", [
-      ...currentParticipants,
-      { name: "", email: "", phone_number: "" },
-    ]);
-  };
-
-  const removeParticipant = (index: number) => {
-    const currentParticipants = form.getValues("participants");
-    if (currentParticipants.length > 1) {
-      form.setValue(
-        "participants",
-        currentParticipants.filter((_, i) => i !== index)
-      );
-    }
-  };
   console.log("experience", experience);
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date);
@@ -251,9 +244,9 @@ export const BookingDialog = ({
         type: "text",
         data: [
           {
-            mobile: data.participants[0].phone_number,
+            mobile: data.participant.phone_number,
             bodyValues: {
-              "1": data.participants[0].name,
+              "1": data.participant.name,
               "2": experience.title,
               "3": `${moment(selectedDate).format("DD/MM/YYYY")} - ${moment(
                 timeSlot?.start_time,
@@ -277,17 +270,17 @@ export const BookingDialog = ({
         "send-booking-confirmation",
         {
           body: {
-            customerEmail: data.participants[0].email,
-            customerName: data.participants[0].name,
+            customerEmail: data.participant.email,
+            customerName: data.participant.name,
             experienceTitle: experience.title,
             bookingDate: selectedDate?.toISOString(),
             timeSlot: timeSlot
               ? `${timeSlot.start_time} - ${timeSlot.end_time}`
               : "Time slot details unavailable",
-            totalParticipants: data.participants.length,
+            totalParticipants: data.participant_count,
             totalAmount: totalPrice,
             currency: experience.currency,
-            participants: data.participants,
+            participants: Array.from({ length: data.participant_count }, () => data.participant),
             bookingId: bookingId,
             noteForGuide: data.note_for_guide,
             paymentId: paymentId || "BYPASSED",
@@ -328,7 +321,7 @@ export const BookingDialog = ({
           time_slot_id: selectedSlotId,
           booking_date: selectedDate.toISOString(),
           note_for_guide: data.note_for_guide || null,
-          total_participants: data.participants.length,
+          total_participants: data.participant_count,
           terms_accepted: data.terms_accepted,
           referral_code: data?.referral_code,
         })
@@ -342,12 +335,12 @@ export const BookingDialog = ({
 
       console.log("Booking created successfully:", booking.id);
 
-      // Create participants
-      const participantsData = data.participants.map((participant) => ({
+      // Create participants - duplicate the primary participant data for each participant
+      const participantsData = Array.from({ length: data.participant_count }, () => ({
         booking_id: booking.id,
-        name: participant.name,
-        email: participant.email,
-        phone_number: participant.phone_number,
+        name: data.participant.name,
+        email: data.participant.email,
+        phone_number: data.participant.phone_number,
       }));
 
       const { error: participantsError } = await supabase
@@ -406,7 +399,7 @@ export const BookingDialog = ({
           time_slot_id: selectedSlotId,
           booking_date: selectedDate.toISOString(),
           note_for_guide: data.note_for_guide || null,
-          total_participants: data.participants.length,
+          total_participants: data.participant_count,
           terms_accepted: data.terms_accepted,
           referral_code: data?.referral_code,
         })
@@ -420,12 +413,12 @@ export const BookingDialog = ({
 
       console.log("Booking created successfully:", booking.id);
 
-      // Create participants
-      const participantsData = data.participants.map((participant) => ({
+      // Create participants - duplicate the primary participant data for each participant
+      const participantsData = Array.from({ length: data.participant_count }, () => ({
         booking_id: booking.id,
-        name: participant.name,
-        email: participant.email,
-        phone_number: participant.phone_number,
+        name: data.participant.name,
+        email: data.participant.email,
+        phone_number: data.participant.phone_number,
       }));
 
       const { error: participantsError } = await supabase
@@ -505,7 +498,8 @@ export const BookingDialog = ({
           experience_id: experience.id,
           time_slot_id: selectedSlotId,
           booking_date: selectedDate.toISOString(),
-          participants: data.participants,
+          participant: data.participant,
+          participant_count: data.participant_count,
           note_for_guide: data.note_for_guide,
           referral_code: data?.referral_code,
           coupon_code: data?.coupon_code,
@@ -546,9 +540,9 @@ export const BookingDialog = ({
           await createBookingAfterPayment(data, response.razorpay_payment_id);
         },
         prefill: {
-          name: data.participants[0].name,
-          email: data.participants[0].email,
-          contact: data.participants[0].phone_number,
+          name: data.participant.name,
+          email: data.participant.email,
+          contact: data.participant.phone_number,
         },
         theme: {
           color: "hsl(var(--brand-primary))",
@@ -598,7 +592,7 @@ export const BookingDialog = ({
 
   // Update price calculation to use activity price
   const totalActivityPrice = selectedActivity
-    ? selectedActivity.price * participants.length
+    ? selectedActivity.price * participantCount
     : 0;
 
   return (
@@ -621,7 +615,7 @@ export const BookingDialog = ({
                   selectedDate={selectedDate}
                   selectedSlotId={selectedSlotId}
                   selectedActivityId={selectedActivityId}
-                  participantCount={participants.length}
+                  participantCount={participantCount}
                   onDateChange={handleDateChange}
                   onSlotChange={handleSlotChange}
                   onActivityChange={setSelectedActivityId}
@@ -652,90 +646,92 @@ export const BookingDialog = ({
 
                 {/* Participants Section */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Participants</h3>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={addParticipant}
-                      className="flex items-center gap-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add Person
-                    </Button>
-                  </div>
+                  <h3 className="text-lg font-semibold">Participants</h3>
+                  
+                  {/* Participant Count Selector */}
+                  <FormField
+                    control={form.control}
+                    name="participant_count"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Number of Participants</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(parseInt(value))}
+                          value={field.value.toString()}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select number of participants" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {[1, 2, 3, 4, 5, 6].map((count) => (
+                              <SelectItem key={count} value={count.toString()}>
+                                {count} {count === 1 ? 'Person' : 'People'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  {participants.map((_, index) => (
-                    <Card key={index} className="relative">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-medium">Person {index + 1}</h4>
-                          {participants.length > 1 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeParticipant(index)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
+                  {/* Single Participant Form */}
+                  <Card>
+                    <CardContent className="p-4">
+                      <h4 className="font-medium mb-4">Primary Contact Details</h4>
+                      <div className="grid grid-cols-1 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="participant.name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Full name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
                           )}
-                        </div>
+                        />
 
-                        <div className="grid grid-cols-1 gap-4">
-                          <FormField
-                            control={form.control}
-                            name={`participants.${index}.name`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="Full name" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                        <FormField
+                          control={form.control}
+                          name="participant.email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="email@example.com"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                          <FormField
-                            control={form.control}
-                            name={`participants.${index}.email`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="email@example.com"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name={`participants.${index}.phone_number`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Phone</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Phone number"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        <FormField
+                          control={form.control}
+                          name="participant.phone_number"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Phone</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Phone number"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 {/* Note for Guide */}
@@ -980,8 +976,8 @@ export const BookingDialog = ({
                           }
                         })()}
                         <div className="text-sm text-muted-foreground">
-                          {participants.length} participant
-                          {participants.length > 1 ? "s" : ""} ×{" "}
+                          {participantCount} participant
+                          {participantCount > 1 ? "s" : ""} ×{" "}
                           {selectedActivity?.currency} {selectedActivity?.price}
                         </div>
                       </div>
