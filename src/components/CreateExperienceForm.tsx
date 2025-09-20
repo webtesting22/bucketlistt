@@ -19,6 +19,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, Upload, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface Category {
   id: string;
@@ -105,6 +107,22 @@ export function CreateExperienceForm({
     days_open: initialData?.days_open || ([] as string[]),
     destination_id: initialData?.destination_id || "",
   });
+
+  // React Quill configuration
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['link'],
+      ['clean']
+    ],
+  };
+
+  const quillFormats = [
+    'header', 'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet', 'link'
+  ];
 
   // Calculate discount percentage if we have original price and current price
   useEffect(() => {
@@ -829,10 +847,10 @@ export function CreateExperienceForm({
                   {categories.filter(
                     (category) => !formData.category_ids.includes(category.id)
                   ).length === 0 && (
-                    <div className="px-2 py-1 text-sm text-muted-foreground">
-                      All categories selected
-                    </div>
-                  )}
+                      <div className="px-2 py-1 text-sm text-muted-foreground">
+                        All categories selected
+                      </div>
+                    )}
                 </SelectContent>
               </Select>
             </div>
@@ -840,14 +858,20 @@ export function CreateExperienceForm({
 
           <div className="space-y-2">
             <Label htmlFor="description">Description *</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              rows={4}
-              required
-              placeholder="Describe the experience.."
-            />
+            <div className="border rounded-md overflow-hidden">
+              <ReactQuill
+                theme="snow"
+                value={formData.description}
+                onChange={(value) => handleInputChange("description", value)}
+                modules={quillModules}
+                formats={quillFormats}
+                placeholder="Describe the experience.."
+                style={{ 
+                  minHeight: '400px',
+                  backgroundColor: 'transparent'
+                }}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -858,12 +882,12 @@ export function CreateExperienceForm({
               onChange={(e) => handleInputChange("location", e.target.value)}
               required
               placeholder="Paste Google Maps link to meeting point/location"
-              // className={
-              //   !formData.location.includes("maps.google.com") ||
-              //   !formData.location.includes("maps.app.goo")
-              //     ? "border-red-500"
-              //     : ""
-              // }
+            // className={
+            //   !formData.location.includes("maps.google.com") ||
+            //   !formData.location.includes("maps.app.goo")
+            //     ? "border-red-500"
+            //     : ""
+            // }
             />
             {/* {formData.location &&
               (!formData.location.includes("maps.google.com") ||
@@ -1231,8 +1255,8 @@ export function CreateExperienceForm({
                 ? "Updating Experience..."
                 : "Creating Experience..."
               : isEditing
-              ? "Update Experience"
-              : "Create Experience"}
+                ? "Update Experience"
+                : "Create Experience"}
           </Button>
         </form>
       </CardContent>

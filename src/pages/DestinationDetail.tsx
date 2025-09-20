@@ -483,7 +483,7 @@ const DestinationDetail = () => {
                           className={`scroll-scale-in ${isAnimated ? "animate" : ""
                             }`}
                           style={{ animationDelay: `${0.6 + index * 0.05}s` }}
-        
+
                         >
                           <ExperienceCard
                             id={experience.id}
@@ -570,7 +570,7 @@ const DestinationDetail = () => {
                       className={`scroll-scale-in ${isAnimated ? "animate" : ""
                         }`}
                       style={{ animationDelay: `${0.6 + index * 0.05}s` }}
-                                        id="ExperienceCardContainerSpecificDestinationDetail"
+                      id="ExperienceCardContainerSpecificDestinationDetail"
                     >
                       <ExperienceCard
                         id={experience.id}
@@ -583,22 +583,20 @@ const DestinationDetail = () => {
                         }
                         rating={Number(experience.rating)}
                         reviews={experience.reviews_count?.toString() || "0"}
-                        price={`${
-                          experience.currency === "USD"
-                            ? "₹"
-                            : experience.currency == "INR"
+                        price={`${experience.currency === "USD"
+                          ? "₹"
+                          : experience.currency == "INR"
                             ? "₹"
                             : experience.currency
-                        } ${experience.price}`}
+                          } ${experience.price}`}
                         originalPrice={
                           experience.original_price
-                            ? `${
-                                experience.currency === "USD"
-                                  ? "₹"
-                                  : experience.currency == "INR"
-                                  ? "₹"
-                                  : experience.currency
-                              } ${experience.original_price}`
+                            ? `${experience.currency === "USD"
+                              ? "₹"
+                              : experience.currency == "INR"
+                                ? "₹"
+                                : experience.currency
+                            } ${experience.original_price}`
                             : undefined
                         }
                         duration={experience.duration || undefined}
@@ -624,6 +622,59 @@ const DestinationDetail = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </section>
+      <section className="IternarySectionContainer">
+        <div className="container">
+          <div
+            className={`scroll-fade-in ${isAnimated ? "animate" : ""}`}
+            style={{ animationDelay: "0.7s" }}
+          >
+            <h2 className="CommonH2 text-center mb-8">
+              Choose Your Perfect Itinerary
+            </h2>
+            <div className="itinerary-cards-grid">
+              {/* 1 Day Itinerary Card */}
+              <div className="itinerary-card itinerary-card-1day">
+                <div className="itinerary-card-overlay">
+                  <span className="itinerary-card-number">1</span>
+                </div>
+                <div className="itinerary-card-content">
+                  <h3 className="itinerary-card-title">1 Day Trip</h3>
+                  <p className="itinerary-card-description">
+                    Perfect for a quick getaway with essential experiences
+                  </p>
+                </div>
+              </div>
+
+              {/* 2 Days Itinerary Card */}
+              <div className="itinerary-card itinerary-card-2day">
+                <div className="itinerary-card-overlay">
+                  <span className="itinerary-card-number">2</span>
+                </div>
+                <div className="itinerary-card-content">
+                  <h3 className="itinerary-card-title">2 Days Trip</h3>
+                  <p className="itinerary-card-description">
+                    Ideal weekend escape with balanced activities
+                  </p>
+                </div>
+              </div>
+
+              {/* 5 Days Itinerary Card */}
+              <div className="itinerary-card itinerary-card-5day">
+                <div className="itinerary-card-overlay">
+                  <span className="itinerary-card-number">5</span>
+                </div>
+                <div className="itinerary-card-content">
+                  <h3 className="itinerary-card-title">5 Days Trip</h3>
+                  <p className="itinerary-card-description">
+                    Complete exploration with all major attractions
+                  </p>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
       </section>

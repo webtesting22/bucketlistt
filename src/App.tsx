@@ -1,8 +1,9 @@
 import React from 'react'
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from "@/components/ui/sonner"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query"
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom"
+import { supabase } from "@/integrations/supabase/client"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { ThemeProvider } from "@/components/ThemeProvider"
 import { PageTransition } from "@/components/PageTransition"
@@ -29,8 +30,68 @@ import ComingSoon from "./pages/ComingSoon"
 import Partner from "./pages/Partner"
 import VendorExperiences from "./pages/VendorExperiences"
 import "./App.css"
+import { MobileFloatingButton } from './components/MobileFloatingButton'
 
 const queryClient = new QueryClient()
+
+// Component to conditionally render AIChatbot only on homepage
+const ConditionalAIChatbot = () => {
+  const location = useLocation()
+  const isHomepage = location.pathname === '/'
+
+  if (!isHomepage) {
+    return null
+  }
+
+  return <AIChatbot />
+}
+
+// Component to conditionally render MobileFloatingButton based on route
+const ConditionalMobileButton = () => {
+  const location = useLocation()
+  const isExperienceDetailRoute = location.pathname.startsWith('/experience/')
+
+  if (!isExperienceDetailRoute) {
+    return null
+  }
+
+  // Extract experience ID from URL
+  const experienceId = location.pathname.split('/experience/')[1]
+  
+  // Get experience data using React Query
+  const { data: experience } = useQuery({
+    queryKey: ["experience", experienceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("experiences")
+        .select("*")
+        .eq("id", experienceId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!experienceId,
+  });
+
+  // Don't render if no experience data
+  if (!experience) {
+    return null
+  }
+
+  return (
+    <MobileFloatingButton
+      price={experience.price || 0}
+      originalPrice={experience.original_price}
+      currency={experience.currency || "INR"}
+      bookingButtonText="Book Now"
+      onBookingClick={() => {
+        // Dispatch custom event to open booking dialog
+        window.dispatchEvent(new CustomEvent('openBookingDialog'))
+      }}
+    />
+  )
+}
 
 const App: React.FC = () => {
   return (
@@ -66,10 +127,12 @@ const App: React.FC = () => {
                 </Routes>
               </PageTransition>
             </Layout>
-          </BrowserRouter>
 
-          {/* AI Chatbot - Fixed position on all pages */}
-          <AIChatbot />
+            {/* AI Chatbot - Only show on homepage */}
+            <ConditionalAIChatbot />
+            {/* Mobile Floating Button - Only show on experience detail routes */}
+            <ConditionalMobileButton />
+          </BrowserRouter>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

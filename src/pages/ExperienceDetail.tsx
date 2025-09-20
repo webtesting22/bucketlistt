@@ -8,8 +8,11 @@ import { ImageGallery } from "@/components/ImageGallery";
 import { BookingDialog } from "@/components/BookingDialog";
 import { BookingSuccessAnimation } from "@/components/BookingSuccessAnimation";
 import { UserBookings } from "@/components/UserBookings";
+import { MobileFloatingButton } from "@/components/MobileFloatingButton";
 import { RecentBookingsTable } from "@/components/RecentBookingsTable";
 import { useAuth } from "@/contexts/AuthContext";
+import { IoCheckmarkDoneCircle } from "react-icons/io5";
+
 import {
   ArrowLeft,
   Star,
@@ -19,13 +22,14 @@ import {
   Calendar,
   Route,
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 // import { saveAs } from "file-saver"
 import { useUserRole } from "@/hooks/useUserRole";
 import { BulkBookingPaymentDialog } from "@/components/BulkBookingPaymentDialog";
 import { ExperienceVendorAnalytics } from "@/components/ExperienceVendorAnalytics";
 import { CertificationBadges } from "@/components/CertificationBadges";
 import "../Styles/ExperienceDetail.css";
+import { Row, Col } from "antd";
 const ExperienceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -130,12 +134,25 @@ const ExperienceDetail = () => {
   const hasExistingBookings = userBookings && userBookings.length > 0;
   const bookingButtonText = hasExistingBookings ? "Book Another" : "Book Now";
 
+  // Listen for custom event from MobileFloatingButton
+  useEffect(() => {
+    const handleOpenBookingDialog = () => {
+      setIsBookingDialogOpen(true);
+    };
+
+    window.addEventListener('openBookingDialog', handleOpenBookingDialog);
+
+    return () => {
+      window.removeEventListener('openBookingDialog', handleOpenBookingDialog);
+    };
+  }, []);
+
   // Combine main image with gallery images, prioritizing gallery images
   const galleryImages =
     images && images.length > 0
       ? images
       : experience?.image_url
-      ? [
+        ? [
           {
             id: "main",
             image_url: experience.image_url,
@@ -144,7 +161,7 @@ const ExperienceDetail = () => {
             is_primary: true,
           },
         ]
-      : [];
+        : [];
 
   // Bulk Booking CSV Download
   const handleDownloadBulkBookingCSV = () => {
@@ -213,8 +230,7 @@ const ExperienceDetail = () => {
 
         if (!bookingDate || !participantName || !participantEmail) {
           errors.push(
-            `Row ${
-              i + 2
+            `Row ${i + 2
             }: Missing required fields (booking_date, participant_name, participant_email)`
           );
           continue;
@@ -250,8 +266,7 @@ const ExperienceDetail = () => {
 
         if (bookingsError) {
           errors.push(
-            `Row ${i + 2}: Error checking existing bookings - ${
-              bookingsError.message
+            `Row ${i + 2}: Error checking existing bookings - ${bookingsError.message
             }`
           );
           continue;
@@ -278,8 +293,7 @@ const ExperienceDetail = () => {
 
         if (!availableSlot) {
           errors.push(
-            `Row ${
-              i + 2
+            `Row ${i + 2
             }: No available time slots for ${participantName} on ${bookingDate}`
           );
           continue;
@@ -388,17 +402,21 @@ const ExperienceDetail = () => {
           Back to Homefsa
         </Button> */}
 
-        <div>
-          {/* Image Gallery Section */}
-          <ImageGallery
-            images={galleryImages}
-            experienceTitle={experience.title}
-          />
+        <div className="container ExperienceDetailContainer">
 
+          {/* Image Gallery Section */}
+          <div className="GridImageGalleryContainer">
+            <ImageGallery
+              images={galleryImages}
+              experienceTitle={experience.title}
+            />
+          </div>
+          <br />
+          <h1 className="text-3xl font-bold mb-0 text-start">{experience.title}</h1>
           {/* Details Section */}
-          <div className="space-y-6 container PaddingSectionTop">
+          <div className="space-y-6 ">
             <div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+              {/* <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <span>{experience.category}</span>
                 {experience.location && (
                   <>
@@ -407,16 +425,46 @@ const ExperienceDetail = () => {
                     <span>{experience.location}</span>
                   </>
                 )}
+              </div> */}
+              <br />
+              <div className="StikyBadgesContainer">
+                <Row gutter={[20, 20]}>
+                  <Col lg={6} md={12} xs={12}>
+                    <div>
+                      <img src="/Images/ATOAICertified.svg" alt="" />
+                      <p>ATOAI Certified</p>
+                    </div>
+                  </Col>
+                  <Col lg={6} md={12} xs={12}>
+                    <div>
+                      <img src="/Images/BookPayLater.svg" alt="" />
+                      <p>Book Now, Pay Later</p>
+                    </div>
+                  </Col>
+                  <Col lg={6} md={12} xs={12}>
+                    <div style={{ marginLeft: "7px" }}>
+                      <IoCheckmarkDoneCircle style={{ fontSize: "20px" }} />
+                      <p>Free Cancellation</p>
+                    </div>
+                  </Col>
+                  <Col lg={6} md={12} xs={12}>
+                    <div>
+                      <img src="/Images/MobileUpatedIcon.svg" alt="" />
+                      <p>Instant Tickets to your mobile
+                      </p>
+                    </div>
+                  </Col>
+                </Row>
               </div>
 
-              <h1 className="text-3xl font-bold mb-4">{experience.title}</h1>
 
-              {experience.is_special_offer && (
+
+              {/* {experience.is_special_offer && (
                 <Badge className="mb-4 bg-orange-500 hover:bg-orange-600">
                   Special Offer
                 </Badge>
-              )}
-
+              )} */}
+              {/* 
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center gap-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -425,24 +473,54 @@ const ExperienceDetail = () => {
                 <span className="text-muted-foreground">
                   ({experience.reviews_count?.toLocaleString()} reviews)
                 </span>
-              </div>
+              </div> */}
 
-              <div className="flex items-center gap-6 text-sm text-muted-foreground mb-4">
-                {experience.duration && (
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{experience.duration}</span>
-                  </div>
-                )}
-                {experience.group_size && (
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    <span>{experience.group_size}</span>
-                  </div>
-                )}
-              </div>
 
-              {getDistanceDisplay() && (
+            </div>
+
+            <div>
+              <Row gutter={[30, 30]}>
+                <Col lg={16}>
+                  {experience.description && (
+                    <div>
+                      {/* <h2 className="text-xl font-semibold mb-3">
+                        About this experience
+                      </h2> */}
+                      <div className="DescriptionEditContainer">
+                        <div
+                          className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: experience.description }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </Col>
+                <Col lg={8}>
+                  <div className="ExperienceDetailRightContainer">
+                    {/* <MobileFloatingButton
+                      price={experience.price}
+                      originalPrice={experience.original_price}
+                      currency={experience.currency}
+                      bookingButtonText={bookingButtonText}
+                      onBookingClick={() => setIsBookingDialogOpen(true)}
+                    /> */}
+                    <div className="PcOnlyButtonContainer">
+                      <div className="flex items-center gap-6 text-sm text-muted-foreground mb-4">
+                        {experience.duration && (
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            <span>{experience.duration}</span>
+                          </div>
+                        )}
+                        {experience.group_size && (
+                          <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            <span>{experience.group_size}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* {getDistanceDisplay() && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 p-3 bg-muted rounded-lg">
                   {experience.distance_km === 0 ? (
                     <MapPin className="h-4 w-4 text-orange-500" />
@@ -451,76 +529,79 @@ const ExperienceDetail = () => {
                   )}
                   <span className="font-medium">{getDistanceDisplay()}</span>
                 </div>
-              )}
+              )} */}
 
-              <div className="flex items-center gap-3 mb-6">
-                <span style={{ color: "grey" }}>From</span>
-                <span className="text-3xl font-bold text-orange-500">
-                  {experience.currency === "USD"
-                    ? "₹"
-                    : experience.currency == "INR"
-                    ? "₹"
-                    : experience.currency}{" "}
-                  {experience.price}
-                </span>
-                {experience.original_price && (
-                  <span className="text-lg text-muted-foreground line-through">
-                    {experience.currency === "USD"
-                      ? "₹"
-                      : experience.currency == "INR"
-                      ? "₹"
-                      : experience.currency}{" "}
-                    {experience.original_price}
-                  </span>
-                )}
-              </div>
+                      <div className="flex items-center gap-3 mb-6">
+                        <span style={{ color: "grey" }}>From</span>
+                        <span className="text-3xl font-bold text-orange-500">
+                          {experience.currency === "USD"
+                            ? "₹"
+                            : experience.currency == "INR"
+                              ? "₹"
+                              : experience.currency}{" "}
+                          {experience.price}
+                        </span>
+                        {experience.original_price && (
+                          <span className="text-lg text-muted-foreground line-through">
+                            {experience.currency === "USD"
+                              ? "₹"
+                              : experience.currency == "INR"
+                                ? "₹"
+                                : experience.currency}{" "}
+                            {experience.original_price}
+                          </span>
+                        )}
+                      </div>
 
-              <Button
-                size="lg"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-                onClick={() => setIsBookingDialogOpen(true)}
-              >
-                {bookingButtonText}
-              </Button>
+                      <Button
+                        size="lg"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                        onClick={() => setIsBookingDialogOpen(true)}
+                      >
+                        {bookingButtonText}
+                      </Button>
 
-              {/* Bulk Booking Buttons for Vendor */}
-              {isVendor && (
-                <div className="flex flex-col gap-2 mt-2">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleDownloadBulkBookingCSV}
-                  >
-                    Bulk Booking (Download CSV Template)
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleBulkUploadClick}
-                  >
-                    Bulk Upload (Upload CSV)
-                  </Button>
-                  <input
-                    type="file"
-                    accept=".csv"
-                    style={{ display: "none" }}
-                    ref={fileInputRef}
-                    onChange={handleBulkUploadFile}
-                  />
-                </div>
-              )}
+                      {/* Bulk Booking Buttons for Vendor */}
+                      {isVendor && (
+                        <div className="flex flex-col gap-2 mt-2">
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={handleDownloadBulkBookingCSV}
+                          >
+                            Bulk Booking (Download CSV Template)
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={handleBulkUploadClick}
+                          >
+                            Bulk Upload (Upload CSV)
+                          </Button>
+                          <input
+                            type="file"
+                            accept=".csv"
+                            style={{ display: "none" }}
+                            ref={fileInputRef}
+                            onChange={handleBulkUploadFile}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className="WhyBucketlisttContainer">
+                      <h1>Why bucketlistt?</h1>
+                      <br />
+                      <ul>
+                        <li><span>✓</span> Certified Vendors with many years of experience</li>
+                        <li><span>✓</span> Get the lowest prices and last minute availability</li>
+                        <li><span>✓</span> Browse verified reviews</li>
+                        <li><span>✓</span> Have a question? Talk to our experts 24/7</li>
+                      </ul>
+                    </div>
+                  </div>
+                </Col>
+              </Row>
             </div>
-
-            {experience.description && (
-              <div>
-                <h2 className="text-xl font-semibold mb-3">
-                  About this experience
-                </h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  {experience.description}
-                </p>
-              </div>
-            )}
           </div>
         </div>
 
@@ -538,11 +619,11 @@ const ExperienceDetail = () => {
         )}
 
         {/* Certification Badges */}
-        <div className="mt-12">
+        {/* <div className="mt-12">
           <div className="border-t pt-8">
             <CertificationBadges />
           </div>
-        </div>
+        </div> */}
 
         {/* Recent Bookings for this Experience */}
         {user && (

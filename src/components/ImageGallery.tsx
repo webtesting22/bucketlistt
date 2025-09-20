@@ -53,93 +53,152 @@ export function ImageGallery({ images, experienceTitle }: ImageGalleryProps) {
     )
   }
 
+  const handlePlayButtonClick = () => {
+    // Handle play button click - could open video modal or navigate to video
+    console.log('Play button clicked')
+  }
+
+  const handleViewAllClick = () => {
+    // Open modal with all images
+    openModal(0)
+  }
+
   if (sortedImages.length === 0) {
     return (
-      <div className="aspect-[3/2] bg-muted rounded-xl flex items-center justify-center">
-        <span className="text-muted-foreground">No images available</span>
+      <div className="image-gallery-grid">
+        <div className="image-gallery-main">
+          <div className="image-gallery-placeholder">No images available</div>
+        </div>
+        <div className="image-gallery-side">
+          <div className="image-gallery-side-item">
+            <div className="image-gallery-placeholder">No images available</div>
+          </div>
+          <div className="image-gallery-side-item">
+            <div className="image-gallery-placeholder">No images available</div>
+          </div>
+          <div className="image-gallery-side-item">
+            <div className="image-gallery-placeholder">No images available</div>
+          </div>
+          <div className="image-gallery-side-item">
+            <div className="image-gallery-placeholder">No images available</div>
+          </div>
+        </div>
       </div>
     )
   }
 
+  // Get main image and side images
   const mainImage = sortedImages[0]
-  const thumbnailImages = sortedImages.slice(1, 5) // Show up to 4 additional thumbnails
+  const sideImages = sortedImages.slice(1, 5) // Get up to 4 side images
 
   return (
     <>
-      <div className=" container">
-        {/* Main Image Swiper */}
-        <div className="relative MainShowingImageContainer">
+      {/* Desktop Layout */}
+      <div className="image-gallery-grid hidden md:grid" >
+        {/* Main Image */}
+        <div className="image-gallery-main" onClick={() => openModal(0)}>
+          <img
+            src={mainImage.image_url}
+            alt={mainImage.alt_text || `${experienceTitle} main image`}
+          />
+          <div className="image-gallery-main-overlay"></div>
+          <div className="image-gallery-play-btn" onClick={(e) => {
+            e.stopPropagation()
+            handlePlayButtonClick()
+          }}>
+            <div className="image-gallery-play-icon"></div>
+          </div>
+        </div>
+
+        {/* Side Images Grid */}
+        <div className="image-gallery-side">
+          {[0, 1, 2, 3].map((index) => {
+            const image = sideImages[index]
+            const imageIndex = index + 1
+
+            return (
+              <div
+                key={image?.id || `placeholder-${index}`}
+                className="image-gallery-side-item"
+                onClick={() => image ? openModal(imageIndex) : null}
+              >
+                {image ? (
+                  <>
+                    <img
+                      src={image.image_url}
+                      alt={image.alt_text || `${experienceTitle} ${imageIndex + 1}`}
+                    />
+                    <div className="image-gallery-side-overlay"></div>
+                    {/* Show "View all images" button on the 4th image if there are more than 5 total images */}
+                    {index === 3 && sortedImages.length > 5 && (
+                      <div
+                        className="image-gallery-view-all"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleViewAllClick()
+                        }}
+                      >
+                        <div className="image-gallery-view-icon"></div>
+                        <span>View all images</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="image-gallery-placeholder">No image</div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="image-gallery-mobile md:hidden">
+        {/* Mobile Full Carousel */}
+        <div className="image-gallery-mobile-carousel">
           <Swiper
             modules={[Autoplay, Navigation, Pagination]}
-            autoplay={{
-              delay: 3000,
-              disableOnInteraction: false,
+            spaceBetween={0}
+            slidesPerView={1}
+            navigation={true}
+            pagination={{
+              clickable: true,
+              dynamicBullets: true,
             }}
-            // navigation={true}
-            // pagination={{
-            //   clickable: true,
-            //   bulletClass: 'swiper-pagination-bullet',
-            //   bulletActiveClass: 'swiper-pagination-bullet-active',
+            // autoplay={{
+            //   delay: 4000,
+            //   disableOnInteraction: false,
             // }}
             loop={sortedImages.length > 1}
-            className="rounded-xl overflow-hidden"
+            className="mobile-full-carousel"
           >
             {sortedImages.map((image, index) => (
               <SwiperSlide key={image.id}>
-                <div
-                  className="cursor-pointer"
-                  id="SwiperInsideImages"
-                // onClick={() => openModal(index)}
+                <div 
+                  className="image-gallery-mobile-slide"
+                  onClick={() => openModal(index)}
                 >
-                  <LazyImage
+                  <img
                     src={image.image_url}
                     alt={image.alt_text || `${experienceTitle} ${index + 1}`}
-                    aspectRatio="aspect-[3/2]"
-
-                    className="rounded-xl w-full h-full object-cover"
                   />
+                  <div className="image-gallery-main-overlay"></div>
+                  <div className="image-gallery-play-btn" onClick={(e) => {
+                    e.stopPropagation()
+                    handlePlayButtonClick()
+                  }}>
+                    <div className="image-gallery-play-icon"></div>
+                  </div>
                 </div>
               </SwiperSlide>
             ))}
           </Swiper>
-          {sortedImages.length > 1 && (
-            <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm z-10">
-              {sortedImages.length} images
-            </div>
-          )}
         </div>
-
-        {/* Thumbnail Grid */}
-        {/* {thumbnailImages.length > 0 && (
-          <div className="grid grid-cols-4 gap-3">
-            {thumbnailImages.map((image, index) => (
-              <div key={image.id} className="relative">
-                <LazyImage
-                  src={image.image_url}
-                  alt={image.alt_text || `${experienceTitle} ${index + 2}`}
-                  aspectRatio="aspect-auto"
-                  className="rounded-lg cursor-pointer hover:opacity-80 transition-opacity h-24 object-cover"
-                  onClick={() => openModal(index + 1)}
-                />
-                {index === 3 && sortedImages.length > 5 && (
-                  <div
-                    className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center cursor-pointer"
-                    onClick={() => openModal(index + 1)}
-                  >
-                    <span className="text-white font-semibold">
-                      +{sortedImages.length - 4}
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )} */}
       </div>
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center ">
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center " id='ImageGalleryModal' style={{ height: '100vh' }}>
           <div className="relative w-full h-full flex items-center justify-center p-4">
             {/* Close Button */}
             <Button

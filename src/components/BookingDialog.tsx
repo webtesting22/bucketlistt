@@ -32,6 +32,8 @@ import { useRazorpay } from "@/hooks/useRazorpay";
 import { SendWhatsappMessage } from "@/utils/whatsappUtil";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
+import { Modal } from "antd";
+import { format } from "date-fns";
 
 const participantSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -79,6 +81,7 @@ export const BookingDialog = ({
   );
   const [bypassPayment, setBypassPayment] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState<string>();
+  const [currentStep, setCurrentStep] = useState(1); // 1: Selection, 2: Participants
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -125,6 +128,34 @@ export const BookingDialog = ({
   const handleSlotChange = (slotId: string | undefined) => {
     setSelectedSlotId(slotId);
     form.setValue("time_slot_id", slotId || "");
+  };
+
+  // Step navigation functions
+  const handleNextStep = () => {
+    if (selectedActivityId && selectedDate && selectedSlotId) {
+      setCurrentStep(2);
+    } else {
+      toast({
+        title: "Missing information",
+        description: "Please select activity, date, and time slot",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePrevStep = () => {
+    setCurrentStep(1);
+  };
+
+  const handleClose = () => {
+    setCurrentStep(1);
+    form.reset();
+    setSelectedDate(undefined);
+    setSelectedSlotId(undefined);
+    setSelectedActivityId(undefined);
+    setBypassPayment(false);
+    setIsSubmitting(false);
+    onClose();
   };
 
   const sendBookingConfirmationEmail = async (
@@ -269,11 +300,7 @@ export const BookingDialog = ({
       });
 
       onBookingSuccess();
-      onClose();
-      form.reset();
-      setSelectedDate(undefined);
-      setSelectedSlotId(undefined);
-      setIsSubmitting(false);
+      handleClose();
     } catch (error) {
       console.error("Direct booking creation error:", error);
       setIsSubmitting(false);
@@ -347,11 +374,7 @@ export const BookingDialog = ({
       });
 
       onBookingSuccess();
-      onClose();
-      form.reset();
-      setSelectedDate(undefined);
-      setSelectedSlotId(undefined);
-      setIsSubmitting(false);
+      handleClose();
     } catch (error) {
       console.error("Booking creation error:", error);
       setIsSubmitting(false);
@@ -493,36 +516,112 @@ export const BookingDialog = ({
     enabled: !!selectedActivityId,
   });
 
+  // Get time slots for summary display
+  const { data: timeSlots } = useQuery({
+    queryKey: ['time-slots-summary', experience.id, selectedDate, selectedActivityId],
+    queryFn: async () => {
+      if (!selectedDate || !selectedActivityId) return [];
+
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('time_slots')
+        .select('*')
+        .eq('experience_id', experience.id)
+        .eq('activity_id', selectedActivityId);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!selectedDate && !!selectedActivityId,
+  });
+
+  // Format time function
+  const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(':');
+    const hour24 = parseInt(hours);
+    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+    const ampm = hour24 >= 12 ? 'PM' : 'AM';
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
   // Update price calculation to use activity price
   const totalActivityPrice = selectedActivity
     ? selectedActivity.price * participants.length
     : 0;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Book Experience: {experience.title}</DialogTitle>
-        </DialogHeader>
+    <Modal
+      open={isOpen}
+      onCancel={handleClose}
+      title={`Book Experience: ${experience.title} - Step ${currentStep} of 2`}
+      width={1000}
+      footer={null}
+      destroyOnClose={true}
+      maskClosable={false}
+    >
+      {currentStep === 1 ? (
+        // Step 1: Activity, Date, and Time Selection
+        <div className="space-y-6">
+          <SlotSelector
+            experienceId={experience.id}
+            selectedDate={selectedDate}
+            selectedSlotId={selectedSlotId}
+            selectedActivityId={selectedActivityId}
+            participantCount={participants.length}
+            onDateChange={handleDateChange}
+            onSlotChange={handleSlotChange}
+            onActivityChange={setSelectedActivityId}
+          />
 
+          {/* Step 1 Footer */}
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleNextStep}
+              disabled={!selectedActivityId || !selectedDate || !selectedSlotId}
+              className="flex-1 bg-orange-500 hover:bg-orange-600"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      ) : (
+        // Step 2: Participants and Payment Details
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column: Activity, Date and Time Selection */}
+              {/* Left Column: Activity Summary */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">
-                  Select Activity & Time
-                </h3>
-                <SlotSelector
-                  experienceId={experience.id}
-                  selectedDate={selectedDate}
-                  selectedSlotId={selectedSlotId}
-                  selectedActivityId={selectedActivityId}
-                  participantCount={participants.length}
-                  onDateChange={handleDateChange}
-                  onSlotChange={handleSlotChange}
-                  onActivityChange={setSelectedActivityId}
-                />
+                <h3 className="text-lg font-semibold mb-4">Booking Summary</h3>
+                <Card className="p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Activity:</span>
+                      <span className="font-medium">{selectedActivity?.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Date:</span>
+                      <span className="font-medium">{selectedDate ? format(selectedDate, 'MMM d, yyyy') : ''}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Time:</span>
+                      <span className="font-medium">
+                        {timeSlots?.find(slot => slot.id === selectedSlotId) ?
+                          `${formatTime(timeSlots.find(slot => slot.id === selectedSlotId)!.start_time)} - ${formatTime(timeSlots.find(slot => slot.id === selectedSlotId)!.end_time)}` :
+                          ''
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </Card>
               </div>
 
               {/* Right Column: Participants and Details */}
@@ -726,15 +825,15 @@ export const BookingDialog = ({
               </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="flex gap-3">
+            {/* Step 2 Footer */}
+            <div className="flex gap-3 pt-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={onClose}
+                onClick={handlePrevStep}
                 className="flex-1"
               >
-                Cancel
+                Back
               </Button>
               <Button
                 type="submit"
@@ -746,7 +845,7 @@ export const BookingDialog = ({
             </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      )}
+    </Modal>
   );
 };
