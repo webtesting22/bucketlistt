@@ -17,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, Upload, X } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface Category {
@@ -66,6 +66,8 @@ interface ExperienceData {
   activities?: Activity[];
   destination_id?: string;
   legacyTimeSlots?: TimeSlot[];
+  image_urls?: string[];
+  image_url?: string;
 }
 
 interface CreateExperienceFormProps {
@@ -108,6 +110,7 @@ export function CreateExperienceForm({
     end_point: initialData?.end_point || "",
     days_open: initialData?.days_open || [],
     destination_id: initialData?.destination_id || "",
+    image_url: initialData?.image_url || "",
   });
 
   // Calculate discount percentage if we have original price and current price
@@ -125,8 +128,21 @@ export function CreateExperienceForm({
         ...prev,
         discount_percentage: discount.toFixed(2),
       }));
+
+      // setPreviewUrls((prev) => [...prev, initialData.image_url || ""]);     
     }
   }, [initialData]);
+
+  const firstRendered = useRef(false);
+
+useEffect(() => {       
+  if(initialData?.image_urls && !firstRendered.current) {
+    firstRendered.current = true;
+setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
+  }
+
+}, [initialData]); 
+  
 
   useEffect(() => {
     fetchCategories();
@@ -1220,7 +1236,7 @@ export function CreateExperienceForm({
               {/* Image Previews */}
               {previewUrls.length > 0 && (
                 <div className="mt-4">
-                  <Label className="text-sm mb-2">Image Previews</Label>
+                  <Label className="text-sm mb-2">Image Previews {previewUrls.length}</Label>
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     {previewUrls.map((url, index) => (
                       <div key={`image-${index}`} className="relative">

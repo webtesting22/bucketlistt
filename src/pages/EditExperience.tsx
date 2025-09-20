@@ -38,7 +38,14 @@ const EditExperience = () => {
           *,
           experience_categories (
             category_id
-          )
+          ),
+            experience_images (
+              id,
+      image_url,
+      alt_text,
+      display_order,
+      is_primary
+            )
         `)
         .eq('id', id)
         .single();
@@ -86,6 +93,8 @@ const EditExperience = () => {
         distance: activity.distance,
         duration: activity.duration,
         price: activity.price,
+        discount_percentage: activity.discount_percentage,
+        discounted_price: activity.discounted_price,  
         currency: activity.currency,
         timeSlots: activity.time_slots || []
       })) || [];
@@ -94,14 +103,15 @@ const EditExperience = () => {
         ...experienceData,
         category_ids: categoryIds,
         activities: transformedActivities,
-        legacyTimeSlots: legacyTimeSlots
+        legacyTimeSlots: legacyTimeSlots,
+        image_urls: experienceData.experience_images.map(image => image.image_url),
       };
     },
     enabled: !!id
   });
 
 
-  console.log("experience", experience);
+  console.log("experience", experience);  
 
   if (authLoading || roleLoading) {
     return (
