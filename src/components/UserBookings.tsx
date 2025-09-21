@@ -7,6 +7,11 @@ import { format } from "date-fns";
 import { Calendar, FileText, MapPin, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+interface BookingWithDueAmount {
+  due_amount?: number;
+  [key: string]: any;
+}
+
 export const UserBookings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -28,6 +33,18 @@ export const UserBookings = () => {
             location,
             price,
             currency
+          ),
+          time_slots (
+            id,
+            start_time,
+            end_time,
+            activity_id,
+            activities (
+              id,
+              name,
+              price,
+              currency
+            )
           ),
           booking_participants (
             name,
@@ -86,6 +103,11 @@ export const UserBookings = () => {
                 <CardTitle className="text-lg mb-1">
                   {booking.experiences?.title}
                 </CardTitle>
+                {booking.time_slots?.activities && (
+                  <div className="text-sm text-muted-foreground mb-2">
+                    Activity: {booking.time_slots.activities.name}
+                  </div>
+                )}
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
@@ -101,12 +123,22 @@ export const UserBookings = () => {
                   )}
                 </div>
               </div>
-              <Badge
-                variant="secondary"
-                className="bg-green-100 text-green-800"
-              >
-                {booking.status}
-              </Badge>
+              <div className="flex flex-col gap-2">
+                <Badge
+                  variant="secondary"
+                  className="bg-green-100 text-green-800"
+                >
+                  {booking.status}
+                </Badge>
+                {(booking as BookingWithDueAmount).due_amount && (booking as BookingWithDueAmount).due_amount! > 0 ? (
+                  <Badge
+                    variant="secondary"
+                    className="bg-orange-100 text-orange-800"
+                  >
+                    Partial Payment
+                  </Badge>
+                ) : null}
+              </div>
             </div>
           </CardHeader>
 
@@ -120,7 +152,7 @@ export const UserBookings = () => {
                   </span>
                 </div>
                 <div className="space-y-1 text-sm text-muted-foreground">
-                  {booking.booking_participants?.map((participant, index) => (
+                  {booking.booking_participants?.slice(0, 1).map((participant, index) => (
                     <div key={index} className="flex justify-between">
                       <span>{participant.name}</span>
                       <span>{participant.email}</span>
@@ -130,20 +162,43 @@ export const UserBookings = () => {
               </div>
 
               <div className="text-right">
-                <div className="text-2xl font-bold text-orange-500 mb-1">
-                  {booking.experiences?.currency === "USD"
-                    ? "₹"
-                    : booking.experiences?.currency}
-                  {(booking.experiences?.price || 0) *
-                    booking.total_participants}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {booking.total_participants} ×{" "}
-                  {booking.experiences?.currency === "USD"
-                    ? "₹"
-                    : booking.experiences?.currency}
-                  {booking.experiences?.price}
-                </div>
+                {(() => {
+                  const activity = booking.time_slots?.activities;
+                  const activityPrice = activity?.price || booking.experiences?.price || 0;
+                  const activityCurrency = activity?.currency || booking.experiences?.currency || "INR";
+                  const totalAmount = activityPrice * booking.total_participants;
+                  const dueAmount = (booking as BookingWithDueAmount).due_amount || 0;
+                  const paidAmount = totalAmount - dueAmount;
+                  
+                  return (
+                    <div>
+                      {dueAmount > 0 ? (
+                        // Partial payment display
+                        <div>
+                          <div className="text-lg font-bold text-green-600 mb-1">
+                            {activityCurrency} {paidAmount}
+                          </div>
+                          <div className="text-sm text-orange-600 mb-1">
+                            Due On-Site: {activityCurrency} {dueAmount}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Total: {activityCurrency} {totalAmount}
+                          </div>
+                        </div>
+                      ) : (
+                        // Full payment display
+                        <div>
+                          <div className="text-2xl font-bold text-orange-500 mb-1">
+                            {activityCurrency} {totalAmount}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {booking.total_participants} × {activityCurrency} {activityPrice}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 
