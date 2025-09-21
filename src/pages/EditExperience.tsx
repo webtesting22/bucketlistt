@@ -158,12 +158,12 @@ const EditExperience = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
+      <div className="container mx-auto px-4 py-8 pt-4">
+        <div className="mb-4">
           <Button
             variant="ghost"
             onClick={() => navigate('/profile')}
-            className="mb-4"
+            className="mb-0"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Profile

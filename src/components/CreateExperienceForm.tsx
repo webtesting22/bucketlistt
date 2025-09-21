@@ -19,8 +19,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, Upload, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 interface Category {
   id: string;
@@ -55,7 +55,7 @@ interface ExperienceData {
   description: string;
   category_ids: string[];
   original_price: number;
-  discount_percentage : number | null;
+  discount_percentage: number | null;
   currency: string;
   duration: string;
   group_size: string;
@@ -118,17 +118,23 @@ export function CreateExperienceForm({
   // React Quill configuration
   const quillModules = {
     toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['link'],
-      ['clean']
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link"],
+      ["clean"],
     ],
   };
 
   const quillFormats = [
-    'header', 'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet', 'link'
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "list",
+    "bullet",
+    "link",
   ];
 
   // Calculate discount percentage if we have original price and current price
@@ -147,20 +153,18 @@ export function CreateExperienceForm({
         discount_percentage: discount.toFixed(2),
       }));
 
-      // setPreviewUrls((prev) => [...prev, initialData.image_url || ""]);     
+      // setPreviewUrls((prev) => [...prev, initialData.image_url || ""]);
     }
   }, [initialData]);
 
   const firstRendered = useRef(false);
 
-useEffect(() => {       
-  if(initialData?.image_urls && !firstRendered.current) {
-    firstRendered.current = true;
-setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
-  }
-
-}, [initialData]); 
-  
+  useEffect(() => {
+    if (initialData?.image_urls && !firstRendered.current) {
+      firstRendered.current = true;
+      setPreviewUrls((prev) => [...prev, ...(initialData?.image_urls || [])]);
+    }
+  }, [initialData]);
 
   useEffect(() => {
     fetchCategories();
@@ -239,7 +243,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
       currency: "INR",
       timeSlots: [],
       discounted_price: 0,
-      };
+    };
     setActivities((prev) => [...prev, newActivity]);
   };
 
@@ -653,7 +657,11 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
 
     // Validate activity data
     const invalidActivities = activities.filter(
-      (activity) => !activity.name.trim() || activity.price <= 0 || activity.discount_percentage <= 0 || activity.discount_percentage > 100
+      (activity) =>
+        !activity.name.trim() ||
+        activity.price <= 0 ||
+        activity.discount_percentage <= 0 ||
+        activity.discount_percentage > 100
     );
     if (invalidActivities.length > 0) {
       toast({
@@ -687,8 +695,10 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
       const minPrice =
         activities.length > 0 ? Math.min(...activities.map((a) => a.price)) : 0;
 
-        const minDiscountPercentage =
-        activities.length > 0 ? Math.min(...activities.map((a) => a.discount_percentage)) : 0;
+      const minDiscountPercentage =
+        activities.length > 0
+          ? Math.min(...activities.map((a) => a.discount_percentage))
+          : 0;
 
       const experienceData = {
         title: formData.title,
@@ -709,9 +719,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
         destination_id: formData.destination_id,
       };
 
-
       console.log("experienceData", experienceData);
-
 
       if (isEditing && initialData?.id) {
         // Update existing experience
@@ -797,7 +805,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
   };
 
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="max-w-4xl mx-auto border-2 border-brand-primary rounded-xl">
       <CardHeader>
         <CardTitle>
           {isEditing ? "Edit Experience" : "Create New Experience"}
@@ -806,7 +814,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
+            <div className="space-y-2 text-start">
               <Label htmlFor="title">Experience Title *</Label>
               <Input
                 id="title"
@@ -817,7 +825,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-start">
               <Label htmlFor="categories">Categories *</Label>
               <Select
                 value={
@@ -887,16 +895,16 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
                   {categories.filter(
                     (category) => !formData.category_ids.includes(category.id)
                   ).length === 0 && (
-                      <div className="px-2 py-1 text-sm text-muted-foreground">
-                        All categories selected
-                      </div>
-                    )}
+                    <div className="px-2 py-1 text-sm text-muted-foreground">
+                      All categories selected
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 text-start">
             <Label htmlFor="description">Description *</Label>
             <div className="border rounded-md overflow-hidden">
               <ReactQuill
@@ -906,15 +914,15 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
                 modules={quillModules}
                 formats={quillFormats}
                 placeholder="Describe the experience.."
-                style={{ 
-                  minHeight: '400px',
-                  backgroundColor: 'transparent'
+                style={{
+                  minHeight: "400px",
+                  backgroundColor: "transparent",
                 }}
               />
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 text-start">
             <Label htmlFor="location">Google Maps Link *</Label>
             <Input
               id="location"
@@ -922,12 +930,12 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
               onChange={(e) => handleInputChange("location", e.target.value)}
               required
               placeholder="Paste Google Maps link to meeting point/location"
-            // className={
-            //   !formData.location.includes("maps.google.com") ||
-            //   !formData.location.includes("maps.app.goo")
-            //     ? "border-red-500"
-            //     : ""
-            // }
+              // className={
+              //   !formData.location.includes("maps.google.com") ||
+              //   !formData.location.includes("maps.app.goo")
+              //     ? "border-red-500"
+              //     : ""
+              // }
             />
             {/* {formData.location &&
               (!formData.location.includes("maps.google.com") ||
@@ -938,7 +946,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
               )} */}
           </div>
 
-          <div>
+          <div className="text-start">
             <DestinationDropdown
               value={formData.destination_id}
               onValueChange={(value) =>
@@ -987,7 +995,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-start">
                     <Label htmlFor={`activity-name-${activity.id}`}>
                       Activity Name *
                     </Label>
@@ -1002,7 +1010,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-start">
                     <Label htmlFor={`activity-distance-${activity.id}`}>
                       Distance
                     </Label>
@@ -1016,7 +1024,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-start">
                     <Label htmlFor={`activity-currency-${activity.id}`}>
                       Currency
                     </Label>
@@ -1038,7 +1046,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-start">
                     <Label htmlFor={`activity-price-${activity.id}`}>
                       Price *
                     </Label>
@@ -1060,8 +1068,10 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor={`activity-discount-percentage-${activity.id}`}>
+                  <div className="space-y-2 text-start">
+                    <Label
+                      htmlFor={`activity-discount-percentage-${activity.id}`}
+                    >
                       Discount Percentage
                     </Label>
                     <Input
@@ -1070,25 +1080,38 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
                       min="0"
                       max="100"
                       value={activity.discount_percentage}
-                      onChange={(e) =>{
-                        updateActivity(activity.id, "discount_percentage", parseFloat(e.target.value) || 0)
-                        updateActivity(activity.id, "discounted_price", activity.price - (activity.price * parseFloat(e.target.value) / 100) || 0)
-                      }
-                      }
+                      onChange={(e) => {
+                        updateActivity(
+                          activity.id,
+                          "discount_percentage",
+                          parseFloat(e.target.value) || 0
+                        );
+                        updateActivity(
+                          activity.id,
+                          "discounted_price",
+                          activity.price -
+                            (activity.price * parseFloat(e.target.value)) /
+                              100 || 0
+                        );
+                      }}
                       placeholder="0.00"
                     />
-                  </div>  
-
-                  <div className="space-y-2">
-                    <section>Discounted Price</section>
-                    <section> {activity.currency} {activity.price - (activity.price * activity.discount_percentage / 100) || 0}</section>
                   </div>
 
-
+                  <div className="space-y-2 text-start">
+                    <section>Discounted Price</section>
+                    <section>
+                      {" "}
+                      {activity.currency}{" "}
+                      {activity.price -
+                        (activity.price * activity.discount_percentage) / 100 ||
+                        0}
+                    </section>
+                  </div>
                 </div>
 
                 {/* Time Slots for this activity */}
-                <div className="mt-6">
+                <div className="mt-6 text-start">
                   <Label className="text-sm font-medium">
                     Time Slots for this Activity *
                   </Label>
@@ -1104,7 +1127,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
+            <div className="space-y-2 text-start">
               <Label htmlFor="start_point">Start Point</Label>
               <Input
                 id="start_point"
@@ -1116,7 +1139,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 text-start">
               <Label htmlFor="end_point">End Point</Label>
               <Input
                 id="end_point"
@@ -1158,7 +1181,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
           </div>
 
           {!isEditing && (
-            <div className="space-y-3">
+            <div className="space-y-3 text-start">
               <Label>Images * (Max 10)</Label>
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                 <input
@@ -1209,7 +1232,7 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
           )}
 
           {isEditing && (
-            <div className="space-y-3">
+            <div className="space-y-3 text-start">
               <Label>Add New Images/Videos (Optional)</Label>
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                 <input
@@ -1260,7 +1283,9 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
               {/* Image Previews */}
               {previewUrls.length > 0 && (
                 <div className="mt-4">
-                  <Label className="text-sm mb-2">Image Previews {previewUrls.length}</Label>
+                  <Label className="text-sm mb-2">
+                    Image Previews {previewUrls.length}
+                  </Label>
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     {previewUrls.map((url, index) => (
                       <div key={`image-${index}`} className="relative">
@@ -1314,15 +1339,15 @@ setPreviewUrls((prev) => [...prev, ...initialData?.image_urls || []]);
               activities.length === 0 ||
               activities.some((activity) => activity.timeSlots.length === 0)
             }
-            className="w-full"
+            className="w-full bg-gradient-to-r from-brand-primary to-brand-secondary"
           >
             {loading
               ? isEditing
                 ? "Updating Experience..."
                 : "Creating Experience..."
               : isEditing
-                ? "Update Experience"
-                : "Create Experience"}
+              ? "Update Experience"
+              : "Create Experience"}
           </Button>
         </form>
       </CardContent>

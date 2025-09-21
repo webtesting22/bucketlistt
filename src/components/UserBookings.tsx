@@ -1,10 +1,31 @@
-import { Badge } from "@/components/ui/badge";
+"use client";
+
+import * as React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { FileText } from "lucide-react";
+import { format, isSameDay } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface BookingWithDueAmount {
   due_amount?: number;
@@ -14,8 +35,13 @@ interface BookingWithDueAmount {
 export const UserBookings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: "booking_date", desc: true }, // default sort
+  ]);
+  const [showTodayOnly, setShowTodayOnly] = React.useState(false);
 
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings = [], isLoading } = useQuery({
     queryKey: ["user-bookings", user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -46,7 +72,8 @@ export const UserBookings = () => {
           ),
           booking_participants (
             name,
-            email
+            email,
+            phone_number
           )
         `
         )
@@ -59,7 +86,17 @@ export const UserBookings = () => {
     enabled: !!user,
   });
 
-  const getStatusColor = (status) => {
+  // Filter today's bookings
+  const filteredBookings = React.useMemo(() => {
+    if (showTodayOnly) {
+      return bookings.filter((booking) =>
+        isSameDay(new Date(booking.booking_date), new Date())
+      );
+    }
+    return bookings;
+  }, [bookings, showTodayOnly]);
+
+  const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "confirmed":
         return "bg-green-100 text-green-700";
@@ -72,9 +109,174 @@ export const UserBookings = () => {
     }
   };
 
-  if (isLoading) return <p className="text-center py-10">Loading...</p>;
+  const columns = React.useMemo<ColumnDef<BookingWithDueAmount>[]>(
+    () => [
+      {
+        accessorKey: "index",
+        header: "No.",
+        cell: ({ row }) => row.index + 1,
+      },
+      {
+        accessorKey: "experiences.title",
+        header: "Title",
+        cell: ({ row }) => (
+          <span
+            className="cursor-pointer hover:text-brand-primary"
+            onClick={() =>
+              navigate(`/experience/${row.original.experiences?.id}`)
+            }
+          >
+            {row.original.experiences?.title}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "time_slots.activities.name",
+        header: "Activity",
+        cell: ({ row }) => row.original.time_slots?.activities?.name || "N/A",
+      },
+      {
+        accessorKey: "booking_date",
+        header: ({ column }) => {
+          const isSorted = column.getIsSorted();
+          const sortIcon =
+            isSorted === "asc" ? "↑" : isSorted === "desc" ? "↓" : "↓";
 
-  if (!bookings || bookings.length === 0)
+          return (
+            <div className="cursor-pointer"
+              onClick={() => column.toggleSorting(isSorted === "asc")}
+            >
+               Activity Date {sortIcon}
+            </div>
+          );
+        },
+        cell: ({ row }) =>
+          format(new Date(row.original.booking_date), "MMM d, yyyy"),
+        sortingFn: (a, b) => {
+          const dateA = new Date(a.original.booking_date).getTime();
+          const dateB = new Date(b.original.booking_date).getTime();
+          return dateA - dateB;
+        },
+      },
+      {
+        accessorKey: "experiences.location",
+        header: "Location",
+        cell: ({ row }) => (
+          <a
+            href={row.original.experiences?.location}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-brand-primary"
+          >
+            {row.original.experiences?.location}
+          </a>
+        ),
+      },
+      {
+        accessorKey: "booking_participants",
+        header: "Participants",
+        cell: ({ row }) => row.original.booking_participants[0]?.name || "N/A",
+      },
+      {
+        accessorKey: "booking_participants_number",
+        header: "Contact Number",
+        cell: ({ row }) =>
+          row.original.booking_participants[0]?.phone_number || "N/A",
+      },
+      {
+        accessorKey: "total_participants",
+        header: "No. of Participants",
+        cell: ({ row }) => row.original.booking_participants?.length || "N/A",
+      },
+      {
+        accessorKey: "price",
+        header: "Total Amount",
+        cell: ({ row }) => {
+          const activity = row.original.time_slots?.activities;
+          const price = activity?.price || row.original.experiences?.price || 0;
+          const currency =
+            activity?.currency || row.original.experiences?.currency || "INR";
+          const totalAmount = price * row.original.total_participants;
+          const dueAmount = row.original.due_amount || 0;
+          const paidAmount = totalAmount - dueAmount;
+
+          return (
+            <div>
+              <div className="text-lg font-bold text-orange-500 mb-1">
+                {currency} {totalAmount}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {row.original.total_participants} × {currency} {price}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "due_payment",
+        header: "Pending Payment",
+        cell: ({ row }) => {
+          const activity = row.original.time_slots?.activities;
+          const price = activity?.price || row.original.experiences?.price || 0;
+          const currency =
+            activity?.currency || row.original.experiences?.currency || "INR";
+          const totalAmount = price * row.original.total_participants;
+          const dueAmount = row.original.due_amount || 0;
+          const paidAmount = totalAmount - dueAmount;
+
+          return (
+            <div>
+              <div className="text-sm text-muted-foreground">
+                {currency} {dueAmount}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => (
+          <div className="space-x-2">
+            <Badge className={getStatusColor(row.original.status)}>
+              {row.original.status}
+            </Badge>
+            {/* {row.original.due_amount && row.original.due_amount > 0 && (
+              <Badge
+                variant="secondary"
+                className="bg-orange-100 text-orange-800"
+              >
+                Partial Payment
+              </Badge>
+            )} */}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "note_for_guide",
+        header: "Notes for Guide",
+        cell: ({ row }) => row.original.note_for_guide || "N/A",
+      },
+    ],
+    [navigate]
+  );
+
+  const table = useReactTable({
+    data: filteredBookings,
+    columns,
+    state: {
+      globalFilter,
+      sorting,
+    },
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+  });
+
+  if (isLoading) return <p className="text-center py-10">Loading...</p>;
+  if (!bookings.length)
     return (
       <div className="text-center py-10 text-muted-foreground">
         No bookings yet!
@@ -82,130 +284,63 @@ export const UserBookings = () => {
     );
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full table-auto border-collapse border border-gray-200">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="px-4 py-2 border">Title</th>
-            <th className="px-4 py-2 border">Activity</th>
-            <th className="px-4 py-2 border">Date</th>
-            <th className="px-4 py-2 border">Location</th>
-            <th className="px-4 py-2 border">Participants</th>
-            <th className="px-4 py-2 border">Price</th>
-            <th className="px-4 py-2 border">Status</th>
-            <th className="px-4 py-2 border">Notes for Guide</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bookings.map((booking) => (
-            <tr
-              key={booking.id}
-              className="hover:bg-gray-50"
-              // onClick={() =>
-              //   navigate(`/experience/${booking.experiences?.id}`)
-              // }
-            >
-              <td
-                className="px-4 py-2 border cursor-pointer hover:text-brand-primary"
-                onClick={() =>
-                  navigate(`/experience/${booking.experiences?.id}`)
-                }
-              >
-                {booking.experiences?.title}
-              </td>
-              <td className="px-4 py-2 border">
-                {booking.time_slots?.activities && (
-                  <>Activity: {booking.time_slots.activities.name}</>
-                )}
-              </td>
-              <td className="px-4 py-2 border">
-                {format(new Date(booking.booking_date), "MMM d, yyyy")}
-              </td>
-              <td className="px-4 py-2 border cursor-pointer hover:text-brand-primary">
-                {" "}
-                <a
-                  // href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  //   booking.experiences?.location
-                  // )}`}
-                  href={booking.experiences?.location}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {booking.experiences?.location}
-                </a>
-              </td>
-              <td className="px-4 py-2 border">
-                {booking.booking_participants?.map((p) => p.name).join(", ")}
-              </td>
-              <td className="px-4 py-2 border text-center">
-                {(() => {
-                  const activity = booking.time_slots?.activities;
-                  const activityPrice =
-                    activity?.price || booking.experiences?.price || 0;
-                  const activityCurrency =
-                    activity?.currency ||
-                    booking.experiences?.currency ||
-                    "INR";
-                  const totalAmount =
-                    activityPrice * booking.total_participants;
-                  const dueAmount =
-                    (booking as BookingWithDueAmount).due_amount || 0;
-                  const paidAmount = totalAmount - dueAmount;
+    <div>
+      <div className="flex justify-between items-center py-4 gap-2">
+        <Input
+          placeholder="Search bookings..."
+          value={globalFilter ?? ""}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          className="max-w-sm"
+        />
+        <Button
+          variant={showTodayOnly ? "default" : "outline"}
+          onClick={() => setShowTodayOnly((prev) => !prev)}
+        >
+          {showTodayOnly ? "Show All" : "Today's bookings"}
+        </Button>
+      </div>
 
-                  return (
-                    <div>
-                      {dueAmount > 0 ? (
-                        // Partial payment display
-                        <div>
-                          <div className="text-lg font-bold text-green-600 mb-1">
-                            {activityCurrency} {paidAmount}
-                          </div>
-                          <div className="text-sm text-orange-600 mb-1">
-                            Due On-Site: {activityCurrency} {dueAmount}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Total: {activityCurrency} {totalAmount}
-                          </div>
-                        </div>
-                      ) : (
-                        // Full payment display
-                        <div>
-                          <div className="text-lg font-bold text-orange-500 mb-1">
-                            {activityCurrency} {totalAmount}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {booking.total_participants} × {activityCurrency}{" "}
-                            {activityPrice}
-                          </div>
-                        </div>
+      <div className="rounded-md border">
+        <Table className="border">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} >
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="border px-4 py-2">
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="border px-4 py-2 text-start">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
                       )}
-                    </div>
-                  );
-                })()}
-              </td>
-              <td className="px-4 py-2 border">
-                <Badge className={`${getStatusColor(booking.status)}`}>
-                  {booking.status}
-                </Badge>
-                {(booking as BookingWithDueAmount).due_amount &&
-                (booking as BookingWithDueAmount).due_amount! > 0 ? (
-                  <Badge
-                    variant="secondary"
-                    className="bg-orange-100 text-orange-800"
-                  >
-                    Partial Payment
-                  </Badge>
-                ) : null}
-              </td>
-              <td className="px-4 py-2 border">
-                <p className="text-sm text-muted-foreground">
-                  {booking.note_for_guide || "N/A"}
-                </p>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  {showTodayOnly ? "No bookings for today." : "No results."}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };

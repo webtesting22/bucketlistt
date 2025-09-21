@@ -32,16 +32,19 @@ import { useLocation } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/ThemeProvider";
 import { AuthModal } from "@/components/AuthModal";
+import { EditProfileDialog } from "./EditProfileDialog";
 
 export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { isVendor } = useUserRole();
   const { role } = useUserRole();
   const { favoritesCount } = useFavorites();
   const { theme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
 
   // Check if we're on the landing page
   const isLandingPage = location.pathname === "/";
@@ -76,8 +79,6 @@ export function Header() {
     };
   }, [isLandingPage]);
 
-
-
   // Query for upcoming bookings
   const { data: nextBooking } = useQuery({
     queryKey: ["next-booking", user?.id],
@@ -107,6 +108,30 @@ export function Header() {
       return data;
     },
     enabled: !!user,
+  });
+
+  const {
+    data: userProfile,
+    isLoading: profileLoading,
+    refetch: refetchProfile,
+  } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      return data;
+    },
+    enabled: !!user?.id,
   });
 
   const handleSignOut = async () => {
@@ -170,15 +195,17 @@ export function Header() {
             <img
               src="https://prepseed.s3.ap-south-1.amazonaws.com/Bucketlistt+(1).png"
               alt="bucketlistt Logo"
-              className={`h-20 w-auto transition-opacity duration-300 ${isScrolled ? 'opacity-0 absolute' : 'opacity-100'
-                }`}
+              className={`h-20 w-auto transition-opacity duration-300 ${
+                isScrolled ? "opacity-0 absolute" : "opacity-100"
+              }`}
             />
             {/* Second logo - shown after scroll */}
             <img
               src="https://prepseed.s3.ap-south-1.amazonaws.com/Bucketlistt.png"
               alt="bucketlistt Logo"
-              className={`h-20 w-auto transition-opacity duration-300 ${isScrolled ? 'opacity-100' : 'opacity-0 absolute'
-                }`}
+              className={`h-20 w-auto transition-opacity duration-300 ${
+                isScrolled ? "opacity-100" : "opacity-0 absolute"
+              }`}
             />
           </div>
 
@@ -316,7 +343,8 @@ export function Header() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => navigate("/profile")}
+                    // onClick={() => navigate("/profile")}
+                    onClick={() => setShowEditProfile(true)}
                   >
                     <UserCircle className="mr-2 h-4 w-4" />
                     Profile
@@ -335,13 +363,13 @@ export function Header() {
                     <Heart className="mr-2 h-4 w-4" />
                     Wishlists
                   </DropdownMenuItem>
-                  <DropdownMenuItem
+                  {/* <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("/coming-soon")}
                   >
                     <Gift className="mr-2 h-4 w-4" />
                     Rewards
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("/coming-soon")}
@@ -349,20 +377,20 @@ export function Header() {
                     <FileText className="mr-2 h-4 w-4" />
                     Reviews
                   </DropdownMenuItem>
-                  <DropdownMenuItem
+                  {/* <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("/coming-soon")}
                   >
                     <CreditCard className="mr-2 h-4 w-4" />
                     Payment methods
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
+                  </DropdownMenuItem> */}
+                  {/* <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("/coming-soon")}
                   >
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="cursor-pointer"
@@ -480,7 +508,8 @@ export function Header() {
 
                   <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => navigate("/profile")}
+                    // onClick={() => navigate("/profile")}
+                    onClick={() => setShowEditProfile(true)}
                   >
                     <UserCircle className="mr-2 h-4 w-4" />
                     Profile
@@ -499,13 +528,13 @@ export function Header() {
                     <Heart className="mr-2 h-4 w-4" />
                     Wishlists
                   </DropdownMenuItem>
-                  <DropdownMenuItem
+                  {/* <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("/coming-soon")}
                   >
                     <Gift className="mr-2 h-4 w-4" />
                     Rewards
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("/coming-soon")}
@@ -513,20 +542,20 @@ export function Header() {
                     <FileText className="mr-2 h-4 w-4" />
                     Reviews
                   </DropdownMenuItem>
-                  <DropdownMenuItem
+                  {/* <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("/coming-soon")}
                   >
                     <CreditCard className="mr-2 h-4 w-4" />
                     Payment methods
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
+                  </DropdownMenuItem> */}
+                  {/* <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => navigate("/coming-soon")}
                   >
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="cursor-pointer"
@@ -543,7 +572,9 @@ export function Header() {
                 <Button
                   style={{
                     background: isScrolled ? "#940fdb" : "white",
-                    color: isScrolled ? "white" : "black", padding: "0px 10px", height: "30px"
+                    color: isScrolled ? "white" : "black",
+                    padding: "0px 10px",
+                    height: "30px",
                   }}
                   onClick={() => setIsAuthModalOpen(true)}
                 >
@@ -559,6 +590,13 @@ export function Header() {
       <AuthModal
         open={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      <EditProfileDialog
+        open={showEditProfile}
+        onOpenChange={setShowEditProfile}
+        userProfile={userProfile}
+        onProfileUpdate={refetchProfile}
       />
     </>
   );
