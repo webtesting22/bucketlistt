@@ -43,6 +43,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Modal, Select as AntSelect } from "antd";
 import { format } from "date-fns";
 import { useDiscountCoupon } from "@/hooks/useDiscountCoupon";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const participantSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -108,7 +109,7 @@ export const BookingDialog = ({
   );
   const [bypassPayment, setBypassPayment] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState<string>();
-  const [currentStep, setCurrentStep] = useState(1); // 1: Selection, 2: Participants
+  const [currentStep, setCurrentStep] = useState(1); // 1: Activity Selection, 2: Date/Time Selection, 3: Participants (mobile only)
   const [couponCode, setCouponCode] = useState("");
   const [couponValidation, setCouponValidation] = useState<{
     isValid: boolean;
@@ -120,6 +121,7 @@ export const BookingDialog = ({
   const navigate = useNavigate();
   const { openRazorpay } = useRazorpay();
   const { validateCoupon } = useDiscountCoupon();
+  const isMobile = useIsMobile();
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
@@ -170,19 +172,55 @@ export const BookingDialog = ({
 
   // Step navigation functions
   const handleNextStep = () => {
-    if (selectedActivityId && selectedDate && selectedSlotId) {
-      setCurrentStep(2);
+    if (isMobile) {
+      // Mobile: 3-step process
+      if (currentStep === 1) {
+        // Step 1 -> Step 2: Check if activity is selected
+        if (selectedActivityId) {
+          setCurrentStep(2);
+        } else {
+          toast({
+            title: "Missing information",
+            description: "Please select an activity",
+            variant: "destructive",
+          });
+        }
+      } else if (currentStep === 2) {
+        // Step 2 -> Step 3: Check if date and time slot are selected
+        if (selectedDate && selectedSlotId) {
+          setCurrentStep(3);
+        } else {
+          toast({
+            title: "Missing information",
+            description: "Please select date and time slot",
+            variant: "destructive",
+          });
+        }
+      }
     } else {
-      toast({
-        title: "Missing information",
-        description: "Please select activity, date, and time slot",
-        variant: "destructive",
-      });
+      // Desktop: 2-step process (original logic)
+      if (selectedActivityId && selectedDate && selectedSlotId) {
+        setCurrentStep(2);
+      } else {
+        toast({
+          title: "Missing information",
+          description: "Please select activity, date, and time slot",
+          variant: "destructive",
+        });
+      }
     }
   };
 
   const handlePrevStep = () => {
-    setCurrentStep(1);
+    if (isMobile) {
+      // Mobile: 3-step process
+      if (currentStep > 1) {
+        setCurrentStep(currentStep - 1);
+      }
+    } else {
+      // Desktop: 2-step process
+      setCurrentStep(1);
+    }
   };
 
   const handleClose = () => {
@@ -651,25 +689,45 @@ export const BookingDialog = ({
     <Modal
       open={isOpen}
       onCancel={handleClose}
-      title={`Book Experience: ${experience.title} - Step ${currentStep} of 2`}
+      title={`Book Experience: ${experience.title}`}
       width={1000}
       footer={null}
       destroyOnClose={true}
       maskClosable={false}
+      className="BookingDialogModal"
     >
       {currentStep === 1 ? (
-        // Step 1: Activity, Date, and Time Selection
+        // Step 1: Activity Selection (Mobile) or Activity + Date + Time Selection (Desktop)
         <div className="space-y-6">
-          <SlotSelector
-            experienceId={experience.id}
-            selectedDate={selectedDate}
-            selectedSlotId={selectedSlotId}
-            selectedActivityId={selectedActivityId}
-            participantCount={participantCount}
-            onDateChange={handleDateChange}
-            onSlotChange={handleSlotChange}
-            onActivityChange={setSelectedActivityId}
-          />
+          {isMobile ? (
+            // Mobile: Only Activity Selection
+            <div>
+              {/* <h3 className="text-lg font-semibold mb-4">Select Activity</h3> */}
+              <SlotSelector
+                experienceId={experience.id}
+                selectedDate={selectedDate}
+                selectedSlotId={selectedSlotId}
+                selectedActivityId={selectedActivityId}
+                participantCount={participantCount}
+                onDateChange={handleDateChange}
+                onSlotChange={handleSlotChange}
+                onActivityChange={setSelectedActivityId}
+                showOnlyActivitySelection={true}
+              />
+            </div>
+          ) : (
+            // Desktop: Activity + Date + Time Selection (original behavior)
+            <SlotSelector
+              experienceId={experience.id}
+              selectedDate={selectedDate}
+              selectedSlotId={selectedSlotId}
+              selectedActivityId={selectedActivityId}
+              participantCount={participantCount}
+              onDateChange={handleDateChange}
+              onSlotChange={handleSlotChange}
+              onActivityChange={setSelectedActivityId}
+            />
+          )}
 
           {/* Step 1 Footer */}
           <div className="flex gap-3 pt-4">
@@ -684,7 +742,45 @@ export const BookingDialog = ({
             <Button
               type="button"
               onClick={handleNextStep}
-              disabled={!selectedActivityId || !selectedDate || !selectedSlotId}
+              disabled={isMobile ? !selectedActivityId : (!selectedActivityId || !selectedDate || !selectedSlotId)}
+              className="flex-1 bg-orange-500 hover:bg-orange-600"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      ) : currentStep === 2 && isMobile ? (
+        // Step 2: Date and Time Selection (Mobile only)
+        <div className="space-y-6">
+          <div>
+            {/* <h3 className="text-lg font-semibold mb-4">Select Date & Time</h3> */}
+            <SlotSelector
+              experienceId={experience.id}
+              selectedDate={selectedDate}
+              selectedSlotId={selectedSlotId}
+              selectedActivityId={selectedActivityId}
+              participantCount={participantCount}
+              onDateChange={handleDateChange}
+              onSlotChange={handleSlotChange}
+              onActivityChange={setSelectedActivityId}
+              showOnlyDateAndTime={true}
+            />
+          </div>
+
+          {/* Step 2 Footer */}
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handlePrevStep}
+              className="flex-1"
+            >
+              Back
+            </Button>
+            <Button
+              type="button"
+              onClick={handleNextStep}
+              disabled={!selectedDate || !selectedSlotId}
               className="flex-1 bg-orange-500 hover:bg-orange-600"
             >
               Next
@@ -698,8 +794,8 @@ export const BookingDialog = ({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column: Activity Summary */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Booking Summary</h3>
-                <Card className="p-4">
+                <h3 className="textSmall mb-4">Booking Summary</h3>
+                <Card className="p-2">
                   {/* Experience Image */}
                   {experience.image_url && (
                     <div className="mb-4">
@@ -712,8 +808,8 @@ export const BookingDialog = ({
                   )}
 
                   {/* Date Selection */}
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="flex flex-col items-center justify-center bg-gray-50 rounded-lg p-3 min-w-[90px]" style={{ border: '1px solid #e0e0e0' }}>
+                  <div className="flex items-center gap-4 mb-4 DateSelectorContainer">
+                    <div className="flex flex-col items-center justify-center bg-gray-50 rounded-lg p-1 min-w-[90px]" style={{ border: '1px solid #e0e0e0' }}>
                       <div className="text-red-500 text-sm font-medium">
                         {selectedDate ? format(selectedDate, 'MMM') : '---'}
                       </div>
@@ -764,7 +860,7 @@ export const BookingDialog = ({
                   <hr className="my-4" />
 
                   {/* Pricing Breakdown */}
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-0">
                     <span className="text-gray-600">
                       {participantCount} {participantCount === 1 ? 'Person' : 'People'}
                     </span>
@@ -773,10 +869,10 @@ export const BookingDialog = ({
                     </span>
                   </div>
 
-                  <hr className="my-4" />
+                  {/* <hr className="my-4" /> */}
 
                   {/* Total Payable */}
-                  <div className="flex justify-between items-center">
+                  {/* <div className="flex justify-between items-center">
                     <div>
                       <div className="font-bold text-lg">Total payable</div>
                       <div className="text-sm text-gray-500 flex items-center gap-1">
@@ -795,7 +891,7 @@ export const BookingDialog = ({
                         {selectedActivity?.currency === 'INR' ? '₹' : selectedActivity?.currency}{totalActivityPrice}
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                 </Card>
               </div>
 
@@ -1159,7 +1255,27 @@ export const BookingDialog = ({
               </div>
             </div>
 
-            {/* Step 2 Footer */}
+            {/* Partial Payment Toggle */}
+            <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-blue-800 dark:text-blue-200">
+                      Pay 10% Now, Rest On-Site
+                    </h4>
+                    <p className="text-sm text-blue-600 dark:text-blue-300">
+                      Pay 10% upfront, remaining amount to be paid directly to vendor
+                    </p>
+                  </div>
+                  <Switch
+                    checked={partialPayment}
+                    onCheckedChange={setPartialPayment}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Step Footer */}
             <div className="flex gap-3 pt-4">
               <Button
                 type="button"

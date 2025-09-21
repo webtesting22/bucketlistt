@@ -459,21 +459,21 @@ const ExperienceDetail = () => {
                     </div>
                   </Col>
                   <Col lg={6} md={12} xs={12}>
-                    <div>
+                    <div >
                       <img src="/Images/BookPayLater.svg" alt="" />
-                      <p>Book Now, Pay Later</p>
+                      <p style={{ marginTop: "-6px" }}>Book Now, Pay Later</p>
                     </div>
                   </Col>
                   <Col lg={6} md={12} xs={12}>
                     <div style={{ marginLeft: "7px" }}>
-                      <IoCheckmarkDoneCircle style={{ fontSize: "20px" }} />
+                      <IoCheckmarkDoneCircle style={{ fontSize: "22px" }} />
                       <p>Free Cancellation</p>
                     </div>
                   </Col>
                   <Col lg={6} md={12} xs={12}>
                     <div>
                       <img src="/Images/MobileUpatedIcon.svg" alt="" />
-                      <p>Instant Tickets to your mobile
+                      <p style={{ marginTop: "-6px" }}>Instant Tickets to your mobile
                       </p>
                     </div>
                   </Col>
@@ -593,7 +593,7 @@ const ExperienceDetail = () => {
                       {/* Coupon Section */}
                       {!isVendor && (
                         <div className="mb-4">
-                          {!showCouponInput && !appliedCoupon && (
+                          {/* {!showCouponInput && !appliedCoupon && (
                             <Button
                               variant="outline"
                               className="w-full mb-2"
@@ -602,9 +602,9 @@ const ExperienceDetail = () => {
                               <Tag className="h-4 w-4 mr-2" />
                               Have a coupon code?
                             </Button>
-                          )}
+                          )} */}
 
-                          {showCouponInput && (
+                          {/* {showCouponInput && (
                             <CouponInput
                               experienceId={experience.id}
                               bookingAmount={experience.price}
@@ -613,7 +613,7 @@ const ExperienceDetail = () => {
                               onCouponRemoved={handleCouponRemoved}
                               className="mb-4"
                             />
-                          )}
+                          )} */}
 
                           {appliedCoupon && (
                             <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -652,31 +652,31 @@ const ExperienceDetail = () => {
                       </Button>
 
                       {/* Bulk Booking Buttons for Vendor */}
-                      {isVendor && (
-                        <div className="flex flex-col gap-2 mt-2">
-                          <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={handleDownloadBulkBookingCSV}
-                          >
-                            Bulk Booking (Download CSV Template)
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={handleBulkUploadClick}
-                          >
-                            Bulk Upload (Upload CSV)
-                          </Button>
-                          <input
-                            type="file"
-                            accept=".csv"
-                            style={{ display: "none" }}
-                            ref={fileInputRef}
-                            onChange={handleBulkUploadFile}
-                          />
-                        </div>
-                      )}
+                      {/* {isVendor && ( */}
+                      <div className="flex flex-col gap-2 mt-2">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={handleDownloadBulkBookingCSV}
+                        >
+                          Bulk Booking (Download CSV Template)
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={handleBulkUploadClick}
+                        >
+                          Bulk Upload (Upload CSV)
+                        </Button>
+                        <input
+                          type="file"
+                          accept=".csv"
+                          style={{ display: "none" }}
+                          ref={fileInputRef}
+                          onChange={handleBulkUploadFile}
+                        />
+                      </div>
+                      {/* )} */}
                     </div>
                     <div className="WhyBucketlisttContainer">
                       <h1>Why bucketlistt?</h1>
