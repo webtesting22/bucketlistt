@@ -1195,7 +1195,7 @@ h6 {
 
 .StikyBadgesContainer .ant-row .ant-col div {
   display: flex;
-  align-items: center;
+  align-items: start;
   gap: 10px;
 }
 
@@ -1211,19 +1211,21 @@ h6 {
   overflow-x: auto;
   padding: 30px 0px;
   padding-top: 10px !important;
-  
+
   /* Custom scrollbar styling */
   scrollbar-width: thin;
   scrollbar-color: var(--brand-color) #f1f1f1;
 }
-.bg-orange-50{
+
+.bg-orange-50 {
   background-color: white !important;
 }
 
 .activity-swiper .swiper-button-prev {
   background-color: white !important;
 }
-.activity-swiper .swiper-button-prev svg, 
+
+.activity-swiper .swiper-button-prev svg,
 .activity-swiper .swiper-button-next svg {
   width: 20px;
   height: 20px;
@@ -1249,7 +1251,48 @@ h6 {
   background: var(--brand-color);
 }
 
+
 @media (max-width: 480px) {
+  .DateSelectorContainer>div:first-child{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .MobileActivityCardsContainer .ant-card-body {
+    padding: 15px 10px !important;
+  }
+
+  .BookingDialogModal .ant-modal-title {
+    font-size: 14px !important;
+  }
+  .BookingDialogModal{
+    top: 0px !important;
+  }
+
+  .BookingDialogModal .ant-modal-content {
+    padding: 15px !important;
+  }
+
+  .textSmall {
+    font-size: 14px !important;
+  }
+
+  .AdjustContentFlexContainer {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .FlexGridContainer {
+    display: flex;
+    align-items: center;
+    flex-direction: row !important;
+  }
+
+  .activity-swiper h3 {
+    font-size: 14px;
+  }
+
   .image-gallery-side {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 1fr;
@@ -1333,6 +1376,12 @@ h6 {
 }
 
 @media (max-width: 768px) {
+  .FlexAdjustContainer{
+    display: flex !important;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+  }
   .MobileOnlyButtonContainer {
     display: flex !important;
     position: fixed !important;
@@ -1352,12 +1401,12 @@ h6 {
     align-items: center;
   }
 
-  .MobileOnlyButtonContainer>div div {
+  /* .MobileOnlyButtonContainer>div div {
     display: flex;
     flex-direction: column;
     align-items: start;
 
-  }
+  } */
 
   .MobileOnlyButtonContainer>div button {
     padding: 25px 0px;
@@ -1365,14 +1414,14 @@ h6 {
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
     border-radius: 10px !important;
   }
-
+ 
   .MobileOnlyButtonContainer>div div span:first-child {
     font-size: 0.875rem !important;
   }
 
   .MobileOnlyButtonContainer>div div span:last-child {
-    font-size: 22px !important;
-    margin-top: -8px;
+    font-size: 1rem !important;
+    /* margin-top: -8px; */
   }
 
   .MobileOnlyButtonContainer>div:last-child {
@@ -1463,11 +1512,11 @@ h6 {
   opacity: 1;
 }
 
-#time-slot-card .ant-card-body{
-padding: 10px !important;
+#time-slot-card .ant-card-body {
+  padding: 10px !important;
 }
 
-.activity-slide .ant-card .ant-card-body{
+.activity-slide .ant-card .ant-card-body {
   padding: 10px !important;
 }
 
@@ -1476,5 +1525,5 @@ padding: 10px !important;
     width: 100%;
     padding: 0 0px;
   }
-  
+
 }
