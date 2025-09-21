@@ -102,6 +102,7 @@ export function CreateExperienceForm({
   const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedVideos, setSelectedVideos] = useState<File[]>([]);
   const [videoPreviewUrls, setVideoPreviewUrls] = useState<string[]>([]);
+  const [removedImages, setRemovedImages] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
@@ -318,6 +319,7 @@ export function CreateExperienceForm({
       URL.revokeObjectURL(previewUrls[index]);
       setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
       setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+      setRemovedImages((prev) => [...prev, previewUrls[index]]);
     }
   };
 
@@ -746,8 +748,28 @@ export function CreateExperienceForm({
           }
         }
 
+
+        // In handleSubmit (inside isEditing && initialData.id case)
+if (removedImages.length > 0) {
+  for (const imageUrl of removedImages) {
+    // 1. Delete from storage (if stored in Supabase Storage)
+    const path = imageUrl.split("/").pop(); // adjust if you save full URL
+    await supabase.storage.from("your-bucket").remove([path]);
+
+    // 2. If you save multiple image URLs in a table, update DB too
+    // Example: remove from experience_images table
+    await supabase
+      .from("experience_images")
+      .delete()
+      .eq("experience_id", initialData.id)
+      .eq("image_url", imageUrl);
+  }
+}
+
         await updateActivities(initialData.id);
         await updateExperienceCategories(initialData.id, formData.category_ids);
+
+
 
         toast({
           title: "Experience updated successfully!",
