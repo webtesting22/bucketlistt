@@ -25,6 +25,7 @@ interface ExperienceCardProps {
   reviews: string;
   price: string;
   originalPrice?: string;
+  discountedPrice?: string; // New prop for discounted price
   duration?: string;
   groupSize?: string;
   isSpecialOffer?: boolean;
@@ -45,6 +46,7 @@ export function ExperienceCard({
   reviews,
   price,
   originalPrice,
+  discountedPrice,
   duration,
   groupSize,
   isSpecialOffer,
@@ -73,6 +75,61 @@ export function ExperienceCard({
     },
     enabled: !image || image === "", // Only fetch if main image is not available
   });
+
+  // Fetch activities data to check for discounted prices
+  const { data: activities } = useQuery({
+    queryKey: ["activities", id],
+    queryFn: async () => {
+      if (!id) return [];
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .eq("experience_id", id)
+        .eq("is_active", true);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
+  // Get the first activity's discounted price
+  const firstActivity = activities?.[0];
+  const activityDiscountedPrice = (firstActivity as any)?.discounted_price;
+
+  // Determine which price to display (same logic as MobileFloatingButton)
+  const getDisplayPrice = () => {
+    // Priority: discountedPrice prop > activityDiscountedPrice > price
+    if (discountedPrice) {
+      return {
+        displayPrice: discountedPrice,
+        originalPrice: price,
+        isDiscounted: true
+      };
+    }
+    
+    // Check if activity has discounted price
+    if (activityDiscountedPrice && firstActivity?.price) {
+      const activityOriginalPrice = `₹${firstActivity.price}`;
+      const activityDiscountedPriceFormatted = `₹${activityDiscountedPrice}`;
+      
+      if (activityDiscountedPrice !== firstActivity.price) {
+        return {
+          displayPrice: activityDiscountedPriceFormatted,
+          originalPrice: activityOriginalPrice,
+          isDiscounted: true
+        };
+      }
+    }
+    
+    return {
+      displayPrice: price,
+      originalPrice: originalPrice,
+      isDiscounted: false
+    };
+  };
+
+  const { displayPrice, originalPrice: displayOriginalPrice, isDiscounted } = getDisplayPrice();
 
   const handleClick = () => {
     setIsClicked(true);
@@ -202,16 +259,34 @@ export function ExperienceCard({
             )}
             <div>
               <div id="PriceContainerOfferHomePageCards">
-                <span
-                  className="text-lg font-bold fontSizeMd"
-                  style={{ color: "var(--brand-color)" }}
-                >
-                  <span style={{ color: "grey" }}>From</span> {price}
-                </span>
-                {originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through fontSizeSm">
-                    {originalPrice}
-                  </span>
+                {isDiscounted ? (
+                  <div className="flex flex-col gap-0" style={{textAlign: "start"}}>
+                    <div className="FlexAdjustContainer font-bold fontSizeMd">
+                    <span style={{ color: "grey" }}>From</span>&nbsp;
+                      <span className="text-muted-foreground line-through">
+                        {displayOriginalPrice}
+                      </span>
+                    </div>
+                    <span
+                      className="font-bold fontSizeMd text-green-600"
+                    >
+                      {displayPrice}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="FlexAdjustContainer">
+                    <span
+                      className="text-lg font-bold fontSizeMd"
+                      style={{ color: "var(--brand-color)" }}
+                    > 
+                      <span style={{ color: "grey" }}>From</span> {displayPrice}
+                    </span>
+                    {displayOriginalPrice && (
+                      <span className="text-sm text-muted-foreground line-through fontSizeSm">
+                        {displayOriginalPrice}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -292,22 +367,42 @@ export function ExperienceCard({
               }}
             />
             <div id="PriceContainerOfferHomePageCards">
-              <div>
-                <span className="FromText">from</span>{" "}
-                {originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through fontSizeSm">
-                    {originalPrice}
-                  </span>
-                )}
-              </div>
-              <div style={{ marginTop: "-5px" }}>
-                <span
-                  className="text-lg font-bold fontSizeMd"
-                  style={{ color: "var(--brand-color)" }}
-                >
-                  {price}
-                </span>
-              </div>
+              {isDiscounted ? (
+                <div className="flex flex-col gap-0" style={{textAlign: "start"}}>
+                  <div className="FlexAdjustContainer">
+                    <span className="FromText textSmall">from</span>
+                    <span className="text-muted-foreground line-through textSmall">
+                      {displayOriginalPrice}
+                    </span>
+                  </div>
+                  <div style={{ marginTop: "-5px" }}>
+                    <span
+                      className="text-lg font-bold fontSizeMd text-green-600"
+                    >
+                      {displayPrice}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <span className="FromText">from</span>{" "}
+                    {displayOriginalPrice && (
+                      <span className="text-sm text-muted-foreground line-through fontSizeSm">
+                        {displayOriginalPrice}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ marginTop: "-5px" }}>
+                    <span
+                      className="text-lg font-bold fontSizeMd"
+                      style={{ color: "var(--brand-color)" }}
+                    >
+                      {displayPrice}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Tag, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, X, Tag, CheckCircle, AlertCircle, Minus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -56,7 +56,7 @@ const bookingSchema = z.object({
   participant_count: z
     .number()
     .min(1, "At least one participant is required")
-    .max(6, "Maximum 6 participants allowed"),
+    .max(50, "Maximum 50 participants allowed"),
   note_for_guide: z.string().optional(),
   terms_accepted: z
     .boolean()
@@ -137,7 +137,12 @@ export const BookingDialog = ({
   });
 
   const participantCount = form.watch("participant_count");
-  
+
+  // Helper function to get activity price (discounted if available)
+  const getActivityPrice = (activity: any) => {
+    return activity?.discounted_price || activity?.price;
+  };
+
   // Calculate base price - will be updated when selectedActivity is available
   const basePrice = experience.price * participantCount;
 
@@ -155,8 +160,8 @@ export const BookingDialog = ({
         activeCoupon.discount_calculation.final_amount * participantCount
       );
     }
-    // Use selected activity price if available, otherwise use experience price
-    const currentPrice = selectedActivity ? selectedActivity.price : experience.price;
+    // Use selected activity price (discounted if available), otherwise use experience price
+    const currentPrice = selectedActivity ? getActivityPrice(selectedActivity) : experience.price;
     return currentPrice * participantCount;
   };
 
@@ -251,7 +256,7 @@ export const BookingDialog = ({
       const result = await validateCoupon(
         couponCode,
         experience.id,
-        selectedActivity ? selectedActivity.price : experience.price
+        selectedActivity ? getActivityPrice(selectedActivity) : experience.price
       );
 
       if (result.valid && result.discount_calculation) {
@@ -666,7 +671,7 @@ export const BookingDialog = ({
   // Calculate final price and payment amounts after selectedActivity is available
   const finalPrice = calculateFinalPrice();
   const totalPrice = finalPrice;
-  
+
   // Calculate payment amounts for partial payment
   const upfrontAmount = partialPayment ? Math.round(finalPrice * 0.1) : finalPrice;
   const dueAmount = partialPayment ? finalPrice - upfrontAmount : 0;
@@ -699,9 +704,8 @@ export const BookingDialog = ({
     return `${hour12}:${minutes} ${ampm}`;
   };
 
-  // Update price calculation to use activity price
   const totalActivityPrice = selectedActivity
-    ? selectedActivity.price * participantCount
+    ? getActivityPrice(selectedActivity) * participantCount
     : 0;
 
   return (
@@ -771,17 +775,17 @@ export const BookingDialog = ({
       ) : currentStep === 2 && isMobile ? (
         // Step 2: Date and Time Selection (Mobile only)
         <div className="space-y-6">
-          <div>
+              <div>
             {/* <h3 className="text-lg font-semibold mb-4">Select Date & Time</h3> */}
-            <SlotSelector
-              experienceId={experience.id}
-              selectedDate={selectedDate}
-              selectedSlotId={selectedSlotId}
-              selectedActivityId={selectedActivityId}
+                <SlotSelector
+                  experienceId={experience.id}
+                  selectedDate={selectedDate}
+                  selectedSlotId={selectedSlotId}
+                  selectedActivityId={selectedActivityId}
               participantCount={participantCount}
-              onDateChange={handleDateChange}
-              onSlotChange={handleSlotChange}
-              onActivityChange={setSelectedActivityId}
+                  onDateChange={handleDateChange}
+                  onSlotChange={handleSlotChange}
+                  onActivityChange={setSelectedActivityId}
               showOnlyDateAndTime={true}
             />
           </div>
@@ -816,7 +820,7 @@ export const BookingDialog = ({
                 <h3 className="textSmall mb-4">Booking Summary</h3>
                 <Card className="p-2">
                   {/* Experience Image */}
-                  {experience.image_url && (
+                  {/* {experience.image_url && (
                     <div className="mb-4">
                       <img
                         src={experience.image_url}
@@ -824,7 +828,7 @@ export const BookingDialog = ({
                         className="w-full h-32 object-cover rounded-lg"
                       />
                     </div>
-                  )}
+                  )} */}
 
                   {/* Date Selection */}
                   <div className="flex items-center gap-4 mb-4 DateSelectorContainer">
@@ -883,9 +887,22 @@ export const BookingDialog = ({
                     <span className="text-gray-600">
                       {participantCount} {participantCount === 1 ? 'Person' : 'People'}
                     </span>
-                    <span className="font-medium">
-                      {selectedActivity?.currency === 'INR' ? '₹' : selectedActivity?.currency}{totalActivityPrice}
-                    </span>
+                    <div className="text-right">
+                      {(selectedActivity as any)?.discounted_price && (selectedActivity as any).discounted_price !== (selectedActivity as any).price ? (
+                        <div className="flex flex-col items-end">
+                          <span className="text-sm text-gray-400 line-through">
+                            {selectedActivity.currency === 'INR' ? '₹' : selectedActivity?.currency} {selectedActivity.price * participantCount}
+                          </span>
+                          <span className="font-medium text-green-600">
+                            {selectedActivity.currency === 'INR' ? '₹' : selectedActivity?.currency} {totalActivityPrice}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="font-medium">
+                          {selectedActivity?.currency === 'INR' ? '₹' : selectedActivity?.currency} {totalActivityPrice}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* <hr className="my-4" /> */}
@@ -938,88 +955,147 @@ export const BookingDialog = ({
 
                 {/* Participants Section */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Participants</h3>
+                    <h3 className="text-lg font-semibold">Participants</h3>
 
                   {/* Participant Count Selector */}
                   <FormField
                     control={form.control}
                     name="participant_count"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Number of Participants</FormLabel>
-                        <AntSelect
-                          value={field.value}
-                          onChange={(value) => field.onChange(value)}
-                          placeholder="Select number of participants"
-                          className="w-full"
-                          size="large"
-                        >
-                          {[1, 2, 3, 4, 5, 6].map((count) => (
-                            <AntSelect.Option key={count} value={count}>
-                              {count} {count === 1 ? 'Person' : 'People'}
-                            </AntSelect.Option>
-                          ))}
-                        </AntSelect>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      const [inputValue, setInputValue] = useState(field.value.toString());
+                      
+                      return (
+                        <FormItem>
+                          <FormLabel>Number of Participants</FormLabel>
+                          <div className="flex items-center gap-2">
+                            {/* Minus Button */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                              size="icon"
+                              className="h-10 w-10 shrink-0"
+                              onClick={() => {
+                                if (field.value > 1) {
+                                  const newValue = field.value - 1;
+                                  field.onChange(newValue);
+                                  setInputValue(newValue.toString());
+                                }
+                              }}
+                              disabled={field.value <= 1}
+                            >
+                              <Minus className="h-4 w-4" />
+                    </Button>
+                            
+                            {/* Input Field */}
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="1"
+                                max="10"
+                                value={inputValue}
+                                onChange={(e) => {
+                                  setInputValue(e.target.value);
+                                }}
+                                onBlur={(e) => {
+                                  const value = parseInt(e.target.value);
+                                  if (isNaN(value) || value < 1) {
+                                    field.onChange(1);
+                                    setInputValue('1');
+                                  } else if (value > 50) {
+                                    field.onChange(50);
+                                    setInputValue('50');
+                                  } else {
+                                    field.onChange(value);
+                                    setInputValue(value.toString());
+                                  }
+                                }}
+                                className="text-center font-medium"
+                                placeholder="1"
+                              />
+                            </FormControl>
+                            
+                            {/* Plus Button */}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              className="h-10 w-10 shrink-0"
+                              onClick={() => {
+                                if (field.value < 50) {
+                                  const newValue = field.value + 1;
+                                  field.onChange(newValue);
+                                  setInputValue(newValue.toString());
+                                }
+                              }}
+                              disabled={field.value >= 50}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                        </div>
+                          <div className="text-sm text-muted-foreground text-center">
+                            {field.value} {field.value === 1 ? 'Person' : 'People'}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   {/* Single Participant Form */}
                   <Card>
                     <CardContent className="p-4">
                       <h4 className="font-medium mb-4">Primary Contact Details</h4>
-                      <div className="grid grid-cols-1 gap-4">
-                        <FormField
-                          control={form.control}
+                        <div className="grid grid-cols-1 gap-4">
+                          <FormField
+                            control={form.control}
                           name="participant.name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Full name" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Full name" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                        <FormField
-                          control={form.control}
+                          <FormField
+                            control={form.control}
                           name="participant.email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="email@example.com"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="email@example.com"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                        <FormField
-                          control={form.control}
+                          <FormField
+                            control={form.control}
                           name="participant.phone_number"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Phone</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Phone number"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Phone</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Phone number"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
                 </div>
 
                 {/* Note for Guide */}
@@ -1279,17 +1355,34 @@ export const BookingDialog = ({
                               </div>
                             );
                           } else {
-                            return (
-                              <div className="text-2xl font-bold text-orange-500">
-                                {selectedActivity?.currency} {totalActivityPrice}
-                              </div>
-                            );
+                            // Show discounted price if available
+                            const isDiscounted = (selectedActivity as any)?.discounted_price && (selectedActivity as any).discounted_price !== (selectedActivity as any).price;
+                            if (isDiscounted) {
+                              return (
+                                <div>
+                                  <div className="text-lg text-muted-foreground line-through">
+                                    {selectedActivity?.currency}{" "}
+                                    {selectedActivity.price * participantCount}
+                                  </div>
+                                  <div className="text-2xl font-bold text-green-600">
+                                    {selectedActivity?.currency}{" "}
+                                    {totalActivityPrice}
+                                  </div>
+                                </div>
+                              );
+                            } else {
+                              return (
+                        <div className="text-2xl font-bold text-orange-500">
+                          {selectedActivity?.currency} {totalActivityPrice}
+                        </div>
+                              );
+                            }
                           }
                         })()}
                         <div className="text-sm text-muted-foreground">
                           {participantCount} participant
                           {participantCount > 1 ? "s" : ""} ×{" "}
-                          {selectedActivity?.currency} {selectedActivity?.price}
+                          {selectedActivity?.currency} {getActivityPrice(selectedActivity)}
                         </div>
                       </div>
                     </div>
@@ -1333,9 +1426,9 @@ export const BookingDialog = ({
                 disabled={isSubmitting || !selectedDate || !selectedSlotId}
                 className="flex-1 bg-orange-500 hover:bg-orange-600"
               >
-                {isSubmitting 
-                  ? "Processing..." 
-                  : partialPayment 
+                {isSubmitting
+                  ? "Processing..."
+                  : partialPayment
                     ? `Pay ${selectedActivity?.currency || experience.currency} ${upfrontAmount} & Confirm Booking`
                     : "Pay & Confirm Booking"
                 }

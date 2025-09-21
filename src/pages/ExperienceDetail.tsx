@@ -81,6 +81,27 @@ const ExperienceDetail = () => {
     },
     enabled: !!id,
   });
+
+  // Get activities data to check for discounted prices
+  const { data: activities } = useQuery({
+    queryKey: ["activities", id],
+    queryFn: async () => {
+      if (!id) return [];
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .eq("experience_id", id)
+        .eq("is_active", true);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
+  // Get the first activity's discounted price (assuming single activity for desktop display)
+  const firstActivity = activities?.[0];
+  const discountedPrice = (firstActivity as any)?.discounted_price;
   // console.log("experienceeeee", experience);
   const { data: userBookings, refetch: refetchBookings } = useQuery({
     queryKey: ["user-experience-bookings", user?.id, id],
@@ -567,16 +588,11 @@ const ExperienceDetail = () => {
 
                       <div className="flex items-center gap-3 mb-6">
                         <span style={{ color: "grey" }}>From</span>
-                        <span
-                          className={`text-3xl font-bold ${appliedCoupon
-                            ? "line-through text-muted-foreground"
-                            : "text-orange-500"
-                            }`}
-                        >
-                          {formatCurrency(experience.price)}
-                        </span>
-                        {appliedCoupon && appliedCoupon.discount_calculation && (
+                        {appliedCoupon && appliedCoupon.discount_calculation ? (
                           <>
+                            <span className="text-3xl font-bold line-through text-muted-foreground">
+                              {formatCurrency(experience.price)}
+                            </span>
                             <span className="text-3xl font-bold text-green-600">
                               {formatCurrency(
                                 appliedCoupon.discount_calculation.final_amount
@@ -593,10 +609,27 @@ const ExperienceDetail = () => {
                               %
                             </Badge>
                           </>
-                        )}
-                        {experience.original_price && !appliedCoupon && (
-                          <span className="text-lg text-muted-foreground line-through">
-                            {formatCurrency(experience.original_price)}
+                        ) : discountedPrice && discountedPrice !== (firstActivity?.price || experience.price) ? (
+                          <>
+                            <span className="text-lg text-muted-foreground line-through">
+                              {formatCurrency(firstActivity?.price || experience.price)}
+                            </span>
+                            <span className="text-3xl font-bold text-green-600">
+                              {formatCurrency(discountedPrice)}
+                            </span>
+                          </>
+                        ) : experience.original_price && experience.original_price !== experience.price ? (
+                          <>
+                            <span className="text-lg text-muted-foreground line-through">
+                              {formatCurrency(experience.original_price)}
+                            </span>
+                            <span className="text-3xl font-bold text-green-600">
+                              {formatCurrency(experience.price)}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-3xl font-bold text-orange-500">
+                            {formatCurrency(firstActivity?.price || experience.price)}
                           </span>
                         )}
                       </div>
@@ -659,7 +692,11 @@ const ExperienceDetail = () => {
                           ? formatCurrency(
                             appliedCoupon.discount_calculation.final_amount
                           )
-                          : formatCurrency(experience.price)}
+                          : discountedPrice && discountedPrice !== (firstActivity?.price || experience.price)
+                            ? formatCurrency(discountedPrice)
+                            : experience.original_price && experience.original_price !== experience.price
+                              ? formatCurrency(experience.price)
+                              : formatCurrency(firstActivity?.price || experience.price)}
                       </Button>
 
                       {/* Bulk Booking Buttons for Vendor */}

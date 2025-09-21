@@ -74,6 +74,27 @@ const ConditionalMobileButton = () => {
     enabled: !!experienceId,
   });
 
+  // Get activities data to check for discounted prices
+  const { data: activities } = useQuery({
+    queryKey: ["activities", experienceId],
+    queryFn: async () => {
+      if (!experienceId) return [];
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .eq("experience_id", experienceId)
+        .eq("is_active", true);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!experienceId,
+  });
+
+  // Get the first activity's discounted price (assuming single activity for mobile button)
+  const firstActivity = activities?.[0];
+  const discountedPrice = (firstActivity as any)?.discounted_price;
+
   // Don't render if no experience data
   if (!experience) {
     return null
@@ -81,10 +102,11 @@ const ConditionalMobileButton = () => {
 
   return (
     <MobileFloatingButton
-      price={experience.price || 0}
+      price={firstActivity?.price || experience.price || 0}
       originalPrice={experience.original_price}
       currency={experience.currency || "INR"}
       bookingButtonText="Book Now"
+      discountedPrice={discountedPrice}
       onBookingClick={() => {
         // Dispatch custom event to open booking dialog
         window.dispatchEvent(new CustomEvent('openBookingDialog'))
