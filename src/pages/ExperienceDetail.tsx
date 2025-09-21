@@ -81,6 +81,27 @@ const ExperienceDetail = () => {
     },
     enabled: !!id,
   });
+
+  // Get activities data to check for discounted prices
+  const { data: activities } = useQuery({
+    queryKey: ["activities", id],
+    queryFn: async () => {
+      if (!id) return [];
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .eq("experience_id", id)
+        .eq("is_active", true);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
+  // Get the first activity's discounted price (assuming single activity for desktop display)
+  const firstActivity = activities?.[0];
+  const discountedPrice = (firstActivity as any)?.discounted_price;
   // console.log("experienceeeee", experience);
   const { data: userBookings, refetch: refetchBookings } = useQuery({
     queryKey: ["user-experience-bookings", user?.id, id],
@@ -470,21 +491,21 @@ const ExperienceDetail = () => {
                     </div>
                   </Col>
                   <Col lg={6} md={12} xs={12}>
-                    <div>
+                    <div >
                       <img src="/Images/BookPayLater.svg" alt="" />
-                      <p>Book Now, Pay Later</p>
+                      <p style={{ marginTop: "-6px" }}>Book Now, Pay Later</p>
                     </div>
                   </Col>
                   <Col lg={6} md={12} xs={12}>
                     <div style={{ marginLeft: "7px" }}>
-                      <IoCheckmarkDoneCircle style={{ fontSize: "20px" }} />
+                      <IoCheckmarkDoneCircle style={{ fontSize: "22px" }} />
                       <p>Free Cancellation</p>
                     </div>
                   </Col>
                   <Col lg={6} md={12} xs={12}>
                     <div>
                       <img src="/Images/MobileUpatedIcon.svg" alt="" />
-                      <p>Instant Tickets to your mobile
+                      <p style={{ marginTop: "-6px" }}>Instant Tickets to your mobile
                       </p>
                     </div>
                   </Col>
@@ -567,16 +588,11 @@ const ExperienceDetail = () => {
 
                       <div className="flex items-center gap-3 mb-6">
                         <span style={{ color: "grey" }}>From</span>
-                        <span
-                          className={`text-3xl font-bold ${appliedCoupon
-                            ? "line-through text-muted-foreground"
-                            : "text-orange-500"
-                            }`}
-                        >
-                          {formatCurrency(experience.price)}
-                        </span>
-                        {appliedCoupon && appliedCoupon.discount_calculation && (
+                        {appliedCoupon && appliedCoupon.discount_calculation ? (
                           <>
+                            <span className="text-3xl font-bold line-through text-muted-foreground">
+                              {formatCurrency(experience.price)}
+                            </span>
                             <span className="text-3xl font-bold text-green-600">
                               {formatCurrency(
                                 appliedCoupon.discount_calculation.final_amount
@@ -593,10 +609,27 @@ const ExperienceDetail = () => {
                               %
                             </Badge>
                           </>
-                        )}
-                        {experience.original_price && !appliedCoupon && (
-                          <span className="text-lg text-muted-foreground line-through">
-                            {formatCurrency(experience.original_price)}
+                        ) : discountedPrice && discountedPrice !== (firstActivity?.price || experience.price) ? (
+                          <>
+                            <span className="text-lg text-muted-foreground line-through">
+                              {formatCurrency(firstActivity?.price || experience.price)}
+                            </span>
+                            <span className="text-3xl font-bold text-green-600">
+                              {formatCurrency(discountedPrice)}
+                            </span>
+                          </>
+                        ) : experience.original_price && experience.original_price !== experience.price ? (
+                          <>
+                            <span className="text-lg text-muted-foreground line-through">
+                              {formatCurrency(experience.original_price)}
+                            </span>
+                            <span className="text-3xl font-bold text-green-600">
+                              {formatCurrency(experience.price)}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-3xl font-bold text-orange-500">
+                            {formatCurrency(firstActivity?.price || experience.price)}
                           </span>
                         )}
                       </div>
@@ -604,7 +637,7 @@ const ExperienceDetail = () => {
                       {/* Coupon Section */}
                       {!isVendor && (
                         <div className="mb-4">
-                          {!showCouponInput && !appliedCoupon && (
+                          {/* {!showCouponInput && !appliedCoupon && (
                             <Button
                               variant="outline"
                               className="w-full mb-2"
@@ -613,9 +646,9 @@ const ExperienceDetail = () => {
                               <Tag className="h-4 w-4 mr-2" />
                               Have a coupon code?
                             </Button>
-                          )}
+                          )} */}
 
-                          {showCouponInput && (
+                          {/* {showCouponInput && (
                             <CouponInput
                               experienceId={experience.id}
                               bookingAmount={experience.price}
@@ -624,7 +657,7 @@ const ExperienceDetail = () => {
                               onCouponRemoved={handleCouponRemoved}
                               className="mb-4"
                             />
-                          )}
+                          )} */}
 
                           {appliedCoupon && (
                             <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -659,35 +692,39 @@ const ExperienceDetail = () => {
                           ? formatCurrency(
                             appliedCoupon.discount_calculation.final_amount
                           )
-                          : formatCurrency(experience.price)}
+                          : discountedPrice && discountedPrice !== (firstActivity?.price || experience.price)
+                            ? formatCurrency(discountedPrice)
+                            : experience.original_price && experience.original_price !== experience.price
+                              ? formatCurrency(experience.price)
+                              : formatCurrency(firstActivity?.price || experience.price)}
                       </Button>
 
                       {/* Bulk Booking Buttons for Vendor */}
-                      {isVendor && (
-                        <div className="flex flex-col gap-2 mt-2">
-                          <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={handleDownloadBulkBookingCSV}
-                          >
-                            Bulk Booking (Download CSV Template)
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={handleBulkUploadClick}
-                          >
-                            Bulk Upload (Upload CSV)
-                          </Button>
-                          <input
-                            type="file"
-                            accept=".csv"
-                            style={{ display: "none" }}
-                            ref={fileInputRef}
-                            onChange={handleBulkUploadFile}
-                          />
-                        </div>
-                      )}
+                      {/* {isVendor && ( */}
+                      <div className="flex flex-col gap-2 mt-2">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={handleDownloadBulkBookingCSV}
+                        >
+                          Bulk Booking (Download CSV Template)
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={handleBulkUploadClick}
+                        >
+                          Bulk Upload (Upload CSV)
+                        </Button>
+                        <input
+                          type="file"
+                          accept=".csv"
+                          style={{ display: "none" }}
+                          ref={fileInputRef}
+                          onChange={handleBulkUploadFile}
+                        />
+                      </div>
+                      {/* )} */}
                     </div>
                     <div className="WhyBucketlisttContainer">
                       <h1>Why bucketlistt?</h1>
