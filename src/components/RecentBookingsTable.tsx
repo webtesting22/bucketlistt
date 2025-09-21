@@ -13,6 +13,11 @@ import {
 import { Calendar, Users, MapPin, FileText, Eye, Clock, CreditCard } from "lucide-react"
 import { format } from "date-fns"
 
+interface BookingWithDueAmount {
+  due_amount?: number;
+  [key: string]: any;
+}
+
 interface RecentBookingsTableProps {
   experienceId?: string
   limit?: number
@@ -48,7 +53,14 @@ export const RecentBookingsTable = ({ experienceId, limit = 10, isVendorView = f
           ),
           time_slots (
             start_time,
-            end_time
+            end_time,
+            activity_id,
+            activities (
+              id,
+              name,
+              price,
+              currency
+            )
           )
         `)
         .order('created_at', { ascending: false })
@@ -79,6 +91,18 @@ export const RecentBookingsTable = ({ experienceId, limit = 10, isVendorView = f
       const { data, error } = await query
       
       if (error) throw error
+      
+      // Debug logging to see what data we're getting
+      console.log('RecentBookingsTable - Bookings data:', data)
+      data?.forEach((booking, index) => {
+        console.log(`Booking ${index}:`, {
+          id: booking.id,
+          total_participants: booking.total_participants,
+          participants_count: booking.booking_participants?.length,
+          participants: booking.booking_participants
+        })
+      })
+      
       return data
     },
     enabled: !!user
@@ -200,17 +224,25 @@ export const RecentBookingsTable = ({ experienceId, limit = 10, isVendorView = f
 
                   {/* Participants */}
                   <div className="col-span-2">
-                    <div className="flex items-center gap-1 text-sm mb-1">
+                    <div className="flex items-center gap-1 text-sm mb-0.5">
                       <Users className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">{booking.total_participants}</span>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {booking.booking_participants?.[0]?.name && (
-                        <div className="truncate">{booking.booking_participants[0].name}</div>
-                      )}
-                      {booking.booking_participants && booking.booking_participants.length > 1 && (
+                    <div className="text-xs text-muted-foreground space-y-0.5">
+                      {booking.booking_participants && booking.booking_participants.length > 0 ? (
+                        <>
+                          {booking.booking_participants[0]?.name && (
+                            <div className="truncate">{booking.booking_participants[0].name}</div>
+                          )}
+                          {booking.booking_participants.length > 1 && (
+                            <div className="text-xs text-muted-foreground">
+                              +{booking.booking_participants.length - 1} more
+                            </div>
+                          )}
+                        </>
+                      ) : (
                         <div className="text-xs text-muted-foreground">
-                          +{booking.booking_participants.length - 1} more
+                          No participants...
                         </div>
                       )}
                     </div>
@@ -218,40 +250,89 @@ export const RecentBookingsTable = ({ experienceId, limit = 10, isVendorView = f
 
                   {/* Contact */}
                   <div className="col-span-2">
-                    {booking.booking_participants?.[0] && (
-                      <div className="text-xs">
-                        <div className="truncate font-medium">
-                          {booking.booking_participants[0].email}
-                        </div>
+                    {booking.booking_participants && booking.booking_participants.length > 0 && booking.booking_participants[0] ? (
+                      <div className="text-xs space-y-0.5">
+                        {booking.booking_participants[0].email && (
+                          <div className="truncate font-medium">
+                            {booking.booking_participants[0].email}
+                          </div>
+                        )}
                         {booking.booking_participants[0].phone_number && (
-                          <div className="truncate text-muted-foreground mt-1">
+                          <div className="truncate text-muted-foreground">
                             {booking.booking_participants[0].phone_number}
                           </div>
                         )}
+                        {!booking.booking_participants[0].email && !booking.booking_participants[0].phone_number && (
+                          <div className="text-xs text-muted-foreground">
+                            No contact details
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-muted-foreground">
+                        No contact found
                       </div>
                     )}
                   </div>
 
                   {/* Amount */}
                   <div className="col-span-2">
-                    <div className="flex items-center gap-1 text-sm font-semibold text-orange-600">
-                      <CreditCard className="h-4 w-4" />
-                      <span>
-                        {booking.experiences?.currency === 'USD' ? '₹' : booking.experiences?.currency} 
-                        {((booking.experiences?.price || 0) * booking.total_participants).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {booking.total_participants} × {booking.experiences?.currency === 'USD' ? '₹' : booking.experiences?.currency}{booking.experiences?.price?.toLocaleString()}
-                    </div>
+                    {(() => {
+                      const activity = booking.time_slots?.activities;
+                      const activityPrice = activity?.price || booking.experiences?.price || 0;
+                      const activityCurrency = activity?.currency || booking.experiences?.currency || "INR";
+                      const totalAmount = activityPrice * booking.total_participants;
+                      const dueAmount = (booking as BookingWithDueAmount).due_amount || 0;
+                      const paidAmount = totalAmount - dueAmount;
+                      
+                      return (
+                        <div className="space-y-0.5">
+                          {dueAmount > 0 ? (
+                            // Partial payment display - more compact
+                            <div>
+                              <div className="text-xs font-semibold text-green-600">
+                                Paid: {activityCurrency} {paidAmount}
+                              </div>
+                              <div className="text-xs text-orange-600">
+                                Due: {activityCurrency} {dueAmount}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Total: {activityCurrency} {totalAmount}
+                              </div>
+                            </div>
+                          ) : (
+                            // Full payment display
+                            <div>
+                              <div className="flex items-center gap-1 text-sm font-semibold text-orange-600">
+                                <CreditCard className="h-4 w-4" />
+                                <span>
+                                  {activityCurrency} {totalAmount}
+                                </span>
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {booking.total_participants} × {activityCurrency} {activityPrice}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Status */}
                   <div className="col-span-1">
-                    <div className="flex items-center gap-1">
+                    <div className="flex flex-col gap-1">
                       <Badge className={`${getStatusColor(booking.status)} border-0 text-xs`}>
                         {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </Badge>
+                      {(booking as BookingWithDueAmount).due_amount && (booking as BookingWithDueAmount).due_amount! > 0 ? (
+                        <Badge
+                          variant="secondary"
+                          className="bg-orange-100 text-orange-800 text-xs"
+                        >
+                          Partial Payment
+                        </Badge>
+                      ) : null}
                       {booking.note_for_guide && (
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -331,11 +412,11 @@ export const RecentBookingsTable = ({ experienceId, limit = 10, isVendorView = f
                       <span className="font-medium">{booking.total_participants}</span>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {booking.booking_participants?.slice(0, 2).map((participant, index) => (
-                        <div key={index} className="truncate">
+                      {booking.booking_participants?.map((participant, index) => 
+                        <div key={index} className={`truncate ${index === 0 ? 'flex' : 'hidden'}`}>
                           {participant.name}
                         </div>
-                      ))}
+                      )}
                       {booking.booking_participants && booking.booking_participants.length > 2 && (
                         <div className="text-xs text-muted-foreground">
                           +{booking.booking_participants.length - 2} more
@@ -346,37 +427,77 @@ export const RecentBookingsTable = ({ experienceId, limit = 10, isVendorView = f
 
                   {/* Amount */}
                   <div className="col-span-2">
-                    <div className="flex items-center gap-1 text-sm font-semibold text-orange-600">
-                      <CreditCard className="h-4 w-4" />
-                      <span>
-                        {booking.experiences?.currency === 'USD' ? '₹' : booking.experiences?.currency} 
-                        {((booking.experiences?.price || 0) * booking.total_participants).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {booking.total_participants} × {booking.experiences?.currency === 'USD' ? '₹' : booking.experiences?.currency}{booking.experiences?.price?.toLocaleString()}
-                    </div>
+                    {(() => {
+                      const activity = booking.time_slots?.activities;
+                      const activityPrice = activity?.price || booking.experiences?.price || 0;
+                      const activityCurrency = activity?.currency || booking.experiences?.currency || "INR";
+                      const totalAmount = activityPrice * booking.total_participants;
+                      const dueAmount = (booking as BookingWithDueAmount).due_amount || 0;
+                      const paidAmount = totalAmount - dueAmount;
+                      
+                      return (
+                        <div className="space-y-0.5">
+                          {dueAmount > 0 ? (
+                            // Partial payment display - more compact
+                            <div>
+                              <div className="text-xs font-semibold text-green-600">
+                                Paid: {activityCurrency} {paidAmount}
+                              </div>
+                              <div className="text-xs text-orange-600">
+                                Due: {activityCurrency} {dueAmount}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Total: {activityCurrency} {totalAmount}
+                              </div>
+                            </div>
+                          ) : (
+                            // Full payment display
+                            <div>
+                              <div className="flex items-center gap-1 text-sm font-semibold text-orange-600">
+                                <CreditCard className="h-4 w-4" />
+                                <span>
+                                  {activityCurrency} {totalAmount}
+                                </span>
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {booking.total_participants} × {activityCurrency} {activityPrice}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Status */}
                   <div className="col-span-2">
-                    <div className="flex items-center gap-2">
-                      <Badge className={`${getStatusColor(booking.status)} border-0`}>
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                      </Badge>
-                      {booking.note_for_guide && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <FileText className="h-4 w-4 text-muted-foreground cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-xs">
-                            <div className="text-xs">
-                              <div className="font-medium mb-1">Note for Guide:</div>
-                              <div>{booking.note_for_guide}</div>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <Badge className={`${getStatusColor(booking.status)} border-0`}>
+                          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        </Badge>
+                        {(booking as BookingWithDueAmount).due_amount && (booking as BookingWithDueAmount).due_amount! > 0 && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-orange-100 text-orange-800"
+                          >
+                            Partial Payment
+                          </Badge>
+                        )}
+                        {booking.note_for_guide && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <FileText className="h-4 w-4 text-muted-foreground cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <div className="text-xs">
+                                <div className="font-medium mb-1">Note for Guide:</div>
+                                <div>{booking.note_for_guide}</div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

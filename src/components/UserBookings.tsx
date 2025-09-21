@@ -5,6 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
+interface BookingWithDueAmount {
+  due_amount?: number;
+  [key: string]: string | number | null;
+}
+
 export const UserBookings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -25,6 +30,18 @@ export const UserBookings = () => {
             location,
             price,
             currency
+          ),
+          time_slots (
+            id,
+            start_time,
+            end_time,
+            activity_id,
+            activities (
+              id,
+              name,
+              price,
+              currency
+            )
           ),
           booking_participants (
             name,
