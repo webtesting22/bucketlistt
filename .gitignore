@@ -118,3 +118,6 @@ temp/
 *.temp
 package-lock.json
 schema.sql
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
